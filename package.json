@@ -1,0 +1,12 @@
+{
+  "name": "agrigator",
+  "version": "1.0.0",
+  "description": "Агрегатор курсов и репетиторов — демо с Node + SQLite бэкендом",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.5"
+  }
+}
