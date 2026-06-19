@@ -1,13 +1,12 @@
 import "server-only";
 import crypto from "crypto";
 import { cookies } from "next/headers";
-import { prisma } from "@/lib/db";
-import type { User } from "@prisma/client";
+import { query, one } from "@/lib/db";
+import type { User, Session } from "@/lib/types";
 
 // ============================================================
-// Сессии: cookie-based, на node:crypto (без внешних зависимостей).
-// Слой изолирован — позже меняется на Supabase Auth (телефон-OTP)
-// без переписывания вызывающего кода.
+// Сессии: cookie-based, на node:crypto. Слой изолирован — позже
+// меняется на Supabase Auth (телефон-OTP) без правки вызывающего кода.
 // ============================================================
 
 export const SESSION_COOKIE = "agr_session";
@@ -37,11 +36,14 @@ export function toPublicUser(u: User): PublicUser {
   return rest;
 }
 
-/** Создаёт сессию и пишет httpOnly-cookie. Вызывать только в Route Handler / Server Action. */
+/** Создаёт сессию и пишет httpOnly-cookie. Вызывать в Route Handler / Server Action. */
 export async function createSession(userId: string): Promise<string> {
   const token = crypto.randomBytes(24).toString("hex");
   const expiresAt = new Date(Date.now() + SESSION_TTL_DAYS * 864e5);
-  await prisma.session.create({ data: { token, userId, expiresAt } });
+  await query(
+    `insert into "Session" (token, "userId", "expiresAt") values ($1, $2, $3)`,
+    [token, userId, expiresAt],
+  );
   cookies().set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
@@ -54,9 +56,7 @@ export async function createSession(userId: string): Promise<string> {
 
 export async function destroySession(): Promise<void> {
   const token = cookies().get(SESSION_COOKIE)?.value;
-  if (token) {
-    await prisma.session.deleteMany({ where: { token } });
-  }
+  if (token) await query(`delete from "Session" where token = $1`, [token]);
   cookies().delete(SESSION_COOKIE);
 }
 
@@ -64,29 +64,19 @@ export async function destroySession(): Promise<void> {
 export async function getCurrentUser(): Promise<User | null> {
   const token = cookies().get(SESSION_COOKIE)?.value;
   if (!token) return null;
-  const session = await prisma.session.findUnique({
-    where: { token },
-    include: { user: true },
-  });
+
+  const session = await one<Session>(`select * from "Session" where token = $1`, [token]);
   if (!session) return null;
-  if (session.expiresAt < new Date()) {
-    await prisma.session.deleteMany({ where: { token } });
+  if (new Date(session.expiresAt) < new Date()) {
+    await query(`delete from "Session" where token = $1`, [token]);
     return null;
   }
-  return session.user;
+  return one<User>(`select * from "User" where id = $1`, [session.userId]);
 }
 
 export async function requireUser(): Promise<User> {
   const user = await getCurrentUser();
   if (!user) throw new AuthError("Войдите в аккаунт", 401);
-  return user;
-}
-
-export async function requireRole(role: "student" | "tutor" | "admin"): Promise<User> {
-  const user = await requireUser();
-  if (user.role !== role && user.role !== "admin") {
-    throw new AuthError("Недостаточно прав", 403);
-  }
   return user;
 }
 

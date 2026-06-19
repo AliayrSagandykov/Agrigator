@@ -2,8 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Sparkles } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { one } from "@/lib/db";
 import { getTutorCards } from "@/lib/tutors";
+import type { StudentGoal } from "@/lib/types";
 import { rankTutors } from "@/lib/match";
 import { TutorCard } from "@/components/tutor-card";
 import { DEADLINE_LABEL, PACE_LABEL, STYLE_LABEL } from "@/lib/constants";
@@ -14,7 +15,7 @@ export default async function MatchPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/register?role=student");
 
-  const goal = await prisma.studentGoal.findUnique({ where: { userId: user.id } });
+  const goal = await one<StudentGoal>(`select * from "StudentGoal" where "userId" = $1`, [user.id]);
   if (!goal) redirect("/onboarding");
 
   const tutors = await getTutorCards();

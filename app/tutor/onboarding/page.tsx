@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { one } from "@/lib/db";
 import { parseJson } from "@/lib/utils";
+import type { TutorProfile } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { TutorProfileForm } from "@/components/tutor-profile-form";
 
@@ -12,7 +13,7 @@ export default async function TutorOnboardingPage() {
   if (!user) redirect("/login");
   if (user.role !== "tutor") redirect("/dashboard");
 
-  const profile = await prisma.tutorProfile.findUnique({ where: { userId: user.id } });
+  const profile = await one<TutorProfile>(`select * from "TutorProfile" where "userId" = $1`, [user.id]);
 
   return (
     <div className="container max-w-2xl py-10">

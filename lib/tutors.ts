@@ -1,12 +1,12 @@
 import "server-only";
-import { prisma } from "@/lib/db";
+import { query, one } from "@/lib/db";
 import { parseJson } from "@/lib/utils";
-import type { TutorProfile, User } from "@prisma/client";
+import type { TutorProfile } from "@/lib/types";
 
 // ============================================================
 // View-model тютора для витрины (каталог/матч/профиль).
-// Метрики карточек берутся из кэша (cold-start); живые метрики
-// для дашборда — в lib/metrics.ts (считаются из Lesson/Result).
+// Метрики карточек — из кэша (cold-start); живые метрики дашборда
+// считаются из Lesson/Result в lib/metrics.ts.
 // ============================================================
 
 export interface OwnScore {
@@ -65,14 +65,21 @@ export interface TutorVM {
   contacts: Contacts;
 }
 
-type ProfileWithUser = TutorProfile & { user: User };
+// Строка JOIN-а профиля с именем/цветом пользователя.
+type ProfileRow = TutorProfile & { userName: string; userAvatarColor: string | null };
 
-export function toTutorVM(p: ProfileWithUser): TutorVM {
+const SELECT_TUTOR = `
+  select p.*, u.name as "userName", u."avatarColor" as "userAvatarColor"
+  from "TutorProfile" p
+  join "User" u on u.id = p."userId"
+`;
+
+export function toTutorVM(p: ProfileRow): TutorVM {
   const delta = Math.round((p.statAfter - p.statBefore) * 10) / 10;
   return {
     id: p.userId,
-    name: p.user.name,
-    avatarColor: p.user.avatarColor,
+    name: p.userName,
+    avatarColor: p.userAvatarColor,
     photo: p.photo,
     gradient: p.gradient,
     subjects: parseJson<string[]>(p.subjectsJson, []).join(", "),
@@ -111,23 +118,13 @@ export function toTutorVM(p: ProfileWithUser): TutorVM {
 }
 
 export async function getTutorCards(): Promise<TutorVM[]> {
-  const profiles = await prisma.tutorProfile.findMany({
-    include: { user: true },
-    orderBy: [{ sponsored: "desc" }, { rating: "desc" }],
-  });
-  return profiles.map(toTutorVM);
+  const rows = await query<ProfileRow>(
+    `${SELECT_TUTOR} order by p.sponsored desc, p.rating desc`,
+  );
+  return rows.map(toTutorVM);
 }
 
 export async function getTutorByUserId(userId: string): Promise<TutorVM | null> {
-  const profile = await prisma.tutorProfile.findUnique({
-    where: { userId },
-    include: { user: true },
-  });
-  return profile ? toTutorVM(profile) : null;
-}
-
-/** subjects-строка для карточки берётся из subjectsJson напрямую (без join по bio). */
-export function tutorSubjectsLine(p: ProfileWithUser): string {
-  const subjects = parseJson<string[]>(p.subjectsJson, []);
-  return subjects.join(" · ");
+  const row = await one<ProfileRow>(`${SELECT_TUTOR} where p."userId" = $1`, [userId]);
+  return row ? toTutorVM(row) : null;
 }

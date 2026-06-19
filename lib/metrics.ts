@@ -1,41 +1,50 @@
 import "server-only";
-import { prisma } from "@/lib/db";
+import { query, one } from "@/lib/db";
+import type { StudentGoal, Result } from "@/lib/types";
 
 // ============================================================
-// Живые метрики для дашбордов — считаются из Lesson/Result/Booking.
-// Где реальных данных ещё нет (cold-start), падаем на кэш TutorProfile.
-// Тютор НЕ редактирует ни дельту, ни удержание — только система.
+// Живые метрики дашбордов — из Lesson/Result/Booking. Где реальных
+// данных ещё нет (cold-start), падаем на кэш TutorProfile.
+// Дельту и удержание считает система, тютор их не редактирует.
 // ============================================================
 
 export interface LiveTutorMetrics {
-  delta: number; // средняя верифицированная дельта
-  lessons: number; // проведённых уроков
-  retention: number; // % вернувшихся учеников
-  sample: number; // верифицированных учеников (с дельтой)
-  isLive: boolean; // есть ли реальные данные поверх кэша
+  delta: number;
+  lessons: number;
+  retention: number;
+  sample: number;
+  isLive: boolean;
 }
 
+type StatRow = {
+  statAfter: number;
+  statBefore: number;
+  statLessons: number;
+  statRetention: number;
+  statSample: number;
+};
+
 export async function computeTutorMetrics(tutorId: string): Promise<LiveTutorMetrics> {
-  const profile = await prisma.tutorProfile.findUnique({ where: { userId: tutorId } });
-
-  const lessons = await prisma.lesson.findMany({
-    where: { tutorId },
-    select: { studentId: true, sequenceNo: true },
-  });
-
-  const results = await prisma.result.findMany({
-    where: { tutorId, status: "delta_set", delta: { not: null } },
-    select: { delta: true },
-  });
+  const [profile, lessons, results] = await Promise.all([
+    one<StatRow>(
+      `select "statAfter","statBefore","statLessons","statRetention","statSample"
+       from "TutorProfile" where "userId" = $1`,
+      [tutorId],
+    ),
+    query<{ studentId: string; sequenceNo: number }>(
+      `select "studentId","sequenceNo" from "Lesson" where "tutorId" = $1`,
+      [tutorId],
+    ),
+    query<{ delta: number }>(
+      `select delta from "Result" where "tutorId" = $1 and status = 'delta_set' and delta is not null`,
+      [tutorId],
+    ),
+  ]);
 
   const lessonsCount = lessons.length;
   const distinct = new Set(lessons.map((l) => l.studentId));
-  const returning = new Set(
-    lessons.filter((l) => l.sequenceNo >= 2).map((l) => l.studentId),
-  );
-  const liveRetention = distinct.size
-    ? Math.round((returning.size / distinct.size) * 100)
-    : null;
+  const returning = new Set(lessons.filter((l) => l.sequenceNo >= 2).map((l) => l.studentId));
+  const liveRetention = distinct.size ? Math.round((returning.size / distinct.size) * 100) : null;
   const liveDelta = results.length
     ? Math.round((results.reduce((s, r) => s + (r.delta ?? 0), 0) / results.length) * 10) / 10
     : null;
@@ -60,20 +69,18 @@ export interface StudentProgress {
 }
 
 export async function computeStudentProgress(studentId: string): Promise<StudentProgress> {
-  const goal = await prisma.studentGoal.findUnique({ where: { userId: studentId } });
-  const results = await prisma.result.findMany({
-    where: { studentId },
-    orderBy: { createdAt: "desc" },
-  });
-  const verified = results.find((r) => r.status === "delta_set");
+  const [goal, results] = await Promise.all([
+    one<StudentGoal>(`select * from "StudentGoal" where "userId" = $1`, [studentId]),
+    query<Result>(`select * from "Result" where "studentId" = $1 order by "createdAt" desc`, [studentId]),
+  ]);
 
+  const verified = results.find((r) => r.status === "delta_set");
   const baselineFromGoal = goal?.baselineScore ? Number(goal.baselineScore) : null;
   const baseline =
     verified?.baseline ?? (Number.isFinite(baselineFromGoal) ? baselineFromGoal : null);
   const latest = verified?.finalScore ?? null;
   const delta =
-    verified?.delta ??
-    (baseline != null && latest != null ? round1(latest - baseline) : null);
+    verified?.delta ?? (baseline != null && latest != null ? round1(latest - baseline) : null);
 
   return {
     exam: goal?.exam ?? null,

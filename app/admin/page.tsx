@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
 import { payments } from "@/lib/payments";
+import { getPendingPayments, getSubmittedResults, getLeads, getAdminCounts } from "@/lib/queries";
 import { parseJson, formatTenge, formatDateTime } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,26 +17,13 @@ export default async function AdminPage() {
   if (user.role !== "admin") redirect("/dashboard");
 
   const [pending, submitted, leads, counts] = await Promise.all([
-    prisma.payment.findMany({
-      where: { status: "pending" },
-      include: { booking: { include: { student: { select: { name: true } }, tutor: { select: { name: true } } } } },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.result.findMany({
-      where: { status: "submitted" },
-      include: { student: { select: { name: true } }, tutor: { select: { name: true } } },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.lead.findMany({ orderBy: { foundAt: "desc" } }),
-    Promise.all([
-      prisma.user.count({ where: { role: "tutor" } }),
-      prisma.user.count({ where: { role: "student" } }),
-      prisma.booking.count(),
-      prisma.lesson.count(),
-    ]),
+    getPendingPayments(),
+    getSubmittedResults(),
+    getLeads(),
+    getAdminCounts(),
   ]);
 
-  const [tutorCount, studentCount, bookingCount, lessonCount] = counts;
+  const { tutors: tutorCount, students: studentCount, bookings: bookingCount, lessons: lessonCount } = counts;
 
   return (
     <div className="container max-w-5xl py-10">
@@ -62,7 +49,7 @@ export default async function AdminPage() {
           pending.map((p) => (
             <Row key={p.id}>
               <div>
-                <div className="font-medium">{p.booking.student.name} → {p.booking.tutor.name}</div>
+                <div className="font-medium">{p.studentName} → {p.tutorName}</div>
                 <div className="text-sm text-muted-foreground">{formatTenge(p.amount)} · бронь #{p.bookingId.slice(0, 6)} · {formatDateTime(p.createdAt)}</div>
               </div>
               <ConfirmPaymentButton bookingId={p.bookingId} />
@@ -79,9 +66,9 @@ export default async function AdminPage() {
           submitted.map((r) => (
             <Row key={r.id}>
               <div>
-                <div className="font-medium">{r.student.name} · {r.exam}</div>
+                <div className="font-medium">{r.studentName} · {r.exam}</div>
                 <div className="text-sm text-muted-foreground">
-                  тютор {r.tutor.name} · baseline {r.baseline ?? "—"}
+                  тютор {r.tutorName} · baseline {r.baseline ?? "—"}
                   {r.reportUrl && <> · <a href={r.reportUrl} target="_blank" className="text-primary hover:underline">report</a></>}
                 </div>
               </div>

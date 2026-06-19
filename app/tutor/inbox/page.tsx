@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { getTutorBookings } from "@/lib/queries";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/avatar";
@@ -16,11 +16,7 @@ export default async function TutorInbox() {
   if (!user) redirect("/login");
   if (user.role !== "tutor") redirect("/dashboard");
 
-  const bookings = await prisma.booking.findMany({
-    where: { tutorId: user.id },
-    include: { student: { select: { name: true, avatarColor: true } }, lesson: true, payment: true },
-    orderBy: { slotAt: "desc" },
-  });
+  const bookings = await getTutorBookings(user.id);
 
   return (
     <div className="container max-w-3xl py-10">
@@ -45,7 +41,7 @@ export default async function TutorInbox() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {b.lesson ? (
+                {b.hasLesson ? (
                   <Badge variant="success">проведён</Badge>
                 ) : (
                   <>

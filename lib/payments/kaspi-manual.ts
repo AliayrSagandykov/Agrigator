@@ -1,5 +1,5 @@
 import "server-only";
-import { prisma } from "@/lib/db";
+import { query, one, withTransaction } from "@/lib/db";
 import { notifyOperator } from "@/lib/notify";
 import type {
   PaymentProvider,
@@ -11,9 +11,9 @@ import type {
 
 // ============================================================
 // KaspiManual — день-0 режим.
-// createCharge  → создаёт Payment(pending) + Kaspi QR-ссылку, пингует оператора.
-// confirmPayment→ оператор видит поступление в Kaspi Pay и подтверждает в /admin.
-// releasePayout → оператор выплачивает раз в неделю.
+// createCharge  → Payment(pending) + Kaspi QR-ссылка, пинг оператору.
+// confirmPayment→ оператор видит поступление в Kaspi Pay и подтверждает.
+// releasePayout → выплата раз в неделю.
 // Состояния в БД те же, что и в auto — меняется только триггер.
 // ============================================================
 
@@ -21,64 +21,56 @@ export class KaspiManual implements PaymentProvider {
   readonly mode: PaymentMode = "manual";
 
   async createCharge({ bookingId, amount }: CreateChargeInput): Promise<CreateChargeResult> {
-    // Эскроу = счёт оператора держит деньги до урока. Код брони — в комментарии платежа.
     const payUrl = `https://kaspi.kz/pay?service=Agrigator&amount=${amount}&comment=BOOKING-${bookingId}`;
 
-    const payment = await prisma.payment.upsert({
-      where: { bookingId },
-      create: {
-        bookingId,
-        amount,
-        status: "pending",
-        provider: "kaspi_manual",
-        payUrl,
-      },
-      update: { amount, payUrl, provider: "kaspi_manual" },
-    });
+    const row = await one<{ id: string }>(
+      `insert into "Payment" ("bookingId", amount, status, provider, "payUrl")
+       values ($1, $2, 'pending', 'kaspi_manual', $3)
+       on conflict ("bookingId") do update
+         set amount = excluded.amount, "payUrl" = excluded."payUrl", provider = 'kaspi_manual'
+       returning id`,
+      [bookingId, amount, payUrl],
+    );
 
     await notifyOperator({ type: "payment_pending", bookingId, amount });
-    return { payUrl, paymentId: payment.id };
+    return { payUrl, paymentId: row!.id };
   }
 
   async confirmPayment(bookingId: string): Promise<void> {
-    const payment = await prisma.payment.findUnique({ where: { bookingId } });
+    const payment = await one<{ status: string }>(
+      `select status from "Payment" where "bookingId" = $1`,
+      [bookingId],
+    );
     if (!payment) throw new Error("Платёж не найден");
     if (payment.status === "confirmed" || payment.status === "released") return; // идемпотентность
 
-    await prisma.$transaction([
-      prisma.payment.update({
-        where: { bookingId },
-        data: { status: "confirmed", confirmedAt: new Date() },
-      }),
-      prisma.booking.update({
-        where: { id: bookingId },
-        data: { status: "paid" },
-      }),
-    ]);
+    await withTransaction(async (c) => {
+      await c.query(
+        `update "Payment" set status = 'confirmed', "confirmedAt" = now() where "bookingId" = $1`,
+        [bookingId],
+      );
+      await c.query(`update "Booking" set status = 'paid' where id = $1`, [bookingId]);
+    });
   }
 
   async releasePayout({ tutorId, paymentId }: ReleasePayoutInput): Promise<{ released: number }> {
-    const payments = await prisma.payment.findMany({
-      where: {
-        status: "confirmed",
-        ...(paymentId ? { id: paymentId } : {}),
-        booking: { tutorId, status: { in: ["paid", "completed"] } },
-      },
-      include: { booking: true },
-    });
+    const rows = await query<{ id: string; bookingId: string }>(
+      `select p.id, p."bookingId"
+       from "Payment" p join "Booking" b on b.id = p."bookingId"
+       where p.status = 'confirmed' and b."tutorId" = $1 and b.status in ('paid','completed')
+       ${paymentId ? `and p.id = $2` : ``}`,
+      paymentId ? [tutorId, paymentId] : [tutorId],
+    );
 
-    for (const p of payments) {
-      await prisma.$transaction([
-        prisma.payment.update({
-          where: { id: p.id },
-          data: { status: "released", releasedAt: new Date() },
-        }),
-        prisma.booking.update({
-          where: { id: p.bookingId },
-          data: { status: "settled" },
-        }),
-      ]);
+    for (const r of rows) {
+      await withTransaction(async (c) => {
+        await c.query(
+          `update "Payment" set status = 'released', "releasedAt" = now() where id = $1`,
+          [r.id],
+        );
+        await c.query(`update "Booking" set status = 'settled' where id = $1`, [r.bookingId]);
+      });
     }
-    return { released: payments.length };
+    return { released: rows.length };
   }
 }

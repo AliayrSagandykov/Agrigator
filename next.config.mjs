@@ -8,10 +8,6 @@ const nextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
-  // legacy/ — старая vanilla-реализация, не часть сборки Next.
-  outputFileTracingExcludes: {
-    "*": ["./legacy/**/*"],
-  },
 };
 
 export default nextConfig;
