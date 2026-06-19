@@ -9,8 +9,10 @@ import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
 
 const proc = process as unknown as { loadEnvFile?: (path?: string) => void };
-try { proc.loadEnvFile?.(".env.local"); } catch {}
-try { proc.loadEnvFile?.(".env"); } catch {}
+if (!process.env.DATABASE_URL) {
+  try { proc.loadEnvFile?.(".env.local"); } catch {}
+  try { proc.loadEnvFile?.(".env"); } catch {}
+}
 
 const url = process.env.DATABASE_URL;
 if (!url) {

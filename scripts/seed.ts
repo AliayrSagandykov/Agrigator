@@ -5,10 +5,13 @@
 import { Client } from "pg";
 import crypto from "crypto";
 
-// Node 20.12+: подгрузить переменные окружения из .env.local (затем .env).
+// Node 20.12+: подгрузить переменные окружения из .env.local (затем .env),
+// но НЕ перетирать уже заданный inline (DATABASE_URL=... npm run db:seed).
 const proc = process as unknown as { loadEnvFile?: (path?: string) => void };
-try { proc.loadEnvFile?.(".env.local"); } catch {}
-try { proc.loadEnvFile?.(".env"); } catch {}
+if (!process.env.DATABASE_URL) {
+  try { proc.loadEnvFile?.(".env.local"); } catch {}
+  try { proc.loadEnvFile?.(".env"); } catch {}
+}
 
 const url = process.env.DATABASE_URL;
 if (!url) {
