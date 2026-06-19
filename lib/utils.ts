@@ -1,0 +1,49 @@
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+/** Безопасный разбор JSON-строкового поля (subjectsJson и т.п.). */
+export function parseJson<T>(value: string | null | undefined, fallback: T): T {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+export function formatPrice(value: number, unit = "час"): string {
+  return `${value.toLocaleString("ru-RU")} ₸/${unit}`;
+}
+
+export function formatTenge(value: number): string {
+  return `${value.toLocaleString("ru-RU")} ₸`;
+}
+
+/** Округлённая дельта со знаком: +1.4 / −0.2 */
+export function formatDelta(value: number): string {
+  const rounded = Math.round(value * 10) / 10;
+  const sign = rounded > 0 ? "+" : rounded < 0 ? "−" : "";
+  return `${sign}${Math.abs(rounded)}`;
+}
+
+export function formatDateTime(d: Date | string): string {
+  const date = typeof d === "string" ? new Date(d) : d;
+  return date.toLocaleString("ru-RU", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+export function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+}

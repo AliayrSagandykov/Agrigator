@@ -1,0 +1,316 @@
+// ============================================================
+// Agrigator — схема данных (Prisma).
+//
+// Dev: SQLite (заводится без внешних сервисов).
+// Prod: Supabase Postgres — поменять provider на "postgresql",
+//       а JSON-строковые поля (subjectsJson, examsJson, …) можно
+//       перевести в нативные String[]/Json. Состояния и связи те же.
+//
+// Принцип (из тех-дока): где у тютора есть мотив соврать — цифру
+// ставит система или вторая сторона. delta и retention считаются
+// из Result/Lesson, тютор их не редактирует.
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ──────────────────────────────────────────────────────────
+// Пользователи и доступ
+// ──────────────────────────────────────────────────────────
+
+/// role: "student" | "tutor" | "admin"
+/// plan: "free" | "pro"
+model User {
+  id           String   @id @default(cuid())
+  role         String   @default("student")
+  name         String
+  email        String   @unique
+  phone        String?  @unique
+  parentPhone  String? // для учеников <18 — требование закона РК о перс. данных
+  passwordHash String
+  plan         String   @default("free")
+  planUntil    DateTime?
+  avatarColor  String?
+  createdAt    DateTime @default(now())
+
+  tutorProfile     TutorProfile?
+  studentGoal      StudentGoal?
+  sessions         Session[]
+  favorites        Favorite[]
+  bookingsAsStudent Booking[]   @relation("StudentBookings")
+  bookingsAsTutor   Booking[]   @relation("TutorBookings")
+  lessonsAsStudent  Lesson[]    @relation("StudentLessons")
+  lessonsAsTutor    Lesson[]    @relation("TutorLessons")
+  resultsAsStudent  Result[]    @relation("StudentResults")
+  resultsAsTutor    Result[]    @relation("TutorResults")
+  reviewsWritten    Review[]    @relation("ReviewAuthor")
+  retentionSignals  RetentionSignal[]
+}
+
+model Session {
+  token     String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+model Favorite {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key    String // "tutor:<id>" | "course:<id>"
+
+  @@unique([userId, key])
+}
+
+// ──────────────────────────────────────────────────────────
+// Тютор — репутационный актив
+// ──────────────────────────────────────────────────────────
+
+/// format: "online" | "offline" | "hybrid"
+/// source: "manual" | "parser"
+/// Кэш-метрики (stat*) — для холодного старта/витрины; по мере
+/// накопления Result/Lesson вытесняются вычисленными значениями.
+model TutorProfile {
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  subjectsJson String  @default("[]") // ["IELTS: Writing", ...]
+  examsJson    String  @default("[]") // ["IELTS","SAT"]
+  price        Int
+  priceUnit    String  @default("час")
+  format       String  @default("online")
+  city         String  @default("Онлайн")
+  experience   Int     @default(0)
+  bio          String  @default("")
+  methodology  String  @default("")
+
+  photo        String?
+  gradient     String  @default("g1")
+  responseTime String  @default("~1 час")
+  videoUrl     String  @default("")
+  bookingUrl   String  @default("") // запасной Calendly до своего календаря
+  calendarId   String? // Google Calendar для авто-ссылок
+
+  verified     Boolean @default(false) // личность подтверждена на входе
+  aiVerified   Boolean @default(false) // результаты верифицированы
+  sponsored    Boolean @default(false) // рекламная карточка
+
+  ownScoresJson    String @default("[]") // [{exam,score,verified}]
+  achievementsJson String @default("[]")
+  languagesJson    String @default("[]")
+  contactsJson     String @default("{}") // {instagram,telegram,whatsapp,phone,email} — Pro-gated
+
+  // Кэш статистики "до/после" (cold-start витрина).
+  // Три ядровые метрики: средняя дельта (statBefore→statAfter),
+  // число уроков (statLessons), удержание (statRetention).
+  // По мере накопления Lesson/Result/Booking вытесняются вычисленными.
+  statMetric    String @default("")
+  statBefore    Float  @default(0)
+  statAfter     Float  @default(0)
+  statSample    Int    @default(0)
+  statPassRate  Int    @default(0)
+  statLessons   Int    @default(0)
+  statRetention Int    @default(0)
+
+  trial     Boolean @default(true)
+  trialFree Boolean @default(true)
+  source    String  @default("manual")
+
+  rating    Float    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ──────────────────────────────────────────────────────────
+// Курс (агрегатор сохраняет каталог курсов как вторичную сущность)
+// ──────────────────────────────────────────────────────────
+
+model Course {
+  id           String  @id @default(cuid())
+  title        String
+  provider     String
+  examsJson    String  @default("[]")
+  price        Int
+  priceUnit    String  @default("мес")
+  format       String  @default("online")
+  city         String  @default("Онлайн")
+  duration     String  @default("")
+  groupSize    String  @default("")
+  level        String  @default("")
+  rating       Float   @default(0)
+  students     Int     @default(0)
+  sponsored    Boolean @default(false)
+  aiVerified   Boolean @default(false)
+  emoji        String  @default("🎓")
+  gradient     String  @default("g1")
+  description  String  @default("")
+  featuresJson String  @default("[]")
+  schedule     String  @default("")
+  scoreStatsJson String @default("{}")
+  trial        Boolean @default(true)
+  trialFree    Boolean @default(true)
+  videoUrl     String  @default("")
+  bookingUrl   String  @default("")
+  contactsJson String  @default("{}")
+  moneyBack    Boolean @default(false)
+  source       String  @default("manual")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ──────────────────────────────────────────────────────────
+// Ученик: матч-вектор из интейка
+// ──────────────────────────────────────────────────────────
+
+/// exam: "SAT" | "IELTS" | "НМТ" | "ЕНТ" | ...
+/// deadline: "1-2m" | "3-6m" | "flex"
+/// pace: "slow" | "fast"
+/// style: "strict" | "soft"
+/// baselineSource: "diagnostic" | "official" | null
+model StudentGoal {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam           String
+  deadline       String  @default("flex")
+  pace           String  @default("slow")
+  style          String  @default("soft")
+  baselineScore  String?
+  baselineSource String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// ──────────────────────────────────────────────────────────
+// Транзакция: бронь → оплата → урок → результат
+// State machine (одна на manual и auto режим):
+//   booking: created → paid → completed → settled
+//   payment: pending → confirmed → released
+//   result:  submitted → verified → delta_set
+// ──────────────────────────────────────────────────────────
+
+/// kind: "trial" | "regular"
+/// status: "created" | "paid" | "completed" | "settled" | "cancelled"
+model Booking {
+  id        String   @id @default(cuid())
+  studentId String
+  student   User     @relation("StudentBookings", fields: [studentId], references: [id], onDelete: Cascade)
+  tutorId   String
+  tutor     User     @relation("TutorBookings", fields: [tutorId], references: [id], onDelete: Cascade)
+  slotAt    DateTime
+  kind      String   @default("trial")
+  status    String   @default("created")
+  meetLink  String   @default("") // система генерит сама
+  note      String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payment Payment?
+  lesson  Lesson?
+  reviews Review[]
+}
+
+/// status: "pending" | "confirmed" | "released" | "refunded"
+/// provider: "kaspi_manual" | "kaspi_auto"
+model Payment {
+  id          String   @id @default(cuid())
+  bookingId   String   @unique
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount      Int
+  status      String   @default("pending")
+  provider    String   @default("kaspi_manual")
+  externalRef String? // id/референс на стороне Kaspi
+  payUrl      String   @default("") // QR/ссылка, которую отдаём студенту
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  confirmedAt DateTime?
+  releasedAt  DateTime?
+}
+
+/// Урок состоялся = система знает из календаря/оплаты.
+/// sequenceNo = N-й урок этой пары (студент+тютор) → база для удержания.
+model Lesson {
+  id         String   @id @default(cuid())
+  bookingId  String   @unique
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  studentId  String
+  student    User     @relation("StudentLessons", fields: [studentId], references: [id], onDelete: Cascade)
+  tutorId    String
+  tutor      User     @relation("TutorLessons", fields: [tutorId], references: [id], onDelete: Cascade)
+  happenedAt DateTime
+  sequenceNo Int      @default(1)
+  createdAt  DateTime @default(now())
+}
+
+/// status: "submitted" | "verified" | "delta_set" | "rejected"
+/// delta = finalScore − baseline, считает СИСТЕМА. Тютор не пишет ни то, ни другое.
+model Result {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     User     @relation("StudentResults", fields: [studentId], references: [id], onDelete: Cascade)
+  tutorId     String
+  tutor       User     @relation("TutorResults", fields: [tutorId], references: [id], onDelete: Cascade)
+  exam        String
+  baseline    Float?
+  finalScore  Float?
+  delta       Float?
+  status      String   @default("submitted")
+  reportUrl   String   @default("") // загруженный score report (Supabase Storage)
+  createdAt   DateTime @default(now())
+  verifiedAt  DateTime?
+}
+
+/// Двусторонняя оценка — слабый сигнал.
+/// byRole: "student" | "tutor"  ; targetType: "tutor" | "course" | "student"
+model Review {
+  id          String   @id @default(cuid())
+  bookingId   String?
+  booking     Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  authorId    String?
+  author      User?    @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  authorName  String
+  byRole      String   @default("student")
+  targetType  String
+  targetId    String
+  rating      Int
+  note        String   @default("")
+  beforeScore String   @default("")
+  afterScore  String   @default("")
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+/// Ответ на ретеншн-микровопрос — чинит конфаундер удержания.
+/// reason: "pause" | "goal_reached" | "not_fit" | "expensive"
+model RetentionSignal {
+  id        String   @id @default(cuid())
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  tutorId   String
+  reason    String
+  createdAt DateTime @default(now())
+}
+
+// ──────────────────────────────────────────────────────────
+// Лиды парсера объявлений (Instagram/OLX/Telegram) — админ
+// ──────────────────────────────────────────────────────────
+
+/// status: "new" | "imported" | "rejected"
+model Lead {
+  id         String   @id @default(cuid())
+  source     String   @default("Вручную")
+  url        String   @default("")
+  status     String   @default("new")
+  rawText    String   @default("")
+  parsedJson String   @default("{}")
+  foundAt    DateTime @default(now())
+}
