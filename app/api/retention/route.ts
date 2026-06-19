@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { query } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 
 // Ретеншн-микровопрос (UX §2.10): отличает «ушёл, потому что сдал» от
@@ -15,6 +15,9 @@ export async function POST(req: Request) {
   if (!tutorId || !allowed.includes(reason))
     return NextResponse.json({ error: "Некорректный ответ" }, { status: 400 });
 
-  await prisma.retentionSignal.create({ data: { studentId: user.id, tutorId, reason } });
+  await query(
+    `insert into "RetentionSignal" ("studentId","tutorId",reason) values ($1,$2,$3)`,
+    [user.id, tutorId, reason],
+  );
   return NextResponse.json({ ok: true });
 }

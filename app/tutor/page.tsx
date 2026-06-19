@@ -2,8 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Pencil, TrendingUp } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { one } from "@/lib/db";
 import { computeTutorMetrics } from "@/lib/metrics";
+import { getTutorBookings, getTutorPayments } from "@/lib/queries";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MetricStat } from "@/components/metric-stat";
@@ -19,21 +20,20 @@ export default async function TutorDashboard() {
   if (user.role === "admin") redirect("/admin");
   if (user.role !== "tutor") redirect("/dashboard");
 
-  const profile = await prisma.tutorProfile.findUnique({ where: { userId: user.id } });
+  const profile = await one<{ photo: string | null; price: number }>(
+    `select photo, price from "TutorProfile" where "userId" = $1`,
+    [user.id],
+  );
   if (!profile) redirect("/tutor/onboarding");
 
   const now = new Date();
   const [metrics, bookings, payments] = await Promise.all([
     computeTutorMetrics(user.id),
-    prisma.booking.findMany({
-      where: { tutorId: user.id },
-      include: { student: { select: { name: true, avatarColor: true } }, lesson: true },
-      orderBy: { slotAt: "asc" },
-    }),
-    prisma.payment.findMany({ where: { booking: { tutorId: user.id } } }),
+    getTutorBookings(user.id),
+    getTutorPayments(user.id),
   ]);
 
-  const requests = bookings.filter((b) => !b.lesson && b.slotAt >= now);
+  const requests = bookings.filter((b) => !b.hasLesson && b.slotAt >= now);
   const escrow = payments.filter((p) => p.status === "confirmed").reduce((s, p) => s + p.amount, 0);
   const released = payments.filter((p) => p.status === "released").reduce((s, p) => s + p.amount, 0);
 

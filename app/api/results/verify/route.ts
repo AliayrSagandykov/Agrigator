@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { query, one } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 
 // Верификация дельты. Manual: оператор читает report и вводит финальный балл.
@@ -17,16 +17,21 @@ export async function POST(req: Request) {
   if (!resultId || !Number.isFinite(finalScore))
     return NextResponse.json({ error: "Нужен финальный балл" }, { status: 400 });
 
-  const result = await prisma.result.findUnique({ where: { id: resultId } });
+  const result = await one<{ baseline: number | null }>(
+    `select baseline from "Result" where id = $1`,
+    [resultId],
+  );
   if (!result) return NextResponse.json({ error: "Результат не найден" }, { status: 404 });
 
   const baseline = baselineOverride ?? result.baseline ?? 0;
   const delta = Math.round((finalScore - baseline) * 10) / 10;
 
-  await prisma.result.update({
-    where: { id: resultId },
-    data: { finalScore, baseline, delta, status: "delta_set", verifiedAt: new Date() },
-  });
+  await query(
+    `update "Result"
+       set "finalScore" = $1, baseline = $2, delta = $3, status = 'delta_set', "verifiedAt" = now()
+     where id = $4`,
+    [finalScore, baseline, delta, resultId],
+  );
 
   return NextResponse.json({ ok: true, delta });
 }

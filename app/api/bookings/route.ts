@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { one } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { createBooking } from "@/lib/bookings";
 import { payments } from "@/lib/payments";
@@ -20,15 +20,17 @@ export async function POST(req: Request) {
   if (Number.isNaN(slotAt.getTime()))
     return NextResponse.json({ error: "Неверный слот" }, { status: 400 });
 
-  const profile = await prisma.tutorProfile.findUnique({ where: { userId: tutorId } });
+  const profile = await one<{ price: number; trialFree: boolean }>(
+    `select price, "trialFree" from "TutorProfile" where "userId" = $1`,
+    [tutorId],
+  );
   if (!profile) return NextResponse.json({ error: "Тютор не найден" }, { status: 404 });
 
   const booking = await createBooking({ studentId: user.id, tutorId, slotAt, kind, note });
 
-  // Бесплатный пробный — без оплаты; иначе открываем заряд в эскроу.
   const free = kind === "trial" && profile.trialFree;
-  let payUrl = "";
   const amount = free ? 0 : profile.price;
+  let payUrl = "";
   if (!free) {
     const charge = await payments.createCharge({ bookingId: booking.id, amount });
     payUrl = charge.payUrl;

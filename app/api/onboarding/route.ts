@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { query } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 
 export async function POST(req: Request) {
@@ -10,18 +10,18 @@ export async function POST(req: Request) {
   const exam = String(body.exam ?? "");
   if (!exam) return NextResponse.json({ error: "Выберите экзамен" }, { status: 400 });
 
-  const data = {
-    exam,
-    deadline: String(body.deadline ?? "flex"),
-    pace: String(body.pace ?? "slow"),
-    style: String(body.style ?? "soft"),
-  };
+  const deadline = String(body.deadline ?? "flex");
+  const pace = String(body.pace ?? "slow");
+  const style = String(body.style ?? "soft");
 
-  await prisma.studentGoal.upsert({
-    where: { userId: user.id },
-    create: { userId: user.id, ...data },
-    update: data,
-  });
+  await query(
+    `insert into "StudentGoal" ("userId", exam, deadline, pace, style)
+     values ($1, $2, $3, $4, $5)
+     on conflict ("userId") do update
+       set exam = excluded.exam, deadline = excluded.deadline,
+           pace = excluded.pace, style = excluded.style`,
+    [user.id, exam, deadline, pace, style],
+  );
 
   return NextResponse.json({ ok: true });
 }

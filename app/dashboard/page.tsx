@@ -2,8 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Video, Plus } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { one, query } from "@/lib/db";
 import { computeStudentProgress } from "@/lib/metrics";
+import { getStudentBookings } from "@/lib/queries";
+import type { StudentGoal } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,18 +25,14 @@ export default async function StudentDashboard() {
 
   const now = new Date();
   const [bookings, goal, progress, retentionSignals] = await Promise.all([
-    prisma.booking.findMany({
-      where: { studentId: user.id },
-      include: { tutor: { select: { id: true, name: true, avatarColor: true } }, payment: true, lesson: true },
-      orderBy: { slotAt: "desc" },
-    }),
-    prisma.studentGoal.findUnique({ where: { userId: user.id } }),
+    getStudentBookings(user.id),
+    one<StudentGoal>(`select * from "StudentGoal" where "userId" = $1`, [user.id]),
     computeStudentProgress(user.id),
-    prisma.retentionSignal.findMany({ where: { studentId: user.id }, select: { tutorId: true } }),
+    query<{ tutorId: string }>(`select "tutorId" from "RetentionSignal" where "studentId" = $1`, [user.id]),
   ]);
 
-  const upcoming = bookings.filter((b) => b.slotAt >= now && !b.lesson && b.status !== "cancelled");
-  const history = bookings.filter((b) => b.lesson);
+  const upcoming = bookings.filter((b) => b.slotAt >= now && !b.hasLesson && b.status !== "cancelled");
+  const history = bookings.filter((b) => b.hasLesson);
 
   // Тюторы, с кем были уроки (для загрузки результата).
   const workedWith = Array.from(
@@ -123,7 +121,7 @@ export default async function StudentDashboard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <PaymentBadge status={b.payment?.status} />
+                  <PaymentBadge status={b.paymentStatus ?? undefined} />
                   <a href={b.meetLink} target="_blank">
                     <Button size="sm"><Video size={15} /> Войти</Button>
                   </a>

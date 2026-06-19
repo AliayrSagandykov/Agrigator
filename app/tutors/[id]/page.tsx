@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BadgeCheck, ShieldCheck, Lock, Star } from "lucide-react";
-import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { getTutorByUserId } from "@/lib/tutors";
 import { computeTutorMetrics } from "@/lib/metrics";
+import { getReviewsFor } from "@/lib/queries";
 import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,10 +20,7 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
   const [user, metrics, reviews] = await Promise.all([
     getCurrentUser(),
     computeTutorMetrics(params.id),
-    prisma.review.findMany({
-      where: { targetType: "tutor", targetId: params.id },
-      orderBy: { createdAt: "desc" },
-    }),
+    getReviewsFor("tutor", params.id),
   ]);
 
   const canSeeContacts = user?.plan === "pro" || user?.role === "admin";

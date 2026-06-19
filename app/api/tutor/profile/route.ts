@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { query } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 
 const J = (v: unknown) => JSON.stringify(v);
@@ -22,27 +22,32 @@ export async function POST(req: Request) {
   const subjects = toList(body.subjects);
   const exams = toList(body.exams);
   const price = Math.max(0, parseInt(body.price, 10) || 0);
+  const format = ["online", "offline", "hybrid"].includes(body.format) ? body.format : "online";
+  const city = String(body.city ?? "Онлайн");
+  const experience = Math.max(0, parseInt(body.experience, 10) || 0);
+  const bio = String(body.bio ?? "");
+  const methodology = String(body.methodology ?? "");
+  const trialFree = body.trialFree !== false;
 
   if (exams.length === 0) return NextResponse.json({ error: "Укажите хотя бы один экзамен" }, { status: 400 });
   if (price <= 0) return NextResponse.json({ error: "Укажите цену за час" }, { status: 400 });
 
-  const data = {
-    subjectsJson: J(subjects),
-    examsJson: J(exams),
-    price,
-    format: ["online", "offline", "hybrid"].includes(body.format) ? body.format : "online",
-    city: String(body.city ?? "Онлайн"),
-    experience: Math.max(0, parseInt(body.experience, 10) || 0),
-    bio: String(body.bio ?? ""),
-    methodology: String(body.methodology ?? ""),
-    trialFree: body.trialFree !== false,
-  };
-
-  await prisma.tutorProfile.upsert({
-    where: { userId: user.id },
-    create: { userId: user.id, verified: true, ...data },
-    update: data,
-  });
+  await query(
+    `insert into "TutorProfile"
+       ("userId","subjectsJson","examsJson",price,format,city,experience,bio,methodology,"trialFree",verified)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,true)
+     on conflict ("userId") do update set
+       "subjectsJson" = excluded."subjectsJson",
+       "examsJson"    = excluded."examsJson",
+       price          = excluded.price,
+       format         = excluded.format,
+       city           = excluded.city,
+       experience     = excluded.experience,
+       bio            = excluded.bio,
+       methodology    = excluded.methodology,
+       "trialFree"    = excluded."trialFree"`,
+    [user.id, J(subjects), J(exams), price, format, city, experience, bio, methodology, trialFree],
+  );
 
   return NextResponse.json({ ok: true });
 }

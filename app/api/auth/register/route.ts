@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { query, one } from "@/lib/db";
 import { hashPassword, createSession, toPublicUser } from "@/lib/auth";
+import type { User } from "@/lib/types";
 
 const AVATAR_COLORS = ["#7c3aed", "#0ea5e9", "#16a34a", "#f59e0b", "#ef4444", "#ec4899"];
 
@@ -19,24 +20,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Некорректный email" }, { status: 400 });
   if (password.length < 6)
     return NextResponse.json({ error: "Пароль — минимум 6 символов" }, { status: 400 });
-  // Закон РК о перс. данных: ученику <18 нужен контакт родителя.
   if (role === "student" && isMinor && !parentPhone)
     return NextResponse.json({ error: "Для учеников младше 18 нужен номер родителя" }, { status: 400 });
 
-  const exists = await prisma.user.findUnique({ where: { email } });
+  const exists = await one(`select id from "User" where email = $1`, [email]);
   if (exists) return NextResponse.json({ error: "Этот email уже зарегистрирован" }, { status: 409 });
 
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      role,
-      phone,
-      parentPhone,
-      passwordHash: hashPassword(password),
-      avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)],
-    },
-  });
+  const avatarColor = AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)];
+  const rows = await query<User>(
+    `insert into "User" (name, email, role, phone, "parentPhone", "passwordHash", "avatarColor")
+     values ($1, $2, $3, $4, $5, $6, $7) returning *`,
+    [name, email, role, phone, parentPhone, hashPassword(password), avatarColor],
+  );
+  const user = rows[0];
 
   await createSession(user.id);
   return NextResponse.json({ user: toPublicUser(user) }, { status: 201 });
