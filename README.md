@@ -53,9 +53,13 @@ npm run dev           # http://localhost:3000
 1. Создай проект на [supabase.com](https://supabase.com) (фри-тариф).
 2. **SQL Editor** → вставь и выполни `supabase/migrations/0001_init.sql` (создаст таблицы).
    _Альтернатива:_ локально `DATABASE_URL=<строка> npm run db:migrate`.
-3. **Project Settings → Database → Connection string → вкладка «Connection pooler»**
-   (Transaction mode, порт `6543`) — скопируй строку, подставь пароль. Это и есть `DATABASE_URL` для Vercel.
-4. Засеять демо-данными (по желанию): локально `DATABASE_URL=<pooler-строка> npm run db:seed`.
+3. **Project Settings → Database → Connection string.** Понадобятся две строки:
+   - **Transaction pooler** (порт `6543`) → это `DATABASE_URL` для Vercel (serverless).
+   - **Session pooler / Direct** (порт `5432`) → для разовых `db:migrate`/`db:seed`
+     с ноутбука (лучше держит DDL и батч-вставки, чем transaction-пулер).
+   В обеих подставь пароль БД.
+4. Засеять демо-данными (по желанию, чтобы каталог был не пустой): локально
+   `DATABASE_URL="<строка 5432>" npm run db:seed`.
 
 ### 2. Vercel (приложение)
 1. Импортируй репозиторий на [vercel.com](https://vercel.com) (Framework = Next.js, определится сам).
