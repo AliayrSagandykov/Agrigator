@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { payments } from "@/lib/payments";
-import { getPendingPayments, getSubmittedResults, getLeads, getAdminCounts, getTutorsWithEscrow } from "@/lib/queries";
+import { getPendingPayments, getSubmittedResults, getLeads, getAdminCounts, getTutorsWithEscrow, getAdminTutors } from "@/lib/queries";
 import { parseJson, formatTenge, formatDateTime } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,8 @@ import { MetricStat } from "@/components/metric-stat";
 import { ConfirmPaymentButton } from "@/components/admin/confirm-payment-button";
 import { VerifyResultForm } from "@/components/admin/verify-result-form";
 import { PayoutButton } from "@/components/admin/payout-button";
+import { LeadActions } from "@/components/admin/lead-actions";
+import { TutorActions } from "@/components/admin/tutor-actions";
 
 export const metadata = { title: "Оператор — Agrigator" };
 
@@ -17,11 +19,12 @@ export default async function AdminPage() {
   if (!user) redirect("/login");
   if (user.role !== "admin") redirect("/dashboard");
 
-  const [pending, submitted, escrow, leads, counts] = await Promise.all([
+  const [pending, submitted, escrow, leads, adminTutors, counts] = await Promise.all([
     getPendingPayments(),
     getSubmittedResults(),
     getTutorsWithEscrow(),
     getLeads(),
+    getAdminTutors(),
     getAdminCounts(),
   ]);
 
@@ -113,11 +116,33 @@ export default async function AdminPage() {
                   </div>
                   <div className="truncate text-sm text-muted-foreground">{l.rawText}</div>
                 </div>
-                <Badge variant={l.status === "new" ? "secondary" : "success"}>{l.status}</Badge>
+                {l.status === "new" ? (
+                  <LeadActions id={l.id} />
+                ) : (
+                  <Badge variant={l.status === "imported" ? "success" : "secondary"}>{l.status}</Badge>
+                )}
               </Row>
             );
           })
         )}
+      </Section>
+
+      {/* Управление карточками тьюторов */}
+      <Section title="Тьюторы (управление)" hint="Тогглы рекламы/verified и удаление. Импортированные из лидов помечены «из лида».">
+        {adminTutors.map((t) => (
+          <Row key={t.userId}>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{t.name}</span>
+                {t.source === "parser" && <Badge variant="outline">из лида</Badge>}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {parseJson<string[]>(t.examsJson, []).join(", ") || "—"} · выборка {t.statSample}
+              </div>
+            </div>
+            <TutorActions userId={t.userId} sponsored={t.sponsored} aiVerified={t.aiVerified} />
+          </Row>
+        ))}
       </Section>
     </div>
   );
