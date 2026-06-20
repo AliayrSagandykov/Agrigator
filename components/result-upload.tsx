@@ -16,9 +16,26 @@ export function ResultUpload({
   const [tutorId, setTutorId] = useState(tutors[0]?.id ?? "");
   const [exam, setExam] = useState(defaultExam ?? "");
   const [reportUrl, setReportUrl] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError("");
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    setUploading(false);
+    if (!res.ok) return setError(data.error || "Не удалось загрузить файл");
+    setReportUrl(data.url);
+    setFileName(file.name);
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,10 +78,17 @@ export function ResultUpload({
         </select>
         <Input placeholder="Экзамен (напр. IELTS)" value={exam} onChange={(e) => setExam(e.target.value)} required />
       </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <label className="cursor-pointer rounded-lg border border-input px-3 py-2 text-sm hover:bg-muted">
+          {uploading ? "Загружаем…" : "Прикрепить файл"}
+          <input type="file" accept="image/*,application/pdf" className="hidden" onChange={onFile} disabled={uploading} />
+        </label>
+        {fileName && <span className="text-xs text-success">✓ {fileName}</span>}
+      </div>
       <Input
-        placeholder="Ссылка/имя файла score report (PDF/скрин)"
+        placeholder="…или ссылка на score report"
         value={reportUrl}
-        onChange={(e) => setReportUrl(e.target.value)}
+        onChange={(e) => { setReportUrl(e.target.value); setFileName(""); }}
       />
       {error && <p className="text-sm text-destructive">{error}</p>}
       <Button type="submit" variant="outline" disabled={loading}>

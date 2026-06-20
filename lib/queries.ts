@@ -140,6 +140,26 @@ export function getLeads(): Promise<Lead[]> {
   return query<Lead>(`select * from "Lead" order by "foundAt" desc`);
 }
 
+export interface EscrowRow {
+  tutorId: string;
+  tutorName: string;
+  amount: number;
+}
+
+/** Тьюторы с подтверждёнными (но не выплаченными) деньгами в эскроу. */
+export function getTutorsWithEscrow(): Promise<EscrowRow[]> {
+  return query<EscrowRow>(
+    `select t.id as "tutorId", t.name as "tutorName", sum(pay.amount)::int as amount
+     from "Payment" pay
+     join "Booking" b on b.id = pay."bookingId"
+     join "User" t on t.id = b."tutorId"
+     where pay.status = 'confirmed'
+     group by t.id, t.name
+     having sum(pay.amount) > 0
+     order by amount desc`,
+  );
+}
+
 /** bookingId, которые этот автор уже оценил (чтобы не просить повторно). */
 export async function getReviewedBookingIds(authorId: string): Promise<Set<string>> {
   const rows = await query<{ bookingId: string }>(

@@ -9,7 +9,8 @@ import "server-only";
 type OperatorEvent =
   | { type: "payment_pending"; bookingId: string; amount: number }
   | { type: "result_submitted"; resultId: string; studentName: string }
-  | { type: "lead_new"; source: string };
+  | { type: "lead_new"; source: string }
+  | { type: "retention_due"; count: number };
 
 export async function notifyOperator(event: OperatorEvent): Promise<void> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -42,5 +43,7 @@ function renderOperatorMessage(event: OperatorEvent): string {
       return `📄 ${event.studentName} загрузил(а) score report (#${event.resultId}). Проверь и проставь дельту в /admin.`;
     case "lead_new":
       return `🔎 Новый лид из ${event.source}. Разбери в /admin.`;
+    case "retention_due":
+      return `🔁 ${event.count} ученик(ов) давно без переброни — отправь ретеншн-вопрос.`;
   }
 }

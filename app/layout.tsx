@@ -1,14 +1,20 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import "./globals.css";
 import { getCurrentUser } from "@/lib/auth";
 import { toPublicUser } from "@/lib/auth";
 import { SiteHeader } from "@/components/site-header";
+import { Analytics } from "@/components/analytics";
 
 export const metadata: Metadata = {
   title: "Agrigator — тюторы с верифицированными результатами",
   description:
     "Выбирай тютора по реальным результатам, а не по чужому логотипу. Верифицированная дельта, удержание, бронь и оплата через платформу.",
+  appleWebApp: { capable: true, title: "Agrigator" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#7c3aed",
 };
 
 const themeScript = `try{var t=localStorage.getItem('agr-theme');if(t==='dark'){document.documentElement.classList.add('dark')}}catch(e){}`;
@@ -25,6 +31,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <SiteHeader user={user ? toPublicUser(user) : null} />
         <main className="flex-1">{children}</main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
