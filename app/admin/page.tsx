@@ -1,13 +1,14 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { payments } from "@/lib/payments";
-import { getPendingPayments, getSubmittedResults, getLeads, getAdminCounts } from "@/lib/queries";
+import { getPendingPayments, getSubmittedResults, getLeads, getAdminCounts, getTutorsWithEscrow } from "@/lib/queries";
 import { parseJson, formatTenge, formatDateTime } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MetricStat } from "@/components/metric-stat";
 import { ConfirmPaymentButton } from "@/components/admin/confirm-payment-button";
 import { VerifyResultForm } from "@/components/admin/verify-result-form";
+import { PayoutButton } from "@/components/admin/payout-button";
 
 export const metadata = { title: "Оператор — Agrigator" };
 
@@ -16,9 +17,10 @@ export default async function AdminPage() {
   if (!user) redirect("/login");
   if (user.role !== "admin") redirect("/dashboard");
 
-  const [pending, submitted, leads, counts] = await Promise.all([
+  const [pending, submitted, escrow, leads, counts] = await Promise.all([
     getPendingPayments(),
     getSubmittedResults(),
+    getTutorsWithEscrow(),
     getLeads(),
     getAdminCounts(),
   ]);
@@ -73,6 +75,23 @@ export default async function AdminPage() {
                 </div>
               </div>
               <VerifyResultForm resultId={r.id} baseline={r.baseline} />
+            </Row>
+          ))
+        )}
+      </Section>
+
+      {/* Выплаты тьюторам */}
+      <Section title="Выплаты тьюторам" hint="Деньги в эскроу после подтверждённых уроков. Manual: выплачивай раз в неделю; auto: крон.">
+        {escrow.length === 0 ? (
+          <Empty>Нет денег к выплате.</Empty>
+        ) : (
+          escrow.map((e) => (
+            <Row key={e.tutorId}>
+              <div>
+                <div className="font-medium">{e.tutorName}</div>
+                <div className="text-sm text-muted-foreground">в эскроу: {formatTenge(e.amount)}</div>
+              </div>
+              <PayoutButton tutorId={e.tutorId} />
             </Row>
           ))
         )}

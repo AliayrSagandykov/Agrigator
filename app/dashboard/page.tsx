@@ -6,6 +6,7 @@ import { one, query } from "@/lib/db";
 import { computeStudentProgress } from "@/lib/metrics";
 import { getStudentBookings, getReviewedBookingIds } from "@/lib/queries";
 import { LessonReview } from "@/components/lesson-review";
+import { BaselineForm } from "@/components/baseline-form";
 import type { StudentGoal } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -81,9 +82,7 @@ export default async function StudentDashboard() {
                 <p className="text-muted-foreground">Сдашь экзамен — загрузи отчёт, и система посчитает дельту.</p>
               </div>
             ) : (
-              <p className="mt-3 text-sm text-muted-foreground">
-                Baseline не задан. Пройди диагностику или укажи прошлый официальный балл — тогда прогресс будет в цифрах.
-              </p>
+              <BaselineForm exam={progress.exam} />
             )}
             {progress.delta != null && (
               <div className="mt-3">
