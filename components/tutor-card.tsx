@@ -3,6 +3,7 @@ import { BadgeCheck, Clock, ShieldCheck, Sparkles } from "lucide-react";
 import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DeltaChart } from "@/components/delta-chart";
+import { FavoriteButton } from "@/components/favorite-button";
 import { formatPrice } from "@/lib/utils";
 import type { TutorVM } from "@/lib/tutors";
 
@@ -10,19 +11,25 @@ export function TutorCard({
   tutor,
   matchPercent,
   reasons,
+  isFav = false,
 }: {
   tutor: TutorVM;
   matchPercent?: number;
   reasons?: string[];
+  isFav?: boolean;
 }) {
   const lowData = tutor.metrics.sample < 10;
 
+  // Ссылка — оверлей на всю карточку; сердце лежит выше неё (z-10), поэтому
+  // его клик не ведёт на профиль (без вложенных интерактивных элементов).
   return (
-    <Link
-      href={`/tutors/${tutor.id}`}
-      className="group flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
-    >
-      <div className="flex items-start gap-3">
+    <div className="group relative flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+      <Link href={`/tutors/${tutor.id}`} className="absolute inset-0" aria-label={tutor.name}>
+        <span className="sr-only">{tutor.name}</span>
+      </Link>
+      <FavoriteButton itemKey={`tutor:${tutor.id}`} initial={isFav} className="absolute right-3 top-3 z-10" />
+
+      <div className="flex items-start gap-3 pr-9">
         <Avatar name={tutor.name} photo={tutor.photo} color={tutor.avatarColor} size={52} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
@@ -30,12 +37,12 @@ export function TutorCard({
             {tutor.aiVerified && <ShieldCheck className="shrink-0 text-success" size={16} />}
           </div>
           <p className="truncate text-sm text-muted-foreground">{tutor.subjects}</p>
+          {tutor.sponsored && (
+            <Badge variant="accent" className="mt-1">
+              <Sparkles size={11} /> Реклама
+            </Badge>
+          )}
         </div>
-        {tutor.sponsored && (
-          <Badge variant="accent" className="shrink-0">
-            <Sparkles size={11} /> Реклама
-          </Badge>
-        )}
       </div>
 
       <div className="mt-4">
@@ -76,6 +83,6 @@ export function TutorCard({
           <Clock size={13} /> {tutor.responseTime}
         </span>
       </div>
-    </Link>
+    </div>
   );
 }

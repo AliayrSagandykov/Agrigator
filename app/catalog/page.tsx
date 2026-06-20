@@ -1,4 +1,6 @@
 import { getTutorCards } from "@/lib/tutors";
+import { getCurrentUser } from "@/lib/auth";
+import { getFavoriteKeys } from "@/lib/queries";
 import { TutorCard } from "@/components/tutor-card";
 import { ALL_EXAMS, FORMATS } from "@/lib/constants";
 
@@ -9,7 +11,8 @@ export default async function CatalogPage({
 }: {
   searchParams: { exam?: string; format?: string; q?: string };
 }) {
-  const all = await getTutorCards();
+  const [all, user] = await Promise.all([getTutorCards(), getCurrentUser()]);
+  const favs = user ? await getFavoriteKeys(user.id) : new Set<string>();
   const { exam, format, q } = searchParams;
   const query = (q ?? "").toLowerCase().trim();
 
@@ -66,7 +69,7 @@ export default async function CatalogPage({
       ) : (
         <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {tutors.map((t) => (
-            <TutorCard key={t.id} tutor={t} />
+            <TutorCard key={t.id} tutor={t} isFav={favs.has(`tutor:${t.id}`)} />
           ))}
         </div>
       )}

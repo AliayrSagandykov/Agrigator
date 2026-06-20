@@ -128,3 +128,14 @@ export async function getTutorByUserId(userId: string): Promise<TutorVM | null> 
   const row = await one<ProfileRow>(`${SELECT_TUTOR} where p."userId" = $1`, [userId]);
   return row ? toTutorVM(row) : null;
 }
+
+/** Тюторы из избранного пользователя (ключ "tutor:<userId>"). */
+export async function getFavoriteTutors(userId: string): Promise<TutorVM[]> {
+  const rows = await query<ProfileRow>(
+    `${SELECT_TUTOR}
+     where ('tutor:' || p."userId") in (select key from "Favorite" where "userId" = $1)
+     order by p.rating desc`,
+    [userId],
+  );
+  return rows.map(toTutorVM);
+}

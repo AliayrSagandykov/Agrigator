@@ -3,6 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 import { getCurrentUser } from "@/lib/auth";
 import { toPublicUser } from "@/lib/auth";
+import { getFavoriteKeys } from "@/lib/queries";
 import { SiteHeader } from "@/components/site-header";
 import { Analytics } from "@/components/analytics";
 
@@ -21,6 +22,7 @@ const themeScript = `try{var t=localStorage.getItem('agr-theme');if(t==='dark'){
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
+  const favCount = user && user.role === "student" ? (await getFavoriteKeys(user.id)).size : 0;
 
   return (
     <html lang="ru" suppressHydrationWarning>
@@ -28,7 +30,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-screen flex flex-col">
-        <SiteHeader user={user ? toPublicUser(user) : null} />
+        <SiteHeader user={user ? toPublicUser(user) : null} favCount={favCount} />
         <main className="flex-1">{children}</main>
         <Footer />
         <Analytics />

@@ -4,6 +4,7 @@ import { Sparkles } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { one } from "@/lib/db";
 import { getTutorCards } from "@/lib/tutors";
+import { getFavoriteKeys } from "@/lib/queries";
 import type { StudentGoal } from "@/lib/types";
 import { rankTutors } from "@/lib/match";
 import { TutorCard } from "@/components/tutor-card";
@@ -18,7 +19,7 @@ export default async function MatchPage() {
   const goal = await one<StudentGoal>(`select * from "StudentGoal" where "userId" = $1`, [user.id]);
   if (!goal) redirect("/onboarding");
 
-  const tutors = await getTutorCards();
+  const [tutors, favs] = await Promise.all([getTutorCards(), getFavoriteKeys(user.id)]);
   const ranked = rankTutors(
     tutors.map((t) => ({
       id: t.id,
@@ -75,7 +76,7 @@ export default async function MatchPage() {
         {top.map((r) => {
           const tutor = byId.get(r.id);
           if (!tutor) return null;
-          return <TutorCard key={r.id} tutor={tutor} matchPercent={r.percent} reasons={r.reasons} />;
+          return <TutorCard key={r.id} tutor={tutor} matchPercent={r.percent} reasons={r.reasons} isFav={favs.has(`tutor:${r.id}`)} />;
         })}
       </div>
     </div>

@@ -4,8 +4,9 @@ import { BadgeCheck, ShieldCheck, Lock, Star } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getTutorByUserId } from "@/lib/tutors";
 import { computeTutorMetrics } from "@/lib/metrics";
-import { getReviewsFor } from "@/lib/queries";
+import { getReviewsFor, getFavoriteKeys } from "@/lib/queries";
 import { Avatar } from "@/components/avatar";
+import { FavoriteButton } from "@/components/favorite-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,6 +25,7 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
   ]);
 
   const canSeeContacts = user?.plan === "pro" || user?.role === "admin";
+  const isFav = user ? (await getFavoriteKeys(user.id)).has(`tutor:${params.id}`) : false;
 
   return (
     <div className="container py-10">
@@ -32,10 +34,11 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
         <div className="space-y-6">
           <div className="flex items-start gap-4">
             <Avatar name={tutor.name} photo={tutor.photo} color={tutor.avatarColor} size={80} />
-            <div>
+            <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-bold">{tutor.name}</h1>
                 {tutor.verified && <ShieldCheck className="text-success" size={20} />}
+                <FavoriteButton itemKey={`tutor:${tutor.id}`} initial={isFav} className="ml-auto border border-border" size={20} />
               </div>
               <p className="text-muted-foreground">{tutor.subjects}</p>
               <div className="mt-2 flex flex-wrap gap-2">
