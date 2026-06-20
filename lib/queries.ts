@@ -140,6 +140,24 @@ export function getLeads(): Promise<Lead[]> {
   return query<Lead>(`select * from "Lead" order by "foundAt" desc`);
 }
 
+export interface AdminTutorRow {
+  userId: string;
+  name: string;
+  examsJson: string;
+  sponsored: boolean;
+  aiVerified: boolean;
+  statSample: number;
+  source: string;
+}
+
+export function getAdminTutors(): Promise<AdminTutorRow[]> {
+  return query<AdminTutorRow>(
+    `select u.id as "userId", u.name, p."examsJson", p.sponsored, p."aiVerified", p."statSample", p.source
+     from "TutorProfile" p join "User" u on u.id = p."userId"
+     order by p.source desc, u.name asc`,
+  );
+}
+
 export interface EscrowRow {
   tutorId: string;
   tutorName: string;
