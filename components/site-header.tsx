@@ -3,6 +3,7 @@ import { GraduationCap, Heart } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LogoutButton } from "@/components/logout-button";
 import { Avatar } from "@/components/avatar";
+import { MobileNav } from "@/components/mobile-nav";
 import { Button } from "@/components/ui/button";
 import type { PublicUser } from "@/lib/auth";
 
@@ -68,6 +69,7 @@ export function SiteHeader({ user, favCount = 0 }: { user: PublicUser | null; fa
               </Link>
             </>
           )}
+          <MobileNav user={user} favCount={favCount} />
         </div>
       </div>
     </header>
