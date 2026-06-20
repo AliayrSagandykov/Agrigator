@@ -57,12 +57,17 @@ export default async function MatchPage() {
               </p>
             </div>
           </div>
-          <Link
-            href="/dashboard"
-            className="shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-          >
-            Позже, в кабинете
-          </Link>
+          <div className="flex shrink-0 items-center gap-3">
+            <Link
+              href="/diagnostic"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+            >
+              Пройти диагностику
+            </Link>
+            <Link href="/dashboard" className="text-sm text-accent-foreground/70 hover:underline">
+              Позже
+            </Link>
+          </div>
         </div>
       )}
 

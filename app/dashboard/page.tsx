@@ -82,7 +82,16 @@ export default async function StudentDashboard() {
                 <p className="text-muted-foreground">Сдашь экзамен — загрузи отчёт, и система посчитает дельту.</p>
               </div>
             ) : (
-              <BaselineForm exam={progress.exam} />
+              <div className="mt-3">
+                <Link
+                  href="/diagnostic"
+                  className="inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                >
+                  🎯 Пройти диагностику
+                </Link>
+                <div className="mt-3 text-xs text-muted-foreground">или укажи прошлый официальный балл:</div>
+                <BaselineForm exam={progress.exam} />
+              </div>
             )}
             {progress.delta != null && (
               <div className="mt-3">
