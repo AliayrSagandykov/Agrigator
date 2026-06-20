@@ -71,7 +71,7 @@ export function BookingFlow({
           </div>
 
           <InfoRow icon={<Video size={16} />} title="Ссылка на урок (сгенерирована автоматически)">
-            <a href={result.booking.meetLink} target="_blank" className="break-all text-primary hover:underline">
+            <a href={result.booking.meetLink} target="_blank" rel="noopener noreferrer" className="break-all text-primary hover:underline">
               {result.booking.meetLink}
             </a>
           </InfoRow>
@@ -82,7 +82,7 @@ export function BookingFlow({
             </InfoRow>
           ) : (
             <InfoRow icon={<CreditCard size={16} />} title={`Оплата ${formatTenge(result.amount)} в эскроу`}>
-              <a href={result.payUrl} target="_blank" className="text-primary hover:underline">
+              <a href={result.payUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                 Оплатить через Kaspi →
               </a>
               <p className="mt-1 text-xs text-muted-foreground">

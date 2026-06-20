@@ -19,6 +19,16 @@ export function formatPrice(value: number, unit = "час"): string {
   return `${value.toLocaleString("ru-RU")} ₸/${unit}`;
 }
 
+const FORMAT_LABELS: Record<string, string> = {
+  online: "Онлайн",
+  offline: "Оффлайн",
+  hybrid: "Гибрид",
+};
+
+export function formatLabel(value: string): string {
+  return FORMAT_LABELS[value] ?? value;
+}
+
 export function formatTenge(value: number): string {
   return `${value.toLocaleString("ru-RU")} ₸`;
 }

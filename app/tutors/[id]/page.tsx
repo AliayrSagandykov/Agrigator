@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DeltaChart } from "@/components/delta-chart";
 import { MetricRow } from "@/components/metric-stat";
-import { formatDelta, formatPrice } from "@/lib/utils";
+import { formatDelta, formatPrice, formatLabel } from "@/lib/utils";
 
 export default async function TutorProfilePage({ params }: { params: { id: string } }) {
   const tutor = await getTutorByUserId(params.id);
@@ -144,7 +144,7 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
               </Link>
 
               <dl className="space-y-1.5 text-sm">
-                <Row label="Формат" value={tutor.format} />
+                <Row label="Формат" value={formatLabel(tutor.format)} />
                 <Row label="Город" value={tutor.city} />
                 <Row label="Опыт" value={`${tutor.experience} лет`} />
                 {tutor.languages.length > 0 && <Row label="Языки" value={tutor.languages.join(", ")} />}

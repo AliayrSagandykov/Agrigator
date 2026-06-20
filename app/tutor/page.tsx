@@ -103,7 +103,7 @@ export default async function TutorDashboard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <a href={b.meetLink} target="_blank" className="text-sm text-primary hover:underline">ссылка</a>
+                  <a href={b.meetLink} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">ссылка</a>
                   <CompleteLessonButton bookingId={b.id} />
                 </div>
               </CardContent>

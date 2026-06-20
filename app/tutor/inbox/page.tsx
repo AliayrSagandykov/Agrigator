@@ -55,7 +55,7 @@ export default async function TutorInbox() {
                     <Badge variant="outline">ждёт ответа</Badge>
                   ) : (
                     <>
-                      <a href={b.meetLink} target="_blank" className="text-sm text-primary hover:underline">ссылка</a>
+                      <a href={b.meetLink} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">ссылка</a>
                       <CompleteLessonButton bookingId={b.id} />
                     </>
                   )}
