@@ -128,7 +128,7 @@ export default async function StudentDashboard() {
                     <Badge variant="outline">ждёт тютора</Badge>
                   )}
                   <PaymentBadge status={b.paymentStatus ?? undefined} />
-                  <a href={b.meetLink} target="_blank">
+                  <a href={b.meetLink} target="_blank" rel="noopener noreferrer">
                     <Button size="sm"><Video size={15} /> Войти</Button>
                   </a>
                 </div>

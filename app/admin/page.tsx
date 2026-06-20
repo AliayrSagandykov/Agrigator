@@ -71,7 +71,7 @@ export default async function AdminPage() {
                 <div className="font-medium">{r.studentName} · {r.exam}</div>
                 <div className="text-sm text-muted-foreground">
                   тютор {r.tutorName} · baseline {r.baseline ?? "—"}
-                  {r.reportUrl && <> · <a href={r.reportUrl} target="_blank" className="text-primary hover:underline">report</a></>}
+                  {r.reportUrl && <> · <a href={r.reportUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">report</a></>}
                 </div>
               </div>
               <VerifyResultForm resultId={r.id} baseline={r.baseline} />
