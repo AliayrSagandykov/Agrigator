@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { formatDelta } from "@/lib/utils";
+import { getT } from "@/lib/locale";
 
 // Верифицированный график «до/после» — единственная «магия» продукта.
 // Цифры ставит система, не тютор.
@@ -18,6 +19,7 @@ export function DeltaChart({
   className?: string;
   compact?: boolean;
 }) {
+  const t = getT();
   const max = Math.max(before, after, 1);
   const beforePct = Math.round((before / max) * 100);
   const afterPct = Math.round((after / max) * 100);
@@ -27,16 +29,16 @@ export function DeltaChart({
     <div className={cn("space-y-2", className)}>
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span className="font-medium">{metric}</span>
-        {sample != null && <span>выборка: {sample} учеников</span>}
+        {sample != null && <span>{t.chart.sample}: {sample} {t.chart.students}</span>}
       </div>
 
-      <Bar label="до" pct={beforePct} value={before} tone="muted" />
-      <Bar label="после" pct={afterPct} value={after} tone="primary" />
+      <Bar label={t.chart.before} pct={beforePct} value={before} tone="muted" />
+      <Bar label={t.chart.after} pct={afterPct} value={after} tone="primary" />
 
       {!compact && (
         <div className="pt-1">
           <span className="inline-flex items-center gap-1 rounded-md bg-success/15 px-2 py-1 text-sm font-semibold text-success">
-            {formatDelta(delta)} к результату
+            {formatDelta(delta)} {t.chart.toResult}
           </span>
         </div>
       )}

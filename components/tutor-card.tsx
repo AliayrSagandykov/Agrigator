@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { DeltaChart } from "@/components/delta-chart";
 import { FavoriteButton } from "@/components/favorite-button";
 import { formatPrice } from "@/lib/utils";
+import { getT } from "@/lib/locale";
 import type { TutorVM } from "@/lib/tutors";
 
 export function TutorCard({
@@ -18,6 +19,7 @@ export function TutorCard({
   reasons?: string[];
   isFav?: boolean;
 }) {
+  const t = getT();
   const lowData = tutor.metrics.sample < 10;
 
   // Ссылка — оверлей на всю карточку; сердце лежит выше неё (z-10), поэтому
@@ -39,7 +41,7 @@ export function TutorCard({
           <p className="truncate text-sm text-muted-foreground">{tutor.subjects}</p>
           {tutor.sponsored && (
             <Badge variant="accent" className="mt-1">
-              <Sparkles size={11} /> Реклама
+              <Sparkles size={11} /> {t.card.ad}
             </Badge>
           )}
         </div>
@@ -48,7 +50,7 @@ export function TutorCard({
       <div className="mt-4">
         {lowData ? (
           <div className="rounded-lg border border-dashed border-border bg-muted/40 p-3 text-center text-sm text-muted-foreground">
-            🌱 Новый тютор, мало уроков — метрики пока копятся
+            {t.card.newTutor}
           </div>
         ) : (
           <DeltaChart
@@ -64,15 +66,15 @@ export function TutorCard({
       {!lowData && (
         <div className="mt-3 flex flex-wrap gap-2">
           <Badge variant="success">
-            <BadgeCheck size={12} /> {tutor.metrics.sample} верифиц. учеников
+            <BadgeCheck size={12} /> {tutor.metrics.sample} {t.card.verifiedStudents}
           </Badge>
-          <Badge variant="secondary">удержание {tutor.metrics.retention}%</Badge>
+          <Badge variant="secondary">{t.card.retention} {tutor.metrics.retention}%</Badge>
         </div>
       )}
 
       {matchPercent != null && (
         <div className="mt-3 rounded-lg bg-accent px-3 py-2 text-sm text-accent-foreground">
-          <span className="font-semibold">{matchPercent}% совпадение</span>
+          <span className="font-semibold">{matchPercent}% {t.card.match}</span>
           {reasons && reasons.length > 0 && <span> · {reasons.join(", ")}</span>}
         </div>
       )}

@@ -4,12 +4,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
+interface NavLabels {
+  tutors: string; match: string; forTutors: string; login: string;
+  register: string; logout: string; favorites: string; dashboard: string;
+}
+
 export function MobileNav({
   user,
   favCount = 0,
+  labels,
 }: {
   user: { role: string } | null;
   favCount?: number;
+  labels: NavLabels;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -41,29 +48,29 @@ export function MobileNav({
       {open && (
         <div className="absolute inset-x-0 top-16 z-50 border-b border-border bg-background p-3 shadow-md">
           <nav className="flex flex-col">
-            <MLink href="/catalog" onClick={close}>Тюторы</MLink>
-            <MLink href="/onboarding" onClick={close}>Подбор</MLink>
-            <MLink href="/for-tutors" onClick={close}>Тьюторам</MLink>
+            <MLink href="/catalog" onClick={close}>{labels.tutors}</MLink>
+            <MLink href="/onboarding" onClick={close}>{labels.match}</MLink>
+            <MLink href="/for-tutors" onClick={close}>{labels.forTutors}</MLink>
             <div className="my-2 border-t border-border" />
             {user ? (
               <>
-                <MLink href={dashboardHref} onClick={close}>Кабинет</MLink>
+                <MLink href={dashboardHref} onClick={close}>{labels.dashboard}</MLink>
                 {user.role === "student" && (
                   <MLink href="/favorites" onClick={close}>
-                    Избранное{favCount ? ` (${favCount})` : ""}
+                    {labels.favorites}{favCount ? ` (${favCount})` : ""}
                   </MLink>
                 )}
                 <button
                   onClick={logout}
                   className="rounded-lg px-3 py-2.5 text-left text-sm font-medium text-muted-foreground hover:bg-muted"
                 >
-                  Выйти
+                  {labels.logout}
                 </button>
               </>
             ) : (
               <>
-                <MLink href="/login" onClick={close}>Войти</MLink>
-                <MLink href="/register" onClick={close}>Регистрация</MLink>
+                <MLink href="/login" onClick={close}>{labels.login}</MLink>
+                <MLink href="/register" onClick={close}>{labels.register}</MLink>
               </>
             )}
           </nav>

@@ -5,8 +5,10 @@ import { Card } from "@/components/ui/card";
 import { DeltaChart } from "@/components/delta-chart";
 import { Avatar } from "@/components/avatar";
 import { getTutorCards } from "@/lib/tutors";
+import { getT } from "@/lib/locale";
 
 export default async function HomePage() {
+  const tr = getT();
   const tutors = await getTutorCards();
   const proof = tutors.filter((t) => t.aiVerified && t.metrics.sample > 30).slice(0, 3);
 
@@ -17,25 +19,24 @@ export default async function HomePage() {
         <div className="container py-16 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground">
-              <ShieldCheck size={14} className="text-success" /> Результаты проверены извне
+              <ShieldCheck size={14} className="text-success" /> {tr.home.badge}
             </span>
             <h1 className="mt-5 text-4xl font-bold leading-tight tracking-tight md:text-5xl">
-              Выбирай тютора по <span className="brand-grad">реальным результатам</span>,
-              а не по чужому логотипу
+              {tr.home.heroLead} <span className="brand-grad">{tr.home.heroHL}</span>
+              {tr.home.heroTail}
             </h1>
             <p className="mx-auto mt-5 max-w-xl text-lg text-muted-foreground">
-              Верифицированная дельта баллов, удержание учеников, бронь и оплата — в одном
-              месте. Цифрам неоткуда врать: их ставит система.
+              {tr.home.subtitle}
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Link href="/onboarding">
                 <Button size="lg" className="w-full sm:w-auto">
-                  Я ищу тютора <ArrowRight size={18} />
+                  {tr.home.ctaFind} <ArrowRight size={18} />
                 </Button>
               </Link>
               <Link href="/for-tutors">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                  <GraduationCap size={18} /> Я тютор
+                  <GraduationCap size={18} /> {tr.home.ctaTutor}
                 </Button>
               </Link>
             </div>
@@ -45,10 +46,8 @@ export default async function HomePage() {
 
       {/* PROOF */}
       <section className="container py-14">
-        <h2 className="text-center text-2xl font-bold">Доказательства, а не обещания</h2>
-        <p className="mt-2 text-center text-muted-foreground">
-          Каждый график «до/после» построен по верифицированным результатам учеников.
-        </p>
+        <h2 className="text-center text-2xl font-bold">{tr.home.proofTitle}</h2>
+        <p className="mt-2 text-center text-muted-foreground">{tr.home.proofSub}</p>
         <div className="mt-8 grid gap-5 md:grid-cols-3">
           {proof.map((t) => (
             <Card key={t.id} className="p-5">
@@ -71,7 +70,7 @@ export default async function HomePage() {
                 href={`/tutors/${t.id}`}
                 className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
               >
-                Профиль тютора <ArrowRight size={14} />
+                {tr.home.proofLink} <ArrowRight size={14} />
               </Link>
             </Card>
           ))}
@@ -81,17 +80,14 @@ export default async function HomePage() {
       {/* WHY */}
       <section className="border-t border-border bg-muted/30">
         <div className="container grid gap-6 py-14 md:grid-cols-3">
-          <Why icon={<TrendingUp className="text-success" />} title="Дельта, а не звёздочки">
-            Главный сигнал — насколько вырос балл ученика. Baseline ставит диагностика или
-            официальный прошлый результат, финал — score report. Тютор число не вводит.
+          <Why icon={<TrendingUp className="text-success" />} title={tr.home.why1Title}>
+            {tr.home.why1Body}
           </Why>
-          <Why icon={<Repeat className="text-primary" />} title="Удержание как правда">
-            Возвращаются ли ученики — видно из переброней. А ушёл «потому что сдал» или
-            «потому что не подошёл» — уточняем одним тапом.
+          <Why icon={<Repeat className="text-primary" />} title={tr.home.why2Title}>
+            {tr.home.why2Body}
           </Why>
-          <Why icon={<ShieldCheck className="text-success" />} title="Всё через платформу">
-            Бронь, авто-ссылка на урок и оплата в эскроу. Оставаться в приложении удобнее,
-            чем уходить в личку.
+          <Why icon={<ShieldCheck className="text-success" />} title={tr.home.why3Title}>
+            {tr.home.why3Body}
           </Why>
         </div>
       </section>

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { getT } from "@/lib/locale";
 
 // Три ядровые метрики тютора: дельта · уроки · удержание.
 export function MetricStat({
@@ -42,11 +43,12 @@ export function MetricRow({
   retention: number | string;
   isLive?: boolean;
 }) {
+  const t = getT();
   return (
     <div className="grid grid-cols-3 gap-2">
-      <MetricStat value={delta} label="средняя дельта" tone="success" />
-      <MetricStat value={String(lessons)} label="уроков" />
-      <MetricStat value={`${retention}%`} label="удержание" tone="primary" />
+      <MetricStat value={delta} label={t.metric.avgDelta} tone="success" />
+      <MetricStat value={String(lessons)} label={t.metric.lessons} />
+      <MetricStat value={`${retention}%`} label={t.metric.retention} tone="primary" />
     </div>
   );
 }

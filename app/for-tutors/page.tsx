@@ -2,42 +2,40 @@ import Link from "next/link";
 import { Check, TrendingUp, ShieldCheck, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { getT } from "@/lib/locale";
 
 export const metadata = { title: "Тьюторам — Agrigator" };
 
 export default function ForTutorsPage() {
+  const t = getT();
   return (
     <div>
       <section className="border-b border-border bg-gradient-to-b from-accent/40 to-background">
         <div className="container py-16 text-center">
           <h1 className="mx-auto max-w-2xl text-4xl font-bold tracking-tight">
-            Твой портфель результатов, который <span className="brand-grad">нельзя купить</span>
+            {t.forTutors.heroLead}
+            <span className="brand-grad">{t.forTutors.heroHL}</span>
+            {t.forTutors.heroTail}
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-            Регистрация бесплатна навсегда. Платформа берёт на себя бронь, ссылку на урок и
-            оплату — а твои метрики растут сами с каждым результатом ученика.
-          </p>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">{t.forTutors.subtitle}</p>
           <Link href="/register?role=tutor" className="mt-7 inline-block">
-            <Button size="lg">Создать профиль тьютора</Button>
+            <Button size="lg">{t.forTutors.cta}</Button>
           </Link>
         </div>
       </section>
 
       <section className="container grid gap-5 py-14 md:grid-cols-2">
-        <Benefit icon={<TrendingUp className="text-primary" />} title="Метрики вместо саморекламы">
-          Средняя дельта, число уроков и удержание считает система. Не нужно доказывать
-          словами — цифры говорят сами.
+        <Benefit icon={<TrendingUp className="text-primary" />} title={t.forTutors.b1Title}>
+          {t.forTutors.b1Body}
         </Benefit>
-        <Benefit icon={<ShieldCheck className="text-success" />} title="Лёгкая верификация на входе">
-          Подтверждение личности и (по желанию) свой балл. Главная верификация идёт потом —
-          из реальных результатов учеников.
+        <Benefit icon={<ShieldCheck className="text-success" />} title={t.forTutors.b2Title}>
+          {t.forTutors.b2Body}
         </Benefit>
-        <Benefit icon={<Wallet className="text-primary" />} title="Оплата и эскроу">
-          Деньги держатся в эскроу до урока и падают тебе после. Никаких «забыл перевести».
+        <Benefit icon={<Wallet className="text-primary" />} title={t.forTutors.b3Title}>
+          {t.forTutors.b3Body}
         </Benefit>
-        <Benefit icon={<Check className="text-success" />} title="Логистика — на платформе">
-          Принятая бронь = слот в календаре и авто-ссылка на урок. Ты не тратишь время на
-          переписку о времени.
+        <Benefit icon={<Check className="text-success" />} title={t.forTutors.b4Title}>
+          {t.forTutors.b4Body}
         </Benefit>
       </section>
     </div>
