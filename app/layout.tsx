@@ -4,6 +4,8 @@ import "./globals.css";
 import { getCurrentUser } from "@/lib/auth";
 import { toPublicUser } from "@/lib/auth";
 import { getFavoriteKeys } from "@/lib/queries";
+import { getLocale, getT } from "@/lib/locale";
+import type { Dict } from "@/lib/i18n";
 import { SiteHeader } from "@/components/site-header";
 import { Analytics } from "@/components/analytics";
 
@@ -23,23 +25,25 @@ const themeScript = `try{var t=localStorage.getItem('agr-theme');if(t==='dark'){
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
   const favCount = user && user.role === "student" ? (await getFavoriteKeys(user.id)).size : 0;
+  const locale = getLocale();
+  const t = getT();
 
   return (
-    <html lang="ru" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-screen flex flex-col">
         <SiteHeader user={user ? toPublicUser(user) : null} favCount={favCount} />
         <main className="flex-1">{children}</main>
-        <Footer />
+        <Footer t={t} />
         <Analytics />
       </body>
     </html>
   );
 }
 
-function Footer() {
+function Footer({ t }: { t: Dict }) {
   return (
     <footer className="border-t border-border">
       <div className="container grid gap-8 py-10 md:grid-cols-4">
@@ -47,17 +51,14 @@ function Footer() {
           <div className="font-bold">
             🎓 Agri<span className="brand-grad">gator</span>
           </div>
-          <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-            Агрегатор тюторов для подготовки к экзаменам. Выбор по верифицированным
-            результатам. Данные демонстрационные.
-          </p>
+          <p className="mt-2 max-w-xs text-sm text-muted-foreground">{t.footer.tagline}</p>
         </div>
-        <FooterCol title="Экзамены" links={[["SAT", "/catalog?exam=SAT"], ["IELTS", "/catalog?exam=IELTS"], ["ЕНТ", "/catalog?exam=ЕНТ"], ["НМТ", "/catalog?exam=НМТ"]]} />
-        <FooterCol title="Платформа" links={[["Тюторы", "/catalog"], ["AI-подбор", "/onboarding"], ["Тьюторам", "/for-tutors"]]} />
-        <FooterCol title="Аккаунт" links={[["Войти", "/login"], ["Регистрация", "/register"], ["Кабинет", "/dashboard"]]} />
+        <FooterCol title={t.footer.exams} links={[["SAT", "/catalog?exam=SAT"], ["IELTS", "/catalog?exam=IELTS"], ["ЕНТ", "/catalog?exam=ЕНТ"], ["НМТ", "/catalog?exam=НМТ"]]} />
+        <FooterCol title={t.footer.platform} links={[[t.nav.tutors, "/catalog"], [t.footer.aiMatch, "/onboarding"], [t.nav.forTutors, "/for-tutors"]]} />
+        <FooterCol title={t.footer.account} links={[[t.nav.login, "/login"], [t.nav.register, "/register"], [t.nav.dashboard, "/dashboard"]]} />
       </div>
       <div className="border-t border-border py-4 text-center text-xs text-muted-foreground">
-        © 2026 Agrigator · Демо-проект
+        {t.footer.rights}
       </div>
     </footer>
   );
