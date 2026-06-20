@@ -14,6 +14,7 @@ export interface StudentBookingRow {
   kind: string;
   meetLink: string;
   hasLesson: boolean;
+  acceptedAt: Date | null;
   paymentStatus: string | null;
   tutor: { id: string; name: string; avatarColor: string | null };
 }
@@ -21,10 +22,10 @@ export interface StudentBookingRow {
 export async function getStudentBookings(studentId: string): Promise<StudentBookingRow[]> {
   const rows = await query<{
     id: string; slotAt: Date; status: string; kind: string; meetLink: string;
-    hasLesson: boolean; paymentStatus: string | null;
+    hasLesson: boolean; acceptedAt: Date | null; paymentStatus: string | null;
     tutorId: string; tutorName: string; tutorAvatarColor: string | null;
   }>(
-    `select b.id, b."slotAt", b.status, b.kind, b."meetLink",
+    `select b.id, b."slotAt", b.status, b.kind, b."meetLink", b."acceptedAt",
             (l.id is not null) as "hasLesson",
             pay.status as "paymentStatus",
             u.id as "tutorId", u.name as "tutorName", u."avatarColor" as "tutorAvatarColor"
@@ -38,7 +39,7 @@ export async function getStudentBookings(studentId: string): Promise<StudentBook
   );
   return rows.map((r) => ({
     id: r.id, slotAt: r.slotAt, status: r.status, kind: r.kind, meetLink: r.meetLink,
-    hasLesson: r.hasLesson, paymentStatus: r.paymentStatus,
+    hasLesson: r.hasLesson, acceptedAt: r.acceptedAt, paymentStatus: r.paymentStatus,
     tutor: { id: r.tutorId, name: r.tutorName, avatarColor: r.tutorAvatarColor },
   }));
 }
@@ -50,15 +51,16 @@ export interface TutorBookingRow {
   kind: string;
   meetLink: string;
   hasLesson: boolean;
+  acceptedAt: Date | null;
   student: { name: string; avatarColor: string | null };
 }
 
 export async function getTutorBookings(tutorId: string): Promise<TutorBookingRow[]> {
   const rows = await query<{
     id: string; slotAt: Date; status: string; kind: string; meetLink: string;
-    hasLesson: boolean; studentName: string; studentAvatarColor: string | null;
+    hasLesson: boolean; acceptedAt: Date | null; studentName: string; studentAvatarColor: string | null;
   }>(
-    `select b.id, b."slotAt", b.status, b.kind, b."meetLink",
+    `select b.id, b."slotAt", b.status, b.kind, b."meetLink", b."acceptedAt",
             (l.id is not null) as "hasLesson",
             u.name as "studentName", u."avatarColor" as "studentAvatarColor"
      from "Booking" b
@@ -70,7 +72,7 @@ export async function getTutorBookings(tutorId: string): Promise<TutorBookingRow
   );
   return rows.map((r) => ({
     id: r.id, slotAt: r.slotAt, status: r.status, kind: r.kind, meetLink: r.meetLink,
-    hasLesson: r.hasLesson,
+    hasLesson: r.hasLesson, acceptedAt: r.acceptedAt,
     student: { name: r.studentName, avatarColor: r.studentAvatarColor },
   }));
 }

@@ -51,8 +51,10 @@ npm run dev           # http://localhost:3000
 
 ### 1. Supabase (база)
 1. Создай проект на [supabase.com](https://supabase.com) (фри-тариф).
-2. **SQL Editor** → вставь и выполни `supabase/migrations/0001_init.sql` (создаст таблицы).
-   _Альтернатива:_ локально `DATABASE_URL=<строка> npm run db:migrate`.
+2. **SQL Editor** → выполни миграции из `supabase/migrations/` по порядку:
+   `0001_init.sql`, затем `0002_schedule.sql` (и любые новые). Миграции после 0001
+   аддитивны и идемпотентны — на боевой базе с данными прогоняй только новые файлы.
+   _Альтернатива (чистая база):_ локально `DATABASE_URL=<строка 5432> npm run db:migrate`.
 3. **Project Settings → Database → Connection string.** Понадобятся две строки:
    - **Transaction pooler** (порт `6543`) → это `DATABASE_URL` для Vercel (serverless).
    - **Session pooler / Direct** (порт `5432`) → для разовых `db:migrate`/`db:seed`

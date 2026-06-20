@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Pencil, TrendingUp } from "lucide-react";
+import { Pencil, TrendingUp, CalendarClock } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { one } from "@/lib/db";
 import { computeTutorMetrics } from "@/lib/metrics";
@@ -47,9 +47,14 @@ export default async function TutorDashboard() {
             <p className="text-muted-foreground">Кабинет тьютора</p>
           </div>
         </div>
-        <Link href="/tutor/onboarding">
-          <Button variant="outline"><Pencil size={15} /> Профиль</Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/tutor/schedule">
+            <Button variant="outline"><CalendarClock size={15} /> Расписание</Button>
+          </Link>
+          <Link href="/tutor/onboarding">
+            <Button variant="outline"><Pencil size={15} /> Профиль</Button>
+          </Link>
+        </div>
       </div>
 
       {/* Репутационный актив: 3 метрики */}

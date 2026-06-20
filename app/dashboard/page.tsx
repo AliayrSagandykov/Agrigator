@@ -123,6 +123,11 @@ export default async function StudentDashboard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {b.acceptedAt ? (
+                    <Badge variant="success">подтверждён</Badge>
+                  ) : (
+                    <Badge variant="outline">ждёт тютора</Badge>
+                  )}
                   <PaymentBadge status={b.paymentStatus ?? undefined} />
                   <a href={b.meetLink} target="_blank">
                     <Button size="sm"><Video size={15} /> Войти</Button>

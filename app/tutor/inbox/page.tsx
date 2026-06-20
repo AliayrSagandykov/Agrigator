@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/avatar";
 import { CompleteLessonButton } from "@/components/complete-lesson-button";
 import { StudentTapReview } from "@/components/student-tap-review";
+import { BookingRespondButtons } from "@/components/booking-respond-buttons";
 import { formatDateTime } from "@/lib/utils";
 
 export const metadata = { title: "Входящие — Agrigator" };
@@ -48,6 +49,10 @@ export default async function TutorInbox() {
                 <div className="flex items-center gap-2">
                   {b.hasLesson ? (
                     <Badge variant="success">проведён</Badge>
+                  ) : b.status === "cancelled" ? (
+                    <Badge variant="secondary">отклонён</Badge>
+                  ) : !b.acceptedAt ? (
+                    <Badge variant="outline">ждёт ответа</Badge>
                   ) : (
                     <>
                       <a href={b.meetLink} target="_blank" className="text-sm text-primary hover:underline">ссылка</a>
@@ -56,6 +61,11 @@ export default async function TutorInbox() {
                   )}
                 </div>
               </div>
+              {!b.hasLesson && b.status !== "cancelled" && !b.acceptedAt && (
+                <div className="border-t border-border pt-3">
+                  <BookingRespondButtons bookingId={b.id} />
+                </div>
+              )}
               {b.hasLesson && !reviewed.has(b.id) && (
                 <div className="border-t border-border pt-3">
                   <div className="mb-2 text-xs text-muted-foreground">Студент пришёл вовремя? Делал ДЗ?</div>
