@@ -2,29 +2,48 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
+import { one } from "@/lib/db";
+import { parseJson } from "@/lib/utils";
 import { getTutorByUserId } from "@/lib/tutors";
 import { BookingFlow } from "@/components/booking-flow";
 import { Avatar } from "@/components/avatar";
 
 export const metadata = { title: "Бронирование — Agrigator" };
 
-// Генерим свободные слоты тютора (на проде — из Google Calendar).
-function buildSlots() {
-  const slots: { iso: string; label: string }[] = [];
-  const times = [10, 14, 18];
+const ALL_TIMES = [10, 12, 14, 16, 18, 20];
+const fmt = (d: Date) =>
+  d.toLocaleString("ru-RU", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+
+// Слоты из доступности тютора (день = getDay()); если пусто — стандартные.
+function buildSlots(availability: string[]) {
   const now = new Date();
+  const out: { iso: string; label: string }[] = [];
+
+  if (availability.length) {
+    const avail = new Set(availability);
+    for (let i = 0; i <= 14 && out.length < 18; i++) {
+      const date = new Date(now);
+      date.setDate(now.getDate() + i);
+      for (const h of ALL_TIMES) {
+        if (!avail.has(`${date.getDay()}-${h}`)) continue;
+        const slot = new Date(date);
+        slot.setHours(h, 0, 0, 0);
+        if (slot > now) out.push({ iso: slot.toISOString(), label: fmt(slot) });
+      }
+    }
+    if (out.length) return out;
+  }
+
+  // fallback: стандартные слоты
   for (let d = 1; d <= 5; d++) {
-    for (const h of times) {
+    for (const h of [10, 14, 18]) {
       const date = new Date(now);
       date.setDate(now.getDate() + d);
       date.setHours(h, 0, 0, 0);
-      slots.push({
-        iso: date.toISOString(),
-        label: date.toLocaleString("ru-RU", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }),
-      });
+      out.push({ iso: date.toISOString(), label: fmt(date) });
     }
   }
-  return slots;
+  return out;
 }
 
 export default async function BookPage({ params }: { params: { tutorId: string } }) {
@@ -34,7 +53,11 @@ export default async function BookPage({ params }: { params: { tutorId: string }
   const tutor = await getTutorByUserId(params.tutorId);
   if (!tutor) notFound();
 
-  const slots = buildSlots();
+  const avail = await one<{ availabilityJson: string }>(
+    `select "availabilityJson" from "TutorProfile" where "userId" = $1`,
+    [params.tutorId],
+  );
+  const slots = buildSlots(parseJson<string[]>(avail?.availabilityJson, []));
 
   return (
     <div className="container max-w-2xl py-10">

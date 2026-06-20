@@ -50,6 +50,7 @@ export interface TutorProfile {
   trialFree: boolean;
   source: string;
   rating: number;
+  availabilityJson: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -109,6 +110,7 @@ export interface Booking {
   status: string;
   meetLink: string;
   note: string;
+  acceptedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
