@@ -2,11 +2,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
-import { getTutorBookings } from "@/lib/queries";
+import { getTutorBookings, getReviewedBookingIds } from "@/lib/queries";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/avatar";
 import { CompleteLessonButton } from "@/components/complete-lesson-button";
+import { StudentTapReview } from "@/components/student-tap-review";
 import { formatDateTime } from "@/lib/utils";
 
 export const metadata = { title: "Входящие — Agrigator" };
@@ -16,7 +17,10 @@ export default async function TutorInbox() {
   if (!user) redirect("/login");
   if (user.role !== "tutor") redirect("/dashboard");
 
-  const bookings = await getTutorBookings(user.id);
+  const [bookings, reviewed] = await Promise.all([
+    getTutorBookings(user.id),
+    getReviewedBookingIds(user.id),
+  ]);
 
   return (
     <div className="container max-w-3xl py-10">
@@ -32,24 +36,32 @@ export default async function TutorInbox() {
         {bookings.length === 0 && <p className="text-sm text-muted-foreground">Броней пока нет.</p>}
         {bookings.map((b) => (
           <Card key={b.id}>
-            <CardContent className="flex items-center justify-between gap-3 py-4">
-              <div className="flex items-center gap-3">
-                <Avatar name={b.student.name} color={b.student.avatarColor} size={40} />
-                <div>
-                  <div className="font-medium">{b.student.name}</div>
-                  <div className="text-sm text-muted-foreground">{formatDateTime(b.slotAt)} · {b.kind === "trial" ? "пробный" : "урок"}</div>
+            <CardContent className="space-y-3 py-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <Avatar name={b.student.name} color={b.student.avatarColor} size={40} />
+                  <div>
+                    <div className="font-medium">{b.student.name}</div>
+                    <div className="text-sm text-muted-foreground">{formatDateTime(b.slotAt)} · {b.kind === "trial" ? "пробный" : "урок"}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {b.hasLesson ? (
+                    <Badge variant="success">проведён</Badge>
+                  ) : (
+                    <>
+                      <a href={b.meetLink} target="_blank" className="text-sm text-primary hover:underline">ссылка</a>
+                      <CompleteLessonButton bookingId={b.id} />
+                    </>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                {b.hasLesson ? (
-                  <Badge variant="success">проведён</Badge>
-                ) : (
-                  <>
-                    <a href={b.meetLink} target="_blank" className="text-sm text-primary hover:underline">ссылка</a>
-                    <CompleteLessonButton bookingId={b.id} />
-                  </>
-                )}
-              </div>
+              {b.hasLesson && !reviewed.has(b.id) && (
+                <div className="border-t border-border pt-3">
+                  <div className="mb-2 text-xs text-muted-foreground">Студент пришёл вовремя? Делал ДЗ?</div>
+                  <StudentTapReview bookingId={b.id} studentName={b.student.name} />
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}

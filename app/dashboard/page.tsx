@@ -4,7 +4,8 @@ import { Video, Plus } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { one, query } from "@/lib/db";
 import { computeStudentProgress } from "@/lib/metrics";
-import { getStudentBookings } from "@/lib/queries";
+import { getStudentBookings, getReviewedBookingIds } from "@/lib/queries";
+import { LessonReview } from "@/components/lesson-review";
 import type { StudentGoal } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,11 +25,12 @@ export default async function StudentDashboard() {
   if (user.role === "admin") redirect("/admin");
 
   const now = new Date();
-  const [bookings, goal, progress, retentionSignals] = await Promise.all([
+  const [bookings, goal, progress, retentionSignals, reviewed] = await Promise.all([
     getStudentBookings(user.id),
     one<StudentGoal>(`select * from "StudentGoal" where "userId" = $1`, [user.id]),
     computeStudentProgress(user.id),
     query<{ tutorId: string }>(`select "tutorId" from "RetentionSignal" where "studentId" = $1`, [user.id]),
+    getReviewedBookingIds(user.id),
   ]);
 
   const upcoming = bookings.filter((b) => b.slotAt >= now && !b.hasLesson && b.status !== "cancelled");
@@ -139,17 +141,20 @@ export default async function StudentDashboard() {
           {history.length === 0 && <p className="text-sm text-muted-foreground">Пока пусто.</p>}
           {history.map((b) => (
             <Card key={b.id}>
-              <CardContent className="flex items-center justify-between gap-3 py-4">
-                <div className="flex items-center gap-3">
-                  <Avatar name={b.tutor.name} color={b.tutor.avatarColor} size={40} />
-                  <div>
-                    <div className="font-medium">{b.tutor.name}</div>
-                    <div className="text-sm text-muted-foreground">Урок {formatDateTime(b.slotAt)}</div>
+              <CardContent className="space-y-3 py-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar name={b.tutor.name} color={b.tutor.avatarColor} size={40} />
+                    <div>
+                      <div className="font-medium">{b.tutor.name}</div>
+                      <div className="text-sm text-muted-foreground">Урок {formatDateTime(b.slotAt)}</div>
+                    </div>
                   </div>
+                  <Link href={`/book/${b.tutor.id}`}>
+                    <Button size="sm" variant="outline">Забронировать ещё</Button>
+                  </Link>
                 </div>
-                <Link href={`/book/${b.tutor.id}`}>
-                  <Button size="sm" variant="outline">Забронировать ещё</Button>
-                </Link>
+                {!reviewed.has(b.id) && <LessonReview bookingId={b.id} tutorName={b.tutor.name} />}
               </CardContent>
             </Card>
           ))}

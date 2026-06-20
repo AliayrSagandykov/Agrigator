@@ -138,6 +138,15 @@ export function getLeads(): Promise<Lead[]> {
   return query<Lead>(`select * from "Lead" order by "foundAt" desc`);
 }
 
+/** bookingId, которые этот автор уже оценил (чтобы не просить повторно). */
+export async function getReviewedBookingIds(authorId: string): Promise<Set<string>> {
+  const rows = await query<{ bookingId: string }>(
+    `select "bookingId" from "Review" where "authorId" = $1 and "bookingId" is not null`,
+    [authorId],
+  );
+  return new Set(rows.map((r) => r.bookingId));
+}
+
 export async function getAdminCounts() {
   const row = await one<{ tutors: string; students: string; bookings: string; lessons: string }>(
     `select
