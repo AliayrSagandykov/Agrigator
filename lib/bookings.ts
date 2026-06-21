@@ -1,6 +1,7 @@
 import "server-only";
 import { query, one, withTransaction } from "@/lib/db";
 import { generateMeetLink } from "@/lib/meet";
+import { ensurePairForBooking } from "@/lib/pairs";
 import type { Booking } from "@/lib/types";
 
 // ============================================================
@@ -59,5 +60,6 @@ export async function markLessonHappened(bookingId: string): Promise<Booking | n
     await c.query(`update "Booking" set status = 'completed' where id = $1`, [bookingId]);
   });
 
+  await ensurePairForBooking(bookingId); // на всякий случай: урок без пары → создаём
   return one<Booking>(`select * from "Booking" where id = $1`, [bookingId]);
 }

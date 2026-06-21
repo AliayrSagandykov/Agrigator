@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { payments } from "@/lib/payments";
+import { ensurePairForBooking } from "@/lib/pairs";
 
 // Ручной режим: подтверждает оператор (admin) из /admin.
 // Auto-режим: тот же confirmPayment дёргает вебхук Kaspi (app/api/webhooks/kaspi).
@@ -14,5 +15,6 @@ export async function POST(req: Request) {
   if (!bookingId) return NextResponse.json({ error: "Не указана бронь" }, { status: 400 });
 
   await payments.confirmPayment(bookingId);
+  await ensurePairForBooking(bookingId); // подтверждённая бронь → Кабинет пары
   return NextResponse.json({ ok: true });
 }
