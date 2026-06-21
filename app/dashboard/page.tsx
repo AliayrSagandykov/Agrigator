@@ -5,6 +5,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { one, query } from "@/lib/db";
 import { computeStudentProgress } from "@/lib/metrics";
 import { getStudentBookings, getReviewedBookingIds } from "@/lib/queries";
+import { getPairsForUser } from "@/lib/pairs";
+import { PairList } from "@/components/room/pair-list";
 import { LessonReview } from "@/components/lesson-review";
 import { BaselineForm } from "@/components/baseline-form";
 import type { StudentGoal } from "@/lib/types";
@@ -26,12 +28,13 @@ export default async function StudentDashboard() {
   if (user.role === "admin") redirect("/admin");
 
   const now = new Date();
-  const [bookings, goal, progress, retentionSignals, reviewed] = await Promise.all([
+  const [bookings, goal, progress, retentionSignals, reviewed, pairs] = await Promise.all([
     getStudentBookings(user.id),
     one<StudentGoal>(`select * from "StudentGoal" where "userId" = $1`, [user.id]),
     computeStudentProgress(user.id),
     query<{ tutorId: string }>(`select "tutorId" from "RetentionSignal" where "studentId" = $1`, [user.id]),
     getReviewedBookingIds(user.id),
+    getPairsForUser(user.id),
   ]);
 
   const upcoming = bookings.filter((b) => b.slotAt >= now && !b.hasLesson && b.status !== "cancelled");
@@ -65,6 +68,13 @@ export default async function StudentDashboard() {
         <div className="mt-6">
           <RetentionQuestion tutorId={retentionTarget.id} tutorName={retentionTarget.name} />
         </div>
+      )}
+
+      {pairs.length > 0 && (
+        <section className="mt-6">
+          <h2 className="mb-3 font-semibold">Кабинеты с тьюторами</h2>
+          <PairList pairs={pairs} />
+        </section>
       )}
 
       <div className="mt-6 grid gap-6 md:grid-cols-2">

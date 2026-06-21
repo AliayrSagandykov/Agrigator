@@ -89,7 +89,8 @@ async function main() {
   console.log("🌱 Очистка и сидинг…");
 
   await client.query(
-    `truncate "RetentionSignal","Review","Result","Lesson","Payment","Booking",
+    `truncate "Consent","Message","ProgressPt","Submission","RoomItem","Pair",
+              "RetentionSignal","Review","Result","Lesson","Payment","Booking",
               "StudentGoal","Favorite","Session","TutorProfile","Course","Lead","User"
      restart identity cascade`,
   );
@@ -123,7 +124,36 @@ async function main() {
   const past = new Date(Date.now() - 7 * 864e5);
   await client.query(`insert into "Booking" (id,"studentId","tutorId","slotAt",kind,status,"meetLink") values ('demo-b1','u2','t1',$1,'trial','completed','https://meet.jit.si/agrigator-demo-b1')`, [past]);
   await client.query(`insert into "Payment" ("bookingId",amount,status,provider,"confirmedAt") values ('demo-b1',12000,'confirmed','kaspi_manual',$1)`, [past]);
-  await client.query(`insert into "Lesson" ("bookingId","studentId","tutorId","happenedAt","sequenceNo") values ('demo-b1','u2','t1',$1,1)`, [past]);
+  await client.query(`insert into "Lesson" ("bookingId","studentId","tutorId","happenedAt","sequenceNo",topic) values ('demo-b1','u2','t1',$1,1,'Разбор Writing Task 2: структура и связки')`, [past]);
+
+  // Кабинет пары u2↔t1 (UX v3 §2): автосоздаётся при подтверждении первой брони.
+  // Здесь — демо-наполнение для дашбордов и витрины раздела.
+  const d = (days: number) => new Date(Date.now() - days * 864e5);
+  await client.query(`insert into "Pair" (id,"studentId","tutorId",subject,status) values ('demo-pair-1','u2','t1','IELTS','active')`);
+  await client.query(
+    `insert into "RoomItem" (id,"pairId",type,title,body,"createdById",status,"createdAt") values
+     ('demo-mat-1','demo-pair-1','material','Шаблоны Writing Task 2','Структура эссе: intro → 2 body → conclusion. Банк связок и примеров.','t1','open',$1),
+     ('demo-mat-2','demo-pair-1','material','Speaking Part 2: 60 cue cards','Актуальные карточки на этот сезон с опорными идеями.','t1','open',$2)`,
+    [d(6), d(4)],
+  );
+  // Домашка: одна проверенная (с разбором), одна открытая с дедлайном.
+  await client.query(`insert into "RoomItem" (id,"pairId",type,title,body,"dueAt","createdById",status,"createdAt") values ('demo-hw-1','demo-pair-1','homework','Эссе: technology in education','Напиши Task 2 (250+ слов). Тема: преимущества и риски технологий в обучении.',$1,'t1','done',$2)`, [d(5), d(6)]);
+  await client.query(`insert into "Submission" (id,"homeworkId","studentId",body,"reviewState","reviewNote","submittedAt") values ('demo-sub-1','demo-hw-1','u2','Прикрепляю эссе на 270 слов. Старалась с linking words.','reviewed','Сильная структура и аргументы. Поработай над разнообразием связок и точностью лексики — это твой путь к Band 7.',$1)`, [d(5)]);
+  await client.query(`insert into "RoomItem" (id,"pairId",type,title,body,"dueAt","createdById",status,"createdAt") values ('demo-hw-2','demo-pair-1','homework','Listening: Cambridge 18, Test 2','Сделай секции 3–4, выпиши незнакомые слова, отметь ошибки.',$1,'t1','open',$2)`, [new Date(Date.now() + 3 * 864e5), d(1)]);
+  // Траектория баллов: входная диагностика → пробники.
+  await client.query(
+    `insert into "ProgressPt" ("pairId",source,score,label,"takenAt") values
+     ('demo-pair-1','diagnostic',5.5,'входная диагностика',$1),
+     ('demo-pair-1','mock',6.0,'Cambridge 17, Test 1',$2),
+     ('demo-pair-1','mock',6.5,'Cambridge 18, Test 1',$3)`,
+    [d(30), d(14), d(3)],
+  );
+  await client.query(
+    `insert into "Message" ("pairId","authorId",body,"createdAt") values
+     ('demo-pair-1','t1','Аймер, привет! Загрузила шаблоны Writing — посмотри до следующего урока.',$1),
+     ('demo-pair-1','u2','Спасибо большое! Гляну сегодня вечером 🙌',$2)`,
+    [d(2), new Date(Date.now() - 2 * 864e5 + 3600e3)],
+  );
 
   for (const r of REVIEWS) {
     await client.query(

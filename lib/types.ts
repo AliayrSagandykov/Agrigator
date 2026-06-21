@@ -11,6 +11,10 @@ export interface User {
   plan: string; // 'free' | 'pro'
   planUntil: Date | null;
   avatarColor: string | null;
+  timezone: string | null;
+  languagesJson: string;
+  verifiedScore: string | null;
+  identityVerified: boolean;
   createdAt: Date;
 }
 
@@ -97,6 +101,7 @@ export interface StudentGoal {
   style: string;
   baselineScore: string | null;
   baselineSource: string | null;
+  language: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -136,6 +141,9 @@ export interface Lesson {
   tutorId: string;
   happenedAt: Date;
   sequenceNo: number;
+  topic: string;
+  joinedAt: Date | null;
+  durationMin: number | null;
   createdAt: Date;
 }
 
@@ -149,8 +157,59 @@ export interface Result {
   delta: number | null;
   status: string;
   reportUrl: string;
+  dropped: boolean;
   createdAt: Date;
   verifiedAt: Date | null;
+}
+
+export interface Pair {
+  id: string;
+  studentId: string;
+  tutorId: string;
+  subject: string;
+  status: string; // 'active' | 'paused' | 'ended'
+  createdAt: Date;
+}
+
+export interface RoomItem {
+  id: string;
+  pairId: string;
+  type: string; // 'material' | 'homework'
+  title: string;
+  body: string;
+  fileUrl: string;
+  dueAt: Date | null;
+  status: string; // homework: 'open' | 'done'
+  createdById: string | null;
+  createdAt: Date;
+}
+
+export interface Submission {
+  id: string;
+  homeworkId: string;
+  studentId: string;
+  fileUrl: string;
+  body: string;
+  submittedAt: Date;
+  reviewState: string; // 'submitted' | 'reviewed'
+  reviewNote: string;
+}
+
+export interface ProgressPt {
+  id: string;
+  pairId: string;
+  source: string; // 'diagnostic' | 'mock' | 'official'
+  score: number;
+  label: string;
+  takenAt: Date;
+}
+
+export interface Message {
+  id: string;
+  pairId: string;
+  authorId: string | null;
+  body: string;
+  createdAt: Date;
 }
 
 export interface Review {

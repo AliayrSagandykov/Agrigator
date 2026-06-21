@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { query, one } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { ensurePairForBooking } from "@/lib/pairs";
 import type { Booking } from "@/lib/types";
 
 // Тютор отвечает на бронь (UX §3.2): принять / отклонить / предложить другое время.
@@ -19,6 +20,7 @@ export async function POST(req: Request) {
 
   if (action === "accept") {
     await query(`update "Booking" set "acceptedAt" = now() where id = $1`, [bookingId]);
+    await ensurePairForBooking(bookingId); // принятая бронь → Кабинет пары
   } else if (action === "decline") {
     await query(`update "Booking" set status = 'cancelled' where id = $1`, [bookingId]);
   } else if (action === "reschedule") {
@@ -26,6 +28,7 @@ export async function POST(req: Request) {
     if (Number.isNaN(slotAt.getTime()))
       return NextResponse.json({ error: "Неверное время" }, { status: 400 });
     await query(`update "Booking" set "slotAt" = $1, "acceptedAt" = now() where id = $2`, [slotAt, bookingId]);
+    await ensurePairForBooking(bookingId); // новое время принято → Кабинет пары
   } else {
     return NextResponse.json({ error: "Неизвестное действие" }, { status: 400 });
   }

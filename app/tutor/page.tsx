@@ -5,6 +5,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { one } from "@/lib/db";
 import { computeTutorMetrics } from "@/lib/metrics";
 import { getTutorBookings, getTutorPayments } from "@/lib/queries";
+import { getPairsForUser } from "@/lib/pairs";
+import { PairList } from "@/components/room/pair-list";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MetricStat } from "@/components/metric-stat";
@@ -27,10 +29,11 @@ export default async function TutorDashboard() {
   if (!profile) redirect("/tutor/onboarding");
 
   const now = new Date();
-  const [metrics, bookings, payments] = await Promise.all([
+  const [metrics, bookings, payments, pairs] = await Promise.all([
     computeTutorMetrics(user.id),
     getTutorBookings(user.id),
     getTutorPayments(user.id),
+    getPairsForUser(user.id),
   ]);
 
   const requests = bookings.filter((b) => !b.hasLesson && b.slotAt >= now);
@@ -81,6 +84,14 @@ export default async function TutorDashboard() {
         <MetricStat value={formatTenge(released)} label="выплачено" />
         <MetricStat value={formatTenge(profile.price)} label="ставка за час" />
       </div>
+
+      {/* Кабинеты учеников — центр удержания */}
+      {pairs.length > 0 && (
+        <section className="mt-8">
+          <h2 className="mb-3 font-semibold">Кабинеты учеников</h2>
+          <PairList pairs={pairs} />
+        </section>
+      )}
 
       {/* Входящие брони */}
       <section className="mt-8">
