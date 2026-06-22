@@ -31,8 +31,9 @@ export default async function MatchPage() {
       rating: t.rating,
       aiVerified: t.aiVerified,
       price: t.price,
+      timezone: t.timezone,
     })),
-    { exam: goal.exam, deadline: goal.deadline, pace: goal.pace, style: goal.style },
+    { exam: goal.exam, deadline: goal.deadline, timezone: user.timezone },
   );
 
   const byId = new Map(tutors.map((t) => [t.id, t]));

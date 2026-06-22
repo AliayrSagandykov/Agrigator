@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { getLocale } from "@/lib/locale";
+import { isValidTimeZone } from "@/lib/time";
 
 export async function POST(req: Request) {
   const user = await getCurrentUser();
@@ -13,15 +15,22 @@ export async function POST(req: Request) {
   const deadline = String(body.deadline ?? "flex");
   const pace = String(body.pace ?? "slow");
   const style = String(body.style ?? "soft");
+  const language = getLocale(); // язык обучения = текущий язык интерфейса
+  const tz = String(body.timezone ?? "");
 
   await query(
-    `insert into "StudentGoal" ("userId", exam, deadline, pace, style)
-     values ($1, $2, $3, $4, $5)
+    `insert into "StudentGoal" ("userId", exam, deadline, pace, style, language)
+     values ($1, $2, $3, $4, $5, $6)
      on conflict ("userId") do update
        set exam = excluded.exam, deadline = excluded.deadline,
-           pace = excluded.pace, style = excluded.style`,
-    [user.id, exam, deadline, pace, style],
+           pace = excluded.pace, style = excluded.style, language = excluded.language`,
+    [user.id, exam, deadline, pace, style, language],
   );
+
+  // Часовой пояс — на User (нужен для матча и показа времени уроков).
+  if (isValidTimeZone(tz)) {
+    await query(`update "User" set timezone = $1 where id = $2`, [tz, user.id]);
+  }
 
   return NextResponse.json({ ok: true });
 }

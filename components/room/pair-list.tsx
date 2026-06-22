@@ -6,8 +6,8 @@ import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/ui/badge";
 import { formatDateTime } from "@/lib/utils";
 
-// Карточки кабинетов пар для дашбордов (ведут в /room/[id]).
-export function PairList({ pairs }: { pairs: PairCard[] }) {
+// Карточки кабинетов пар для дашбордов (ведут в /room/[id]). tz — пояс зрителя.
+export function PairList({ pairs, tz }: { pairs: PairCard[]; tz?: string }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {pairs.map((p) => (
@@ -21,7 +21,7 @@ export function PairList({ pairs }: { pairs: PairCard[] }) {
                   {p.subject && <Badge variant="secondary">{p.subject}</Badge>}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {p.nextSlotAt ? `следующий урок ${formatDateTime(p.nextSlotAt)}` : "нет запланированных уроков"}
+                  {p.nextSlotAt ? `следующий урок ${formatDateTime(p.nextSlotAt, tz)}` : "нет запланированных уроков"}
                 </div>
               </div>
               <ArrowRight size={16} className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />

@@ -8,11 +8,20 @@ import type { StudentGoal, Result } from "@/lib/types";
 // Дельту и удержание считает система, тютор их не редактирует.
 // ============================================================
 
+// Порог «мало данных» и псевдо-счёт усадки малой выборки к нулю (risk-adjust).
+const MIN_N = 5;
+const SHRINK_K = 4;
+
 export interface LiveTutorMetrics {
-  delta: number;
+  delta: number;             // сырая средняя дельта завершивших (заголовок)
+  riskAdjustedDelta: number; // консервативно: бросившие = 0 прироста + усадка на малых N
+  continuationRate: number;  // % дошедших до результата (не бросивших), 0..100
+  n: number;                 // верифицированных дельт (завершившие) — база доказательства
+  nTotal: number;            // завершившие + бросившие
   lessons: number;
-  retention: number;
-  sample: number;
+  retention: number;         // вернулись на 2-й+ урок, 0..100
+  sample: number;            // = n (обратная совместимость со старым кодом)
+  lowConfidence: boolean;    // n < MIN_N → честная подпись «мало данных»
   isLive: boolean;
 }
 
@@ -35,8 +44,8 @@ export async function computeTutorMetrics(tutorId: string): Promise<LiveTutorMet
       `select "studentId","sequenceNo" from "Lesson" where "tutorId" = $1`,
       [tutorId],
     ),
-    query<{ delta: number }>(
-      `select delta from "Result" where "tutorId" = $1 and status = 'delta_set' and delta is not null`,
+    query<{ delta: number | null; dropped: boolean }>(
+      `select delta, dropped from "Result" where "tutorId" = $1 and status = 'delta_set'`,
       [tutorId],
     ),
   ]);
@@ -45,17 +54,32 @@ export async function computeTutorMetrics(tutorId: string): Promise<LiveTutorMet
   const distinct = new Set(lessons.map((l) => l.studentId));
   const returning = new Set(lessons.filter((l) => l.sequenceNo >= 2).map((l) => l.studentId));
   const liveRetention = distinct.size ? Math.round((returning.size / distinct.size) * 100) : null;
-  const liveDelta = results.length
-    ? Math.round((results.reduce((s, r) => s + (r.delta ?? 0), 0) / results.length) * 10) / 10
-    : null;
+
+  // Завершившие = есть дельта и не бросил; бросившие учитываются в знаменателях.
+  const completers = results.filter((r) => !r.dropped && r.delta != null);
+  const droppedCount = results.filter((r) => r.dropped).length;
+  const n = completers.length;
+  const nTotal = n + droppedCount;
+  const sumDelta = completers.reduce((s, r) => s + (r.delta ?? 0), 0);
+
+  const rawDelta = n ? round1(sumDelta / n) : null;
+  // Risk-adjust: бросившие = 0 прироста, плюс усадка к нулю на малой выборке.
+  const riskAdjusted = nTotal ? round1(sumDelta / (nTotal + SHRINK_K)) : null;
+  const continuation = nTotal ? Math.round((n / nTotal) * 100) : null;
 
   const hasLive = lessonsCount > 0 || results.length > 0;
+  const cachedDelta = round1((profile?.statAfter ?? 0) - (profile?.statBefore ?? 0));
 
   return {
-    delta: liveDelta ?? round1((profile?.statAfter ?? 0) - (profile?.statBefore ?? 0)),
+    delta: rawDelta ?? cachedDelta,
+    riskAdjustedDelta: riskAdjusted ?? cachedDelta,
+    continuationRate: continuation ?? (profile?.statRetention ?? 0),
+    n,
+    nTotal,
     lessons: lessonsCount || (profile?.statLessons ?? 0),
     retention: liveRetention ?? (profile?.statRetention ?? 0),
-    sample: results.length || (profile?.statSample ?? 0),
+    sample: n || (profile?.statSample ?? 0),
+    lowConfidence: n < MIN_N,
     isLive: hasLive,
   };
 }

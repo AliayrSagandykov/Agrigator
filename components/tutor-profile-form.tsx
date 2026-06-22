@@ -38,10 +38,11 @@ export function TutorProfileForm({ initial }: { initial?: TutorProfileInitial })
     e.preventDefault();
     setLoading(true);
     setError("");
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const res = await fetch("/api/tutor/profile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, timezone }),
     });
     const data = await res.json();
     setLoading(false);

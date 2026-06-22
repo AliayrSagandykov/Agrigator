@@ -40,14 +40,21 @@ export function formatDelta(value: number): string {
   return `${sign}${Math.abs(rounded)}`;
 }
 
-export function formatDateTime(d: Date | string): string {
+export function formatDateTime(d: Date | string, timeZone?: string): string {
   const date = typeof d === "string" ? new Date(d) : d;
-  return date.toLocaleString("ru-RU", {
+  const opts: Intl.DateTimeFormatOptions = {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
-  });
+  };
+  try {
+    // Без timeZone используется зона сервера (на Vercel — UTC), поэтому
+    // в местах, где знаем пояс зрителя, передаём его явно.
+    return date.toLocaleString("ru-RU", timeZone ? { ...opts, timeZone } : opts);
+  } catch {
+    return date.toLocaleString("ru-RU", opts);
+  }
 }
 
 export function initials(name: string): string {

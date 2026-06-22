@@ -24,6 +24,7 @@ import { ProgressChart } from "@/components/room/progress-chart";
 import { MessageForm } from "@/components/room/message-form";
 import { LessonNoteForm } from "@/components/room/lesson-note-form";
 import { formatDateTime } from "@/lib/utils";
+import { shortTzLabel, tzCity } from "@/lib/time";
 
 export const metadata = { title: "Кабинет пары — Agrigator" };
 
@@ -43,6 +44,12 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
   const { pair, viewerRole } = view;
   const canTutor = viewerRole === "tutor" || user.role === "admin";
   const visavi = viewerRole === "tutor" ? view.student : view.tutor;
+  const tz = user.timezone ?? undefined; // время уроков — в поясе зрителя
+  // Подсказка о поясе собеседника, если он отличается.
+  const otherTz =
+    visavi.timezone && visavi.timezone !== user.timezone
+      ? `${tzCity(visavi.timezone)} · ${shortTzLabel(visavi.timezone)}`
+      : null;
 
   const [materials, homeworks, progress, messages, lessons, upcoming, studentProgress] = await Promise.all([
     getMaterials(pair.id),
@@ -75,7 +82,7 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
                 <div className="flex items-center gap-3">
                   <CalendarClock size={18} className="text-muted-foreground" />
                   <div>
-                    <div className="font-medium">{formatDateTime(b.slotAt)}</div>
+                    <div className="font-medium">{formatDateTime(b.slotAt, tz)}</div>
                     <div className="text-sm text-muted-foreground">{b.kind === "trial" ? "пробный" : "урок"}</div>
                   </div>
                 </div>
@@ -112,7 +119,7 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
                     {l.sequenceNo}
                   </span>
                   <div>
-                    <div className="text-sm text-muted-foreground">{formatDateTime(l.happenedAt)}</div>
+                    <div className="text-sm text-muted-foreground">{formatDateTime(l.happenedAt, tz)}</div>
                     <LessonNoteForm lessonId={l.id} topic={l.topic} canEdit={canTutor} />
                   </div>
                 </div>
@@ -144,7 +151,7 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
                       </a>
                     )}
                   </div>
-                  <span className="shrink-0 text-xs text-muted-foreground">{formatDateTime(m.createdAt)}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">{formatDateTime(m.createdAt, tz)}</span>
                 </div>
               </CardContent>
             </Card>
@@ -176,7 +183,7 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
                           </a>
                         )}
                         {h.dueAt && (
-                          <span className="inline-flex items-center gap-1"><Clock size={12} /> до {formatDateTime(h.dueAt)}</span>
+                          <span className="inline-flex items-center gap-1"><Clock size={12} /> до {formatDateTime(h.dueAt, tz)}</span>
                         )}
                       </div>
                     </div>
@@ -187,7 +194,7 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
                   {h.submission ? (
                     <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
                       <div className="mb-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                        <span>Сдано {formatDateTime(h.submission.submittedAt)}</span>
+                        <span>Сдано {formatDateTime(h.submission.submittedAt, tz)}</span>
                         {h.submission.fileUrl && (
                           <a href={h.submission.fileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
                             <Paperclip size={13} /> работа
@@ -274,9 +281,10 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
           <Avatar name={visavi.name} color={visavi.avatarColor} size={52} />
           <div>
             <h1 className="text-xl font-bold">{visavi.name}</h1>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               {pair.subject && <Badge variant="secondary">{pair.subject}</Badge>}
               <span>{viewerRole === "tutor" ? "ваш ученик" : "ваш тьютор"}</span>
+              {otherTz && <span className="text-xs">· {otherTz}</span>}
             </div>
           </div>
         </div>
@@ -285,7 +293,7 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
             <CardContent className="flex items-center justify-between gap-2 py-3">
               <div>
                 <div className="text-xs text-muted-foreground">Следующий урок</div>
-                <div className="text-sm font-medium">{formatDateTime(nextLesson.slotAt)}</div>
+                <div className="text-sm font-medium">{formatDateTime(nextLesson.slotAt, tz)}</div>
               </div>
               {nextLesson.acceptedAt && (
                 <a href={nextLesson.meetLink} target="_blank" rel="noopener noreferrer">

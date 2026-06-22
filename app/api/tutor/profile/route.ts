@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { isValidTimeZone } from "@/lib/time";
 
 const J = (v: unknown) => JSON.stringify(v);
 const toList = (v: unknown): string[] =>
@@ -48,6 +49,12 @@ export async function POST(req: Request) {
        "trialFree"    = excluded."trialFree"`,
     [user.id, J(subjects), J(exams), price, format, city, experience, bio, methodology, trialFree],
   );
+
+  // Часовой пояс тютора — на User (нужен для матча и расписания).
+  const tz = String(body.timezone ?? "");
+  if (isValidTimeZone(tz)) {
+    await query(`update "User" set timezone = $1 where id = $2`, [tz, user.id]);
+  }
 
   return NextResponse.json({ ok: true });
 }

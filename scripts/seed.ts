@@ -117,7 +117,13 @@ async function main() {
   await client.query(`insert into "User" (id,role,name,email,"passwordHash","avatarColor") values ('u2','student','Аймер','user@demo.kz',$1,'#0ea5e9')`, [hashPassword("demo123")]);
   await client.query(`insert into "User" (id,role,name,email,"passwordHash",plan,"avatarColor") values ('u3','student','Pro Студент','pro@demo.kz',$1,'pro','#16a34a')`, [hashPassword("demo123")]);
 
-  await client.query(`insert into "StudentGoal" ("userId",exam,deadline,pace,style,"baselineScore","baselineSource") values ('u2','IELTS','3-6m','slow','soft','5.5','official')`);
+  // Часовые пояса (UX v3 §5): по умолчанию Алматы, пара тьюторов в других зонах
+  // — чтобы матч по поясу было видно на демо.
+  await client.query(`update "User" set timezone = 'Asia/Almaty' where timezone is null`);
+  await client.query(`update "User" set timezone = 'Europe/London' where id = 't10'`);
+  await client.query(`update "User" set timezone = 'Europe/Moscow' where id in ('t9','u3')`);
+
+  await client.query(`insert into "StudentGoal" ("userId",exam,deadline,pace,style,"baselineScore","baselineSource",language) values ('u2','IELTS','3-6m','slow','soft','5.5','official','ru')`);
   await client.query(`insert into "Favorite" ("userId",key) values ('u2','tutor:t1'),('u2','course:c1')`);
 
   // Полный пройденный пайплайн: бронь → урок → (демо для дашбордов)
@@ -168,7 +174,39 @@ async function main() {
       [l.source, l.url, l.rawText, J(l.parsed)]);
   }
 
-  console.log(`✅ Засеяно: ${TUTORS.length} тюторов, ${COURSES.length} курсов, ${REVIEWS.length} отзывов, ${LEADS.length} лидов.`);
+  // Реальные верифицированные результаты (UX v3 §9–10: «no fake deltas»):
+  // живая база, из которой система сама считает дельту/доходимость на дашборде.
+  // Каждый результат = отдельный выпускник + бросившие учитываются в risk-adjust.
+  const COHORTS = [
+    { tutor: "t1", exam: "IELTS", base: 5.5, deltas: [1.0, 1.5, 1.0, 2.0, 1.5, 0.5, 1.5], dropped: 1 },
+    { tutor: "t2", exam: "SAT", base: 1200, deltas: [180, 140, 220, 160, 200], dropped: 1 },
+    { tutor: "t6", exam: "ЕНТ", base: 70, deltas: [30, 42, 38], dropped: 0 },
+  ];
+  let alum = 0;
+  for (const c of COHORTS) {
+    for (const d of c.deltas) {
+      const sid = `alum${++alum}`;
+      await client.query(`insert into "User" (id,role,name,email,"passwordHash",timezone) values ($1,'student',$2,$3,$4,'Asia/Almaty')`,
+        [sid, `Выпускник ${alum}`, `${sid}@demo.kz`, hashPassword("demo123")]);
+      await client.query(
+        `insert into "Result" ("studentId","tutorId",exam,baseline,"finalScore",delta,status,dropped,"verifiedAt")
+         values ($1,$2,$3,$4,$5,$6,'delta_set',false,now())`,
+        [sid, c.tutor, c.exam, c.base, c.base + d, d],
+      );
+    }
+    for (let i = 0; i < c.dropped; i++) {
+      const sid = `alum${++alum}`;
+      await client.query(`insert into "User" (id,role,name,email,"passwordHash",timezone) values ($1,'student',$2,$3,$4,'Asia/Almaty')`,
+        [sid, `Выпускник ${alum}`, `${sid}@demo.kz`, hashPassword("demo123")]);
+      await client.query(
+        `insert into "Result" ("studentId","tutorId",exam,baseline,status,dropped)
+         values ($1,$2,$3,$4,'delta_set',true)`,
+        [sid, c.tutor, c.exam, c.base],
+      );
+    }
+  }
+
+  console.log(`✅ Засеяно: ${TUTORS.length} тюторов, ${COURSES.length} курсов, ${REVIEWS.length} отзывов, ${LEADS.length} лидов, ${alum} выпускников с результатами.`);
   console.log("   Демо-входы: admin@agrigator.kz/admin123 · user@demo.kz/demo123 · aigerim@agrigator.kz/tutor123");
   await client.end();
 }
