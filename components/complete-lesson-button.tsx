@@ -2,8 +2,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import type { Dict } from "@/lib/i18n";
 
-export function CompleteLessonButton({ bookingId }: { bookingId: string }) {
+export function CompleteLessonButton({ bookingId, labels }: { bookingId: string; labels: Dict["tutorDash"] }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -20,7 +21,7 @@ export function CompleteLessonButton({ bookingId }: { bookingId: string }) {
 
   return (
     <Button size="sm" variant="outline" onClick={complete} disabled={loading}>
-      {loading ? "…" : "Урок проведён"}
+      {loading ? "…" : labels.lessonHeld}
     </Button>
   );
 }

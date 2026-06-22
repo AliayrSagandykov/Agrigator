@@ -7,6 +7,7 @@ import { parseJson } from "@/lib/utils";
 import { getTutorByUserId } from "@/lib/tutors";
 import { BookingFlow } from "@/components/booking-flow";
 import { Avatar } from "@/components/avatar";
+import { getT } from "@/lib/locale";
 
 export const metadata = { title: "Бронирование — Agrigator" };
 
@@ -58,17 +59,18 @@ export default async function BookPage({ params }: { params: { tutorId: string }
     [params.tutorId],
   );
   const slots = buildSlots(parseJson<string[]>(avail?.availabilityJson, []));
+  const L = getT().booking;
 
   return (
     <div className="container max-w-2xl py-10">
       <Link href={`/tutors/${tutor.id}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft size={15} /> К профилю
+        <ArrowLeft size={15} /> {L.toProfile}
       </Link>
 
       <div className="mt-4 flex items-center gap-3">
         <Avatar name={tutor.name} photo={tutor.photo} color={tutor.avatarColor} size={56} />
         <div>
-          <h1 className="text-xl font-bold">Пробный урок с {tutor.name}</h1>
+          <h1 className="text-xl font-bold">{L.trialWithPre}{tutor.name}</h1>
           <p className="text-sm text-muted-foreground">{tutor.subjects}</p>
         </div>
       </div>
@@ -80,6 +82,7 @@ export default async function BookPage({ params }: { params: { tutorId: string }
           price={tutor.price}
           trialFree={tutor.trialFree}
           slots={slots}
+          labels={L}
         />
       </div>
     </div>

@@ -2,9 +2,10 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { Dict } from "@/lib/i18n";
 
 // Оценка студента тютором (UX §3.6): пара тапов — вовремя? ДЗ?
-export function StudentTapReview({ bookingId, studentName }: { bookingId: string; studentName: string }) {
+export function StudentTapReview({ bookingId, studentName, labels }: { bookingId: string; studentName: string; labels: Dict["tutorDash"] }) {
   const [onTime, setOnTime] = useState(false);
   const [homework, setHomework] = useState(false);
   const [done, setDone] = useState(false);
@@ -21,18 +22,18 @@ export function StudentTapReview({ bookingId, studentName }: { bookingId: string
     setDone(true);
   }
 
-  if (done) return <span className="text-xs text-success">оценён ✓</span>;
+  if (done) return <span className="text-xs text-success">{labels.rated}</span>;
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Toggle active={onTime} onClick={() => setOnTime((v) => !v)}>Вовремя</Toggle>
-      <Toggle active={homework} onClick={() => setHomework((v) => !v)}>ДЗ сделал</Toggle>
+      <Toggle active={onTime} onClick={() => setOnTime((v) => !v)}>{labels.onTime}</Toggle>
+      <Toggle active={homework} onClick={() => setHomework((v) => !v)}>{labels.didHomework}</Toggle>
       <button
         onClick={submit}
         disabled={loading}
         className="rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
       >
-        {loading ? "…" : "Оценить"}
+        {loading ? "…" : labels.rate}
       </button>
     </div>
   );

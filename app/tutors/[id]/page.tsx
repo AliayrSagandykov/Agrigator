@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DeltaChart } from "@/components/delta-chart";
 import { MetricRow } from "@/components/metric-stat";
 import { formatDelta, formatPrice, formatLabel } from "@/lib/utils";
+import { getT } from "@/lib/locale";
 
 export default async function TutorProfilePage({ params }: { params: { id: string } }) {
   const tutor = await getTutorByUserId(params.id);
@@ -24,6 +25,7 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
     getReviewsFor("tutor", params.id),
   ]);
 
+  const L = getT().profile;
   const canSeeContacts = user?.plan === "pro" || user?.role === "admin";
   const isFav = user ? (await getFavoriteKeys(user.id)).has(`tutor:${params.id}`) : false;
 
@@ -46,7 +48,7 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
                   <Badge key={e} variant="secondary">{e}</Badge>
                 ))}
                 {tutor.aiVerified && (
-                  <Badge variant="success"><BadgeCheck size={12} /> результаты верифицированы</Badge>
+                  <Badge variant="success"><BadgeCheck size={12} /> {L.resultsVerified}</Badge>
                 )}
               </div>
             </div>
@@ -55,7 +57,7 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
           {/* Верифицированный график «до/после» */}
           <Card>
             <CardContent>
-              <h2 className="mb-3 font-semibold">Результаты учеников</h2>
+              <h2 className="mb-3 font-semibold">{L.studentResults}</h2>
               {tutor.metrics.sample > 0 ? (
                 <DeltaChart
                   metric={tutor.metrics.metric}
@@ -64,7 +66,7 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
                   sample={tutor.metrics.sample}
                 />
               ) : (
-                <p className="text-sm text-muted-foreground">Метрики ещё копятся.</p>
+                <p className="text-sm text-muted-foreground">{L.metricsBuilding}</p>
               )}
               <div className="mt-5">
                 <MetricRow
@@ -79,10 +81,10 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
 
           {/* О тюторе */}
           <section>
-            <h2 className="font-semibold">О тюторе</h2>
+            <h2 className="font-semibold">{L.aboutTutor}</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{tutor.bio}</p>
             {tutor.methodology && (
-              <p className="mt-3 text-sm"><span className="font-medium">Образование/методика:</span> {tutor.methodology}</p>
+              <p className="mt-3 text-sm"><span className="font-medium">{L.eduMethod}</span> {tutor.methodology}</p>
             )}
             {tutor.ownScores.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
@@ -104,9 +106,9 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
 
           {/* Отзывы — внизу, слабый сигнал */}
           <section>
-            <h2 className="font-semibold">Отзывы <span className="text-muted-foreground">({reviews.length})</span></h2>
+            <h2 className="font-semibold">{L.reviews} <span className="text-muted-foreground">({reviews.length})</span></h2>
             <div className="mt-3 space-y-3">
-              {reviews.length === 0 && <p className="text-sm text-muted-foreground">Пока нет отзывов.</p>}
+              {reviews.length === 0 && <p className="text-sm text-muted-foreground">{L.noReviews}</p>}
               {reviews.map((r) => (
                 <Card key={r.id}>
                   <CardContent className="py-4">
@@ -120,7 +122,7 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
                     </div>
                     {r.beforeScore && r.afterScore && (
                       <div className="mt-1 text-xs text-success">
-                        {r.beforeScore} → {r.afterScore} {r.verified && "· подтверждён"}
+                        {r.beforeScore} → {r.afterScore} {r.verified && `· ${L.verifiedReview}`}
                       </div>
                     )}
                     <p className="mt-2 text-sm text-muted-foreground">{r.note}</p>
@@ -137,38 +139,35 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
             <CardContent className="space-y-4">
               <div>
                 <div className="text-2xl font-bold">{formatPrice(tutor.price, tutor.priceUnit)}</div>
-                <div className="text-sm text-muted-foreground">Ответ {tutor.responseTime}</div>
+                <div className="text-sm text-muted-foreground">{L.responsePre}{tutor.responseTime}</div>
               </div>
 
               <Link href={`/book/${tutor.id}`} className="block">
                 <Button className="w-full" size="lg">
-                  {tutor.trialFree ? "Забронировать бесплатный пробный" : "Забронировать пробный урок"}
+                  {tutor.trialFree ? L.bookFreeTrial : L.bookTrial}
                 </Button>
               </Link>
 
               <dl className="space-y-1.5 text-sm">
-                <Row label="Формат" value={formatLabel(tutor.format)} />
-                <Row label="Город" value={tutor.city} />
-                <Row label="Опыт" value={`${tutor.experience} лет`} />
-                {tutor.languages.length > 0 && <Row label="Языки" value={tutor.languages.join(", ")} />}
+                <Row label={L.format} value={formatLabel(tutor.format)} />
+                <Row label={L.city} value={tutor.city} />
+                <Row label={L.experience} value={`${tutor.experience} ${L.years}`} />
+                {tutor.languages.length > 0 && <Row label={L.languages} value={tutor.languages.join(", ")} />}
               </dl>
 
               {/* Контакты — Pro-фича (слабый замок, главный путь — бронь) */}
               <div className="rounded-lg border border-border p-3">
                 <div className="mb-1 flex items-center gap-1.5 text-sm font-medium">
-                  <Lock size={14} /> Прямые контакты
+                  <Lock size={14} /> {L.directContacts}
                 </div>
                 {canSeeContacts ? (
                   <div className="space-y-0.5 text-sm text-muted-foreground">
                     {tutor.contacts.telegram && <div>Telegram: @{tutor.contacts.telegram}</div>}
                     {tutor.contacts.whatsapp && <div>WhatsApp: {tutor.contacts.whatsapp}</div>}
-                    {tutor.contacts.phone && <div>Тел: {tutor.contacts.phone}</div>}
+                    {tutor.contacts.phone && <div>{L.phoneShort} {tutor.contacts.phone}</div>}
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground">
-                    Доступны в Pro. Рекомендуем бронь через платформу — так результат
-                    засчитается в метрики.
-                  </p>
+                  <p className="text-xs text-muted-foreground">{L.proContacts}</p>
                 )}
               </div>
             </CardContent>

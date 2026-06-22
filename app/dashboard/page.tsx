@@ -18,6 +18,7 @@ import { DeltaChart } from "@/components/delta-chart";
 import { ResultUpload } from "@/components/result-upload";
 import { RetentionQuestion } from "@/components/retention-question";
 import { formatDateTime, formatDelta } from "@/lib/utils";
+import { getT } from "@/lib/locale";
 
 export const metadata = { title: "Кабинет — Agrigator" };
 
@@ -27,6 +28,8 @@ export default async function StudentDashboard() {
   if (user.role === "tutor") redirect("/tutor");
   if (user.role === "admin") redirect("/admin");
 
+  const L = getT().dash;
+  const tz = user.timezone ?? undefined;
   const now = new Date();
   const [bookings, goal, progress, retentionSignals, reviewed, pairs] = await Promise.all([
     getStudentBookings(user.id),
@@ -56,24 +59,24 @@ export default async function StudentDashboard() {
     <div className="container max-w-4xl py-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Привет, {user.name.split(" ")[0]}</h1>
-          {goal && <p className="text-muted-foreground">Цель: {goal.exam}</p>}
+          <h1 className="text-2xl font-bold">{L.hiPre}{user.name.split(" ")[0]}</h1>
+          {goal && <p className="text-muted-foreground">{L.goal} {goal.exam}</p>}
         </div>
         <Link href="/catalog">
-          <Button variant="outline"><Plus size={16} /> Найти тютора</Button>
+          <Button variant="outline"><Plus size={16} /> {L.findTutor}</Button>
         </Link>
       </div>
 
       {retentionTarget && (
         <div className="mt-6">
-          <RetentionQuestion tutorId={retentionTarget.id} tutorName={retentionTarget.name} />
+          <RetentionQuestion tutorId={retentionTarget.id} tutorName={retentionTarget.name} labels={L} />
         </div>
       )}
 
       {pairs.length > 0 && (
         <section className="mt-6">
-          <h2 className="mb-3 font-semibold">Кабинеты с тьюторами</h2>
-          <PairList pairs={pairs} tz={user.timezone ?? undefined} />
+          <h2 className="mb-3 font-semibold">{L.roomsWithTutors}</h2>
+          <PairList pairs={pairs} tz={tz} />
         </section>
       )}
 
@@ -81,15 +84,15 @@ export default async function StudentDashboard() {
         {/* Прогресс */}
         <Card>
           <CardContent>
-            <h2 className="font-semibold">Прогресс</h2>
+            <h2 className="font-semibold">{L.progress}</h2>
             {progress.hasBaseline && progress.latest != null ? (
               <div className="mt-3">
-                <DeltaChart metric={progress.exam ?? "Балл"} before={progress.baseline!} after={progress.latest} />
+                <DeltaChart metric={progress.exam ?? L.progress} before={progress.baseline!} after={progress.latest} />
               </div>
             ) : progress.hasBaseline ? (
               <div className="mt-3 space-y-1 text-sm">
-                <div className="flex justify-between"><span className="text-muted-foreground">Baseline</span><span className="font-medium">{progress.baseline}</span></div>
-                <p className="text-muted-foreground">Сдашь экзамен — загрузи отчёт, и система посчитает дельту.</p>
+                <div className="flex justify-between"><span className="text-muted-foreground">{L.baselineLabel}</span><span className="font-medium">{progress.baseline}</span></div>
+                <p className="text-muted-foreground">{L.afterExamUpload}</p>
               </div>
             ) : (
               <div className="mt-3">
@@ -97,15 +100,15 @@ export default async function StudentDashboard() {
                   href="/diagnostic"
                   className="inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
                 >
-                  🎯 Пройти диагностику
+                  {L.takeDiagnostic}
                 </Link>
-                <div className="mt-3 text-xs text-muted-foreground">или укажи прошлый официальный балл:</div>
-                <BaselineForm exam={progress.exam} />
+                <div className="mt-3 text-xs text-muted-foreground">{L.orPastScore}</div>
+                <BaselineForm labels={L} />
               </div>
             )}
             {progress.delta != null && (
               <div className="mt-3">
-                <Badge variant="success">{formatDelta(progress.delta)} к результату</Badge>
+                <Badge variant="success">{formatDelta(progress.delta)} {L.toResult}</Badge>
               </div>
             )}
           </CardContent>
@@ -114,20 +117,20 @@ export default async function StudentDashboard() {
         {/* Загрузка результата */}
         <Card>
           <CardContent>
-            <h2 className="font-semibold">Загрузить результат</h2>
-            <p className="mb-3 mt-1 text-sm text-muted-foreground">Официальный score report после экзамена.</p>
-            <ResultUpload tutors={workedWith} defaultExam={goal?.exam} />
+            <h2 className="font-semibold">{L.uploadResultCard}</h2>
+            <p className="mb-3 mt-1 text-sm text-muted-foreground">{L.officialReport}</p>
+            <ResultUpload tutors={workedWith} defaultExam={goal?.exam} labels={L} />
           </CardContent>
         </Card>
       </div>
 
       {/* Ближайшие уроки */}
       <section className="mt-8">
-        <h2 className="font-semibold">Ближайшие уроки</h2>
+        <h2 className="font-semibold">{L.upcomingLessons}</h2>
         <div className="mt-3 space-y-3">
           {upcoming.length === 0 && (
             <Card><CardContent className="py-6 text-center text-sm text-muted-foreground">
-              Нет запланированных уроков. <Link href="/catalog" className="text-primary hover:underline">Забронировать</Link>
+              {L.noUpcoming} <Link href="/catalog" className="text-primary hover:underline">{L.book}</Link>
             </CardContent></Card>
           )}
           {upcoming.map((b) => (
@@ -137,18 +140,18 @@ export default async function StudentDashboard() {
                   <Avatar name={b.tutor.name} color={b.tutor.avatarColor} size={40} />
                   <div>
                     <div className="font-medium">{b.tutor.name}</div>
-                    <div className="text-sm text-muted-foreground">{formatDateTime(b.slotAt, user.timezone ?? undefined)}</div>
+                    <div className="text-sm text-muted-foreground">{formatDateTime(b.slotAt, tz)}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {b.acceptedAt ? (
-                    <Badge variant="success">подтверждён</Badge>
+                    <Badge variant="success">{L.confirmed}</Badge>
                   ) : (
-                    <Badge variant="outline">ждёт тютора</Badge>
+                    <Badge variant="outline">{L.awaitingTutor}</Badge>
                   )}
-                  <PaymentBadge status={b.paymentStatus ?? undefined} />
+                  <PaymentBadge status={b.paymentStatus ?? undefined} labels={L} />
                   <a href={b.meetLink} target="_blank" rel="noopener noreferrer">
-                    <Button size="sm"><Video size={15} /> Войти</Button>
+                    <Button size="sm"><Video size={15} /> {L.join}</Button>
                   </a>
                 </div>
               </CardContent>
@@ -159,9 +162,9 @@ export default async function StudentDashboard() {
 
       {/* История + перебронь (главный путь удержания) */}
       <section className="mt-8">
-        <h2 className="font-semibold">История</h2>
+        <h2 className="font-semibold">{L.history}</h2>
         <div className="mt-3 space-y-3">
-          {history.length === 0 && <p className="text-sm text-muted-foreground">Пока пусто.</p>}
+          {history.length === 0 && <p className="text-sm text-muted-foreground">{L.empty}</p>}
           {history.map((b) => (
             <Card key={b.id}>
               <CardContent className="space-y-3 py-4">
@@ -170,14 +173,14 @@ export default async function StudentDashboard() {
                     <Avatar name={b.tutor.name} color={b.tutor.avatarColor} size={40} />
                     <div>
                       <div className="font-medium">{b.tutor.name}</div>
-                      <div className="text-sm text-muted-foreground">Урок {formatDateTime(b.slotAt, user.timezone ?? undefined)}</div>
+                      <div className="text-sm text-muted-foreground">{L.lessonPre} {formatDateTime(b.slotAt, tz)}</div>
                     </div>
                   </div>
                   <Link href={`/book/${b.tutor.id}`}>
-                    <Button size="sm" variant="outline">Забронировать ещё</Button>
+                    <Button size="sm" variant="outline">{L.bookAgain}</Button>
                   </Link>
                 </div>
-                {!reviewed.has(b.id) && <LessonReview bookingId={b.id} tutorName={b.tutor.name} />}
+                {!reviewed.has(b.id) && <LessonReview bookingId={b.id} tutorName={b.tutor.name} labels={L} />}
               </CardContent>
             </Card>
           ))}
@@ -187,9 +190,9 @@ export default async function StudentDashboard() {
   );
 }
 
-function PaymentBadge({ status }: { status?: string }) {
-  if (!status) return <Badge variant="secondary">бесплатно</Badge>;
+function PaymentBadge({ status, labels }: { status?: string; labels: { freeBadge: string; paid: string; awaitingPayment: string } }) {
+  if (!status) return <Badge variant="secondary">{labels.freeBadge}</Badge>;
   if (status === "confirmed" || status === "released")
-    return <Badge variant="success">оплачено</Badge>;
-  return <Badge variant="secondary">ожидает оплаты</Badge>;
+    return <Badge variant="success">{labels.paid}</Badge>;
+  return <Badge variant="secondary">{labels.awaitingPayment}</Badge>;
 }

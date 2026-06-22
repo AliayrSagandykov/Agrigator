@@ -13,6 +13,7 @@ import { MetricStat } from "@/components/metric-stat";
 import { Avatar } from "@/components/avatar";
 import { CompleteLessonButton } from "@/components/complete-lesson-button";
 import { formatDateTime, formatDelta, formatTenge } from "@/lib/utils";
+import { getT } from "@/lib/locale";
 
 export const metadata = { title: "Кабинет тьютора — Agrigator" };
 
@@ -28,6 +29,8 @@ export default async function TutorDashboard() {
   );
   if (!profile) redirect("/tutor/onboarding");
 
+  const L = getT().tutorDash;
+  const tz = user.timezone ?? undefined;
   const now = new Date();
   const [metrics, bookings, payments, pairs] = await Promise.all([
     computeTutorMetrics(user.id),
@@ -47,15 +50,15 @@ export default async function TutorDashboard() {
           <Avatar name={user.name} photo={profile.photo} color={user.avatarColor} size={48} />
           <div>
             <h1 className="text-2xl font-bold">{user.name}</h1>
-            <p className="text-muted-foreground">Кабинет тьютора</p>
+            <p className="text-muted-foreground">{L.tutorCabinet}</p>
           </div>
         </div>
         <div className="flex gap-2">
           <Link href="/tutor/schedule">
-            <Button variant="outline"><CalendarClock size={15} /> Расписание</Button>
+            <Button variant="outline"><CalendarClock size={15} /> {L.schedule}</Button>
           </Link>
           <Link href="/tutor/onboarding">
-            <Button variant="outline"><Pencil size={15} /> Профиль</Button>
+            <Button variant="outline"><Pencil size={15} /> {L.profile}</Button>
           </Link>
         </div>
       </div>
@@ -65,51 +68,48 @@ export default async function TutorDashboard() {
         <CardContent>
           <div className="mb-3 flex items-center gap-2">
             <TrendingUp size={18} className="text-primary" />
-            <h2 className="font-semibold">Твой портфель результатов</h2>
+            <h2 className="font-semibold">{L.portfolio}</h2>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <MetricStat value={formatDelta(metrics.delta)} label="средняя дельта" hint={metrics.n ? `по ${metrics.n} рез.` : "стартовая"} tone="success" />
-            <MetricStat value={formatDelta(metrics.riskAdjustedDelta)} label="с поправкой" hint="учтены бросившие" />
-            <MetricStat value={`${metrics.continuationRate}%`} label="доходимость" tone="primary" />
-            <MetricStat value={String(metrics.lessons)} label="уроков" />
+            <MetricStat value={formatDelta(metrics.delta)} label={L.avgDelta} hint={metrics.n ? `${metrics.n} ${L.results}` : L.starter} tone="success" />
+            <MetricStat value={formatDelta(metrics.riskAdjustedDelta)} label={L.adjusted} hint={L.droppedCounted} />
+            <MetricStat value={`${metrics.continuationRate}%`} label={L.continuation} tone="primary" />
+            <MetricStat value={String(metrics.lessons)} label={L.lessons} />
           </div>
           {metrics.lowConfidence && (
             <div className="mt-3 rounded-lg border border-dashed border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-              Мало верифицированных результатов (N={metrics.n}). Дельта показывается, но станет
-              надёжнее с каждым новым результатом — мы намеренно не раздуваем цифру на малой выборке.
+              {L.lowDataPre}{metrics.n}{L.lowDataSuf}
             </div>
           )}
           <p className="mt-3 text-xs text-muted-foreground">
-            Цифры нельзя купить — их ставит система из проведённых уроков и верифицированных
-            результатов. Дельта «с поправкой» консервативна: бросившие считаются нулевым приростом,
-            малая выборка усаживается к нулю. {metrics.isLive ? "Есть живые данные." : "Показаны стартовые метрики."}
+            {L.portfolioNote} {metrics.isLive ? L.liveData : L.starterMetrics}
           </p>
         </CardContent>
       </Card>
 
       <div className="mt-6 grid gap-6 md:grid-cols-3">
-        <MetricStat value={formatTenge(escrow)} label="в эскроу" />
-        <MetricStat value={formatTenge(released)} label="выплачено" />
-        <MetricStat value={formatTenge(profile.price)} label="ставка за час" />
+        <MetricStat value={formatTenge(escrow)} label={L.escrow} />
+        <MetricStat value={formatTenge(released)} label={L.paidOut} />
+        <MetricStat value={formatTenge(profile.price)} label={L.hourlyRate} />
       </div>
 
       {/* Кабинеты учеников — центр удержания */}
       {pairs.length > 0 && (
         <section className="mt-8">
-          <h2 className="mb-3 font-semibold">Кабинеты учеников</h2>
-          <PairList pairs={pairs} tz={user.timezone ?? undefined} />
+          <h2 className="mb-3 font-semibold">{L.studentRooms}</h2>
+          <PairList pairs={pairs} tz={tz} />
         </section>
       )}
 
       {/* Входящие брони */}
       <section className="mt-8">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold">Входящие брони</h2>
-          <Link href="/tutor/inbox" className="text-sm text-primary hover:underline">Все →</Link>
+          <h2 className="font-semibold">{L.incomingBookings}</h2>
+          <Link href="/tutor/inbox" className="text-sm text-primary hover:underline">{L.all}</Link>
         </div>
         <div className="mt-3 space-y-3">
           {requests.length === 0 && (
-            <Card><CardContent className="py-6 text-center text-sm text-muted-foreground">Новых броней нет.</CardContent></Card>
+            <Card><CardContent className="py-6 text-center text-sm text-muted-foreground">{L.noNewBookings}</CardContent></Card>
           )}
           {requests.slice(0, 5).map((b) => (
             <Card key={b.id}>
@@ -118,12 +118,12 @@ export default async function TutorDashboard() {
                   <Avatar name={b.student.name} color={b.student.avatarColor} size={40} />
                   <div>
                     <div className="font-medium">{b.student.name}</div>
-                    <div className="text-sm text-muted-foreground">{formatDateTime(b.slotAt, user.timezone ?? undefined)} · {b.kind === "trial" ? "пробный" : "урок"}</div>
+                    <div className="text-sm text-muted-foreground">{formatDateTime(b.slotAt, tz)} · {b.kind === "trial" ? L.trial : L.lesson}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <a href={b.meetLink} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">ссылка</a>
-                  <CompleteLessonButton bookingId={b.id} />
+                  <a href={b.meetLink} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">{L.link}</a>
+                  <CompleteLessonButton bookingId={b.id} labels={L} />
                 </div>
               </CardContent>
             </Card>

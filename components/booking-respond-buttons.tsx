@@ -2,9 +2,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import type { Dict } from "@/lib/i18n";
 
 // Ответ тютора на бронь (UX §3.2): принять / отклонить / предложить другое время.
-export function BookingRespondButtons({ bookingId }: { bookingId: string }) {
+export function BookingRespondButtons({ bookingId, labels }: { bookingId: string; labels: Dict["tutorDash"] }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [reschedule, setReschedule] = useState(false);
@@ -35,10 +36,10 @@ export function BookingRespondButtons({ bookingId }: { bookingId: string }) {
           disabled={loading || !slotAt}
           onClick={() => respond("reschedule", { slotAt: new Date(slotAt).toISOString() })}
         >
-          Предложить
+          {labels.propose}
         </Button>
         <Button size="sm" variant="ghost" onClick={() => setReschedule(false)} disabled={loading}>
-          Отмена
+          {labels.cancel}
         </Button>
       </div>
     );
@@ -47,13 +48,13 @@ export function BookingRespondButtons({ bookingId }: { bookingId: string }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Button size="sm" variant="success" disabled={loading} onClick={() => respond("accept")}>
-        Принять
+        {labels.accept}
       </Button>
       <Button size="sm" variant="outline" disabled={loading} onClick={() => setReschedule(true)}>
-        Другое время
+        {labels.otherTime}
       </Button>
       <Button size="sm" variant="ghost" disabled={loading} onClick={() => respond("decline")}>
-        Отклонить
+        {labels.decline}
       </Button>
     </div>
   );

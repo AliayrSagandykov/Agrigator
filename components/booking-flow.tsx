@@ -5,6 +5,7 @@ import { Check, Video, CreditCard, CalendarClock } from "lucide-react";
 import { cn, formatTenge } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import type { Dict } from "@/lib/i18n";
 
 interface Slot {
   iso: string;
@@ -24,12 +25,14 @@ export function BookingFlow({
   price,
   trialFree,
   slots,
+  labels,
 }: {
   tutorId: string;
   tutorName: string;
   price: number;
   trialFree: boolean;
   slots: Slot[];
+  labels: Dict["booking"];
 }) {
   const [selected, setSelected] = useState<Slot | null>(null);
   const [result, setResult] = useState<BookingResult | null>(null);
@@ -48,7 +51,7 @@ export function BookingFlow({
     const data = await res.json();
     setLoading(false);
     if (!res.ok) {
-      setError(data.error || "Не удалось забронировать");
+      setError(data.error || labels.bookError);
       return;
     }
     setResult(data);
@@ -63,39 +66,37 @@ export function BookingFlow({
               <Check size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-semibold">Слот забронирован</h2>
+              <h2 className="text-lg font-semibold">{labels.slotBooked}</h2>
               <p className="text-sm text-muted-foreground">
-                Пробный урок с {tutorName}, {selected?.label}
+                {labels.trialWithPre}{tutorName}, {selected?.label}
               </p>
             </div>
           </div>
 
-          <InfoRow icon={<Video size={16} />} title="Ссылка на урок (сгенерирована автоматически)">
+          <InfoRow icon={<Video size={16} />} title={labels.lessonLink}>
             <a href={result.booking.meetLink} target="_blank" rel="noopener noreferrer" className="break-all text-primary hover:underline">
               {result.booking.meetLink}
             </a>
           </InfoRow>
 
           {result.free ? (
-            <InfoRow icon={<CalendarClock size={16} />} title="Оплата">
-              Бесплатный пробный — оплата не нужна.
+            <InfoRow icon={<CalendarClock size={16} />} title={labels.payment}>
+              {labels.freeTrialNoPay}
             </InfoRow>
           ) : (
-            <InfoRow icon={<CreditCard size={16} />} title={`Оплата ${formatTenge(result.amount)} в эскроу`}>
+            <InfoRow icon={<CreditCard size={16} />} title={`${labels.payInEscrowA} ${formatTenge(result.amount)} ${labels.payInEscrowB}`}>
               <a href={result.payUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                Оплатить через Kaspi →
+                {labels.payKaspi}
               </a>
               <p className="mt-1 text-xs text-muted-foreground">
-                Деньги держатся в эскроу до урока.{" "}
-                {result.paymentMode === "manual"
-                  ? "Оператор подтвердит поступление вручную."
-                  : "Подтверждение придёт автоматически после оплаты."}
+                {labels.escrowHold}{" "}
+                {result.paymentMode === "manual" ? labels.manualConfirm : labels.autoConfirm}
               </p>
             </InfoRow>
           )}
 
           <Link href="/dashboard">
-            <Button className="w-full">Перейти в кабинет</Button>
+            <Button className="w-full">{labels.toCabinetBtn}</Button>
           </Link>
         </CardContent>
       </Card>
@@ -105,8 +106,8 @@ export function BookingFlow({
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-semibold">Выбери слот</h2>
-        <p className="text-sm text-muted-foreground">Свободное время {tutorName}.</p>
+        <h2 className="font-semibold">{labels.chooseSlot}</h2>
+        <p className="text-sm text-muted-foreground">{labels.freeTimePre}{tutorName}.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -130,20 +131,20 @@ export function BookingFlow({
         <Card>
           <CardContent className="space-y-3">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Дата</span>
+              <span className="text-muted-foreground">{labels.date}</span>
               <span className="font-medium">{selected.label}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Формат</span>
-              <span className="font-medium">Пробный урок · онлайн</span>
+              <span className="text-muted-foreground">{labels.format}</span>
+              <span className="font-medium">{labels.trialOnline}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Цена</span>
-              <span className="font-medium">{trialFree ? "Бесплатно" : formatTenge(price)}</span>
+              <span className="text-muted-foreground">{labels.price}</span>
+              <span className="font-medium">{trialFree ? labels.free : formatTenge(price)}</span>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button className="w-full" onClick={confirm} disabled={loading}>
-              {loading ? "Бронируем…" : trialFree ? "Подтвердить бронь" : "Подтвердить и оплатить"}
+              {loading ? labels.booking : trialFree ? labels.confirmBooking : labels.confirmPay}
             </Button>
           </CardContent>
         </Card>
