@@ -3,14 +3,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { Dict } from "@/lib/i18n";
 
 // Оператор вводит финальный балл из score report. delta считает система.
 export function VerifyResultForm({
   resultId,
   baseline,
+  labels,
 }: {
   resultId: string;
   baseline: number | null;
+  labels: Dict["admin"];
 }) {
   const router = useRouter();
   const [finalScore, setFinalScore] = useState("");
@@ -31,7 +34,7 @@ export function VerifyResultForm({
   return (
     <form onSubmit={verify} className="flex items-end gap-2">
       <div className="w-32">
-        <label className="text-xs text-muted-foreground">Финальный балл</label>
+        <label className="text-xs text-muted-foreground">{labels.finalScore}</label>
         <Input
           type="number"
           step="any"
@@ -41,7 +44,7 @@ export function VerifyResultForm({
         />
       </div>
       <Button size="sm" disabled={loading || !finalScore}>
-        {loading ? "…" : baseline != null ? `Δ = ${finalScore || "?"} − ${baseline}` : "Проставить дельту"}
+        {loading ? "…" : baseline != null ? `Δ = ${finalScore || "?"} − ${baseline}` : labels.setDelta}
       </Button>
     </form>
   );

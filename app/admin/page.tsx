@@ -11,6 +11,7 @@ import { VerifyResultForm } from "@/components/admin/verify-result-form";
 import { PayoutButton } from "@/components/admin/payout-button";
 import { LeadActions } from "@/components/admin/lead-actions";
 import { TutorActions } from "@/components/admin/tutor-actions";
+import { getT } from "@/lib/locale";
 
 export const metadata = { title: "Оператор — Agrigator" };
 
@@ -19,6 +20,7 @@ export default async function AdminPage() {
   if (!user) redirect("/login");
   if (user.role !== "admin") redirect("/dashboard");
 
+  const L = getT().admin;
   const [pending, submitted, escrow, leads, adminTutors, counts] = await Promise.all([
     getPendingPayments(),
     getSubmittedResults(),
@@ -33,77 +35,77 @@ export default async function AdminPage() {
   return (
     <div className="container max-w-5xl py-10">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Оператор</h1>
+        <h1 className="text-2xl font-bold">{L.title}</h1>
         <Badge variant={payments.mode === "auto" ? "success" : "secondary"}>
-          режим оплат: {payments.mode}
+          {L.payMode} {payments.mode}
         </Badge>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <MetricStat value={String(tutorCount)} label="тьюторов" />
-        <MetricStat value={String(studentCount)} label="учеников" />
-        <MetricStat value={String(bookingCount)} label="броней" />
-        <MetricStat value={String(lessonCount)} label="уроков" />
+        <MetricStat value={String(tutorCount)} label={L.tutors} />
+        <MetricStat value={String(studentCount)} label={L.students} />
+        <MetricStat value={String(bookingCount)} label={L.bookings} />
+        <MetricStat value={String(lessonCount)} label={L.lessons} />
       </div>
 
       {/* Подтверждение оплат (manual режим) */}
-      <Section title="Оплаты к подтверждению" hint="Поступление видно в Kaspi Pay → подтверди вручную (в auto это делает вебхук).">
+      <Section title={L.payTitle} hint={L.payHint}>
         {pending.length === 0 ? (
-          <Empty>Нет ожидающих оплат.</Empty>
+          <Empty>{L.noPending}</Empty>
         ) : (
           pending.map((p) => (
             <Row key={p.id}>
               <div>
                 <div className="font-medium">{p.studentName} → {p.tutorName}</div>
-                <div className="text-sm text-muted-foreground">{formatTenge(p.amount)} · бронь #{p.bookingId.slice(0, 6)} · {formatDateTime(p.createdAt)}</div>
+                <div className="text-sm text-muted-foreground">{formatTenge(p.amount)} · {L.bookingShort}{p.bookingId.slice(0, 6)} · {formatDateTime(p.createdAt)}</div>
               </div>
-              <ConfirmPaymentButton bookingId={p.bookingId} />
+              <ConfirmPaymentButton bookingId={p.bookingId} labels={L} />
             </Row>
           ))
         )}
       </Section>
 
       {/* Верификация результатов */}
-      <Section title="Результаты к верификации" hint="Прочитай score report и введи финальный балл. Дельту посчитает система.">
+      <Section title={L.resTitle} hint={L.resHint}>
         {submitted.length === 0 ? (
-          <Empty>Нет результатов на проверке.</Empty>
+          <Empty>{L.noResults}</Empty>
         ) : (
           submitted.map((r) => (
             <Row key={r.id}>
               <div>
                 <div className="font-medium">{r.studentName} · {r.exam}</div>
                 <div className="text-sm text-muted-foreground">
-                  тютор {r.tutorName} · baseline {r.baseline ?? "—"}
+                  {L.tutorWord} {r.tutorName} · baseline {r.baseline ?? "—"}
                   {r.reportUrl && <> · <a href={r.reportUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">report</a></>}
                 </div>
               </div>
-              <VerifyResultForm resultId={r.id} baseline={r.baseline} />
+              <VerifyResultForm resultId={r.id} baseline={r.baseline} labels={L} />
             </Row>
           ))
         )}
       </Section>
 
       {/* Выплаты тьюторам */}
-      <Section title="Выплаты тьюторам" hint="Деньги в эскроу после подтверждённых уроков. Manual: выплачивай раз в неделю; auto: крон.">
+      <Section title={L.payoutTitle} hint={L.payoutHint}>
         {escrow.length === 0 ? (
-          <Empty>Нет денег к выплате.</Empty>
+          <Empty>{L.noPayouts}</Empty>
         ) : (
           escrow.map((e) => (
             <Row key={e.tutorId}>
               <div>
                 <div className="font-medium">{e.tutorName}</div>
-                <div className="text-sm text-muted-foreground">в эскроу: {formatTenge(e.amount)}</div>
+                <div className="text-sm text-muted-foreground">{L.inEscrow} {formatTenge(e.amount)}</div>
               </div>
-              <PayoutButton tutorId={e.tutorId} />
+              <PayoutButton tutorId={e.tutorId} labels={L} />
             </Row>
           ))
         )}
       </Section>
 
       {/* Лиды парсера */}
-      <Section title="Лиды парсера" hint="Объявления из Instagram/OLX/Telegram — кандидаты в каталог.">
+      <Section title={L.leadsTitle} hint={L.leadsHint}>
         {leads.length === 0 ? (
-          <Empty>Лидов нет.</Empty>
+          <Empty>{L.noLeads}</Empty>
         ) : (
           leads.map((l) => {
             const parsed = parseJson<Record<string, unknown>>(l.parsedJson, {});
@@ -112,12 +114,12 @@ export default async function AdminPage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <Badge variant="outline">{l.source}</Badge>
-                    <span className="font-medium">{String(parsed.title ?? "Лид")}</span>
+                    <span className="font-medium">{String(parsed.title ?? L.leadWord)}</span>
                   </div>
                   <div className="truncate text-sm text-muted-foreground">{l.rawText}</div>
                 </div>
                 {l.status === "new" ? (
-                  <LeadActions id={l.id} />
+                  <LeadActions id={l.id} labels={L} />
                 ) : (
                   <Badge variant={l.status === "imported" ? "success" : "secondary"}>{l.status}</Badge>
                 )}
@@ -128,19 +130,19 @@ export default async function AdminPage() {
       </Section>
 
       {/* Управление карточками тьюторов */}
-      <Section title="Тьюторы (управление)" hint="Тогглы рекламы/verified и удаление. Импортированные из лидов помечены «из лида».">
+      <Section title={L.tutorsMgmtTitle} hint={L.tutorsMgmtHint}>
         {adminTutors.map((t) => (
           <Row key={t.userId}>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span className="font-medium">{t.name}</span>
-                {t.source === "parser" && <Badge variant="outline">из лида</Badge>}
+                {t.source === "parser" && <Badge variant="outline">{L.fromLead}</Badge>}
               </div>
               <div className="text-sm text-muted-foreground">
-                {parseJson<string[]>(t.examsJson, []).join(", ") || "—"} · выборка {t.statSample}
+                {parseJson<string[]>(t.examsJson, []).join(", ") || "—"} · {L.sampleWord} {t.statSample}
               </div>
             </div>
-            <TutorActions userId={t.userId} sponsored={t.sponsored} aiVerified={t.aiVerified} />
+            <TutorActions userId={t.userId} sponsored={t.sponsored} aiVerified={t.aiVerified} labels={L} />
           </Row>
         ))}
       </Section>
