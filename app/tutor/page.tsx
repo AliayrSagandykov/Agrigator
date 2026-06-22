@@ -67,14 +67,22 @@ export default async function TutorDashboard() {
             <TrendingUp size={18} className="text-primary" />
             <h2 className="font-semibold">Твой портфель результатов</h2>
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            <MetricStat value={formatDelta(metrics.delta)} label="средняя дельта" tone="success" />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <MetricStat value={formatDelta(metrics.delta)} label="средняя дельта" hint={metrics.n ? `по ${metrics.n} рез.` : "стартовая"} tone="success" />
+            <MetricStat value={formatDelta(metrics.riskAdjustedDelta)} label="с поправкой" hint="учтены бросившие" />
+            <MetricStat value={`${metrics.continuationRate}%`} label="доходимость" tone="primary" />
             <MetricStat value={String(metrics.lessons)} label="уроков" />
-            <MetricStat value={`${metrics.retention}%`} label="удержание" tone="primary" />
           </div>
+          {metrics.lowConfidence && (
+            <div className="mt-3 rounded-lg border border-dashed border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+              Мало верифицированных результатов (N={metrics.n}). Дельта показывается, но станет
+              надёжнее с каждым новым результатом — мы намеренно не раздуваем цифру на малой выборке.
+            </div>
+          )}
           <p className="mt-3 text-xs text-muted-foreground">
-            Эти цифры нельзя купить — их ставит система из проведённых уроков и
-            верифицированных результатов. {metrics.isLive ? "Есть живые данные." : "Показаны стартовые метрики."}
+            Цифры нельзя купить — их ставит система из проведённых уроков и верифицированных
+            результатов. Дельта «с поправкой» консервативна: бросившие считаются нулевым приростом,
+            малая выборка усаживается к нулю. {metrics.isLive ? "Есть живые данные." : "Показаны стартовые метрики."}
           </p>
         </CardContent>
       </Card>
@@ -89,7 +97,7 @@ export default async function TutorDashboard() {
       {pairs.length > 0 && (
         <section className="mt-8">
           <h2 className="mb-3 font-semibold">Кабинеты учеников</h2>
-          <PairList pairs={pairs} />
+          <PairList pairs={pairs} tz={user.timezone ?? undefined} />
         </section>
       )}
 
@@ -110,7 +118,7 @@ export default async function TutorDashboard() {
                   <Avatar name={b.student.name} color={b.student.avatarColor} size={40} />
                   <div>
                     <div className="font-medium">{b.student.name}</div>
-                    <div className="text-sm text-muted-foreground">{formatDateTime(b.slotAt)} · {b.kind === "trial" ? "пробный" : "урок"}</div>
+                    <div className="text-sm text-muted-foreground">{formatDateTime(b.slotAt, user.timezone ?? undefined)} · {b.kind === "trial" ? "пробный" : "урок"}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

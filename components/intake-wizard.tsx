@@ -24,12 +24,13 @@ export function IntakeWizard() {
       setStep(step + 1);
       return;
     }
-    // Последний шаг → сохраняем вектор и ведём на матч.
+    // Последний шаг → сохраняем вектор (+ авто-определённый пояс) и ведём на матч.
     setSaving(true);
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     await fetch("/api/onboarding", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(next),
+      body: JSON.stringify({ ...next, timezone }),
     });
     router.push("/match");
     router.refresh();

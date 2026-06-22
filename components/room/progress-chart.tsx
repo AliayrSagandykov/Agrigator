@@ -1,21 +1,18 @@
 import type { ProgressPt } from "@/lib/types";
 import { formatDelta } from "@/lib/utils";
-
-const SOURCE_LABEL: Record<string, string> = {
-  diagnostic: "диагностика",
-  mock: "пробник",
-  official: "офиц.",
-};
+import { getT } from "@/lib/locale";
 
 // График траектории баллов (диагностика → пробники → офиц.). UX v3 §2.5.
 // Баллы вводит тютор/ученик; систему дельты это не подменяет — это рабочая динамика.
 export function ProgressChart({ points }: { points: ProgressPt[] }) {
+  const t = getT();
+  const SOURCE_LABEL: Record<string, string> = {
+    diagnostic: t.room.srcDiagnostic,
+    mock: t.room.srcMock,
+    official: t.room.srcOfficial,
+  };
   if (points.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        Пока нет точек прогресса. Добавьте балл диагностики или пробника — построим траекторию.
-      </p>
-    );
+    return <p className="text-sm text-muted-foreground">{t.room.noProgress}</p>;
   }
 
   const scores = points.map((p) => p.score);
@@ -37,7 +34,7 @@ export function ProgressChart({ points }: { points: ProgressPt[] }) {
     <div className="space-y-3">
       {points.length >= 2 && (
         <div className="inline-flex items-center gap-1 rounded-md bg-success/15 px-2 py-1 text-sm font-semibold text-success">
-          {formatDelta(delta)} с первого замера
+          {formatDelta(delta)} {t.room.fromFirst}
         </div>
       )}
 

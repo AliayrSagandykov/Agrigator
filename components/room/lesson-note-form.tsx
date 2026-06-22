@@ -4,16 +4,19 @@ import { useRouter } from "next/navigation";
 import { Check, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { Dict } from "@/lib/i18n";
 
 // Тютор отмечает тему урока в один тап (UX v3 §2.2). Студенту тема видна как текст.
 export function LessonNoteForm({
   lessonId,
   topic,
   canEdit,
+  labels,
 }: {
   lessonId: string;
   topic: string;
   canEdit: boolean;
+  labels: Dict["room"];
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -36,7 +39,7 @@ export function LessonNoteForm({
     return topic ? (
       <span className="text-sm text-foreground">{topic}</span>
     ) : (
-      <span className="text-sm italic text-muted-foreground">тема не отмечена</span>
+      <span className="text-sm italic text-muted-foreground">{labels.topicUnset}</span>
     );
   }
 
@@ -46,7 +49,7 @@ export function LessonNoteForm({
         onClick={() => setEditing(true)}
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
-        {topic ? <span className="text-foreground">{topic}</span> : <span className="italic">отметить тему</span>}
+        {topic ? <span className="text-foreground">{topic}</span> : <span className="italic">{labels.topicSet}</span>}
         <Pencil size={12} />
       </button>
     );
@@ -59,10 +62,10 @@ export function LessonNoteForm({
         autoFocus
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Тема урока"
+        placeholder={labels.topicPh}
         onKeyDown={(e) => e.key === "Enter" && save()}
       />
-      <Button size="sm" onClick={save} disabled={loading} aria-label="Сохранить тему">
+      <Button size="sm" onClick={save} disabled={loading} aria-label={labels.save}>
         <Check size={14} />
       </Button>
     </div>

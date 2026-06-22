@@ -38,6 +38,7 @@ export interface TutorVM {
   id: string; // userId
   name: string;
   avatarColor: string | null;
+  timezone: string | null;
   photo: string | null;
   gradient: string;
   subjects: string;
@@ -65,11 +66,15 @@ export interface TutorVM {
   contacts: Contacts;
 }
 
-// Строка JOIN-а профиля с именем/цветом пользователя.
-type ProfileRow = TutorProfile & { userName: string; userAvatarColor: string | null };
+// Строка JOIN-а профиля с именем/цветом/поясом пользователя.
+type ProfileRow = TutorProfile & {
+  userName: string;
+  userAvatarColor: string | null;
+  userTimezone: string | null;
+};
 
 const SELECT_TUTOR = `
-  select p.*, u.name as "userName", u."avatarColor" as "userAvatarColor"
+  select p.*, u.name as "userName", u."avatarColor" as "userAvatarColor", u.timezone as "userTimezone"
   from "TutorProfile" p
   join "User" u on u.id = p."userId"
 `;
@@ -80,6 +85,7 @@ export function toTutorVM(p: ProfileRow): TutorVM {
     id: p.userId,
     name: p.userName,
     avatarColor: p.userAvatarColor,
+    timezone: p.userTimezone,
     photo: p.photo,
     gradient: p.gradient,
     subjects: parseJson<string[]>(p.subjectsJson, []).join(", "),

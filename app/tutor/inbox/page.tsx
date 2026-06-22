@@ -43,7 +43,7 @@ export default async function TutorInbox() {
                   <Avatar name={b.student.name} color={b.student.avatarColor} size={40} />
                   <div>
                     <div className="font-medium">{b.student.name}</div>
-                    <div className="text-sm text-muted-foreground">{formatDateTime(b.slotAt)} · {b.kind === "trial" ? "пробный" : "урок"}</div>
+                    <div className="text-sm text-muted-foreground">{formatDateTime(b.slotAt, user.timezone ?? undefined)} · {b.kind === "trial" ? "пробный" : "урок"}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

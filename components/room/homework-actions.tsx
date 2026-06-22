@@ -4,9 +4,10 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FileField } from "@/components/room/file-field";
+import type { Dict } from "@/lib/i18n";
 
 // Ученик сдаёт домашку.
-export function SubmitHomeworkForm({ homeworkId }: { homeworkId: string }) {
+export function SubmitHomeworkForm({ homeworkId, labels }: { homeworkId: string; labels: Dict["room"] }) {
   const router = useRouter();
   const [fileUrl, setFileUrl] = useState("");
   const [body, setBody] = useState("");
@@ -26,17 +27,17 @@ export function SubmitHomeworkForm({ homeworkId }: { homeworkId: string }) {
 
   return (
     <form onSubmit={submit} className="mt-2 flex flex-wrap items-center gap-2">
-      <FileField onUploaded={(url) => setFileUrl(url)} />
-      <Input className="h-9 w-44" placeholder="комментарий" value={body} onChange={(e) => setBody(e.target.value)} />
+      <FileField onUploaded={(url) => setFileUrl(url)} labels={labels} />
+      <Input className="h-9 w-44" placeholder={labels.submitPh} value={body} onChange={(e) => setBody(e.target.value)} />
       <Button type="submit" size="sm" disabled={loading || (!fileUrl && !body)}>
-        {loading ? "…" : "Сдать"}
+        {loading ? "…" : labels.submit}
       </Button>
     </form>
   );
 }
 
 // Тютор проверяет домашку.
-export function ReviewHomeworkForm({ homeworkId }: { homeworkId: string }) {
+export function ReviewHomeworkForm({ homeworkId, labels }: { homeworkId: string; labels: Dict["room"] }) {
   const router = useRouter();
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
@@ -55,9 +56,9 @@ export function ReviewHomeworkForm({ homeworkId }: { homeworkId: string }) {
 
   return (
     <form onSubmit={submit} className="mt-2 flex flex-wrap items-center gap-2">
-      <Input className="h-9 w-52" placeholder="комментарий к работе" value={note} onChange={(e) => setNote(e.target.value)} />
+      <Input className="h-9 w-52" placeholder={labels.reviewPh} value={note} onChange={(e) => setNote(e.target.value)} />
       <Button type="submit" size="sm" variant="success" disabled={loading}>
-        {loading ? "…" : "Проверено"}
+        {loading ? "…" : labels.reviewed}
       </Button>
     </form>
   );

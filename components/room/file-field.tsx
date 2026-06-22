@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import { Paperclip, Check } from "lucide-react";
+import type { Dict } from "@/lib/i18n";
 
 // Загружает файл в Supabase Storage через /api/upload, отдаёт url наверх.
-export function FileField({ onUploaded }: { onUploaded: (url: string, name: string) => void }) {
+export function FileField({ onUploaded, labels }: { onUploaded: (url: string, name: string) => void; labels: Dict["room"] }) {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -18,7 +19,7 @@ export function FileField({ onUploaded }: { onUploaded: (url: string, name: stri
     const res = await fetch("/api/upload", { method: "POST", body: fd });
     const data = await res.json().catch(() => ({}));
     setBusy(false);
-    if (!res.ok) return setError(data.error || "Не удалось загрузить");
+    if (!res.ok) return setError(data.error || labels.uploadError);
     setName(file.name);
     onUploaded(data.url, file.name);
   }
@@ -26,7 +27,7 @@ export function FileField({ onUploaded }: { onUploaded: (url: string, name: stri
   return (
     <div className="flex items-center gap-2">
       <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-input px-3 py-1.5 text-sm hover:bg-muted">
-        <Paperclip size={14} /> {busy ? "Загрузка…" : "Файл"}
+        <Paperclip size={14} /> {busy ? labels.uploading : labels.fileBtn}
         <input type="file" className="hidden" onChange={onFile} disabled={busy} />
       </label>
       {name && (

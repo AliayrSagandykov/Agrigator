@@ -73,7 +73,7 @@ export default async function StudentDashboard() {
       {pairs.length > 0 && (
         <section className="mt-6">
           <h2 className="mb-3 font-semibold">Кабинеты с тьюторами</h2>
-          <PairList pairs={pairs} />
+          <PairList pairs={pairs} tz={user.timezone ?? undefined} />
         </section>
       )}
 
@@ -137,7 +137,7 @@ export default async function StudentDashboard() {
                   <Avatar name={b.tutor.name} color={b.tutor.avatarColor} size={40} />
                   <div>
                     <div className="font-medium">{b.tutor.name}</div>
-                    <div className="text-sm text-muted-foreground">{formatDateTime(b.slotAt)}</div>
+                    <div className="text-sm text-muted-foreground">{formatDateTime(b.slotAt, user.timezone ?? undefined)}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -170,7 +170,7 @@ export default async function StudentDashboard() {
                     <Avatar name={b.tutor.name} color={b.tutor.avatarColor} size={40} />
                     <div>
                       <div className="font-medium">{b.tutor.name}</div>
-                      <div className="text-sm text-muted-foreground">Урок {formatDateTime(b.slotAt)}</div>
+                      <div className="text-sm text-muted-foreground">Урок {formatDateTime(b.slotAt, user.timezone ?? undefined)}</div>
                     </div>
                   </div>
                   <Link href={`/book/${b.tutor.id}`}>
