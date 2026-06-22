@@ -2,21 +2,24 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import type { Dict } from "@/lib/i18n";
 
 export function TutorActions({
   userId,
   sponsored,
   aiVerified,
+  labels,
 }: {
   userId: string;
   sponsored: boolean;
   aiVerified: boolean;
+  labels: Dict["admin"];
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   async function act(action: string) {
-    if (action === "delete" && !confirm("Удалить тьютора и все его данные?")) return;
+    if (action === "delete" && !confirm(labels.deleteConfirm)) return;
     setLoading(true);
     await fetch("/api/admin/tutors", {
       method: "POST",
@@ -30,17 +33,17 @@ export function TutorActions({
   return (
     <div className="flex shrink-0 flex-wrap gap-2">
       <Toggle on={sponsored} disabled={loading} onClick={() => act("toggleSponsored")}>
-        Реклама
+        {labels.adReklama}
       </Toggle>
       <Toggle on={aiVerified} disabled={loading} onClick={() => act("toggleVerified")}>
-        Verified
+        {labels.verified}
       </Toggle>
       <button
         disabled={loading}
         onClick={() => act("delete")}
         className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 disabled:opacity-50"
       >
-        Удалить
+        {labels.deleteBtn}
       </button>
     </div>
   );

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
+import type { Dict } from "@/lib/i18n";
 
 export interface TutorProfileInitial {
   subjects?: string;
@@ -16,7 +17,7 @@ export interface TutorProfileInitial {
   trialFree?: boolean;
 }
 
-export function TutorProfileForm({ initial }: { initial?: TutorProfileInitial }) {
+export function TutorProfileForm({ initial, labels }: { initial?: TutorProfileInitial; labels: Dict["tutorOnb"] }) {
   const router = useRouter();
   const [form, setForm] = useState({
     subjects: initial?.subjects ?? "",
@@ -46,63 +47,63 @@ export function TutorProfileForm({ initial }: { initial?: TutorProfileInitial })
     });
     const data = await res.json();
     setLoading(false);
-    if (!res.ok) return setError(data.error || "Не удалось сохранить");
+    if (!res.ok) return setError(data.error || labels.saveError);
     router.push("/tutor");
     router.refresh();
   }
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <Field label="Экзамены" hint="Через запятую: IELTS, SAT">
+      <Field label={labels.examsLabel} hint={labels.examsHint}>
         <Input value={form.exams} onChange={(e) => set("exams", e.target.value)} placeholder="IELTS, SAT" required />
       </Field>
-      <Field label="Предметы / специализация" hint="Через запятую">
+      <Field label={labels.subjectsLabel} hint={labels.commaHint}>
         <Input value={form.subjects} onChange={(e) => set("subjects", e.target.value)} placeholder="IELTS Writing, Speaking" />
       </Field>
       <div className="grid grid-cols-2 gap-4">
-        <Field label="Цена за час, ₸">
+        <Field label={labels.priceLabel}>
           <Input type="number" value={form.price} onChange={(e) => set("price", e.target.value)} placeholder="12000" required />
         </Field>
-        <Field label="Опыт, лет">
+        <Field label={labels.experienceLabel}>
           <Input type="number" value={form.experience} onChange={(e) => set("experience", e.target.value)} placeholder="5" />
         </Field>
       </div>
       <div className="grid grid-cols-2 gap-4">
-        <Field label="Формат">
+        <Field label={labels.formatLabel}>
           <select
             value={form.format}
             onChange={(e) => set("format", e.target.value)}
             className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm"
           >
-            <option value="online">Онлайн</option>
-            <option value="offline">Оффлайн</option>
-            <option value="hybrid">Гибрид</option>
+            <option value="online">{labels.online}</option>
+            <option value="offline">{labels.offline}</option>
+            <option value="hybrid">{labels.hybrid}</option>
           </select>
         </Field>
-        <Field label="Город">
+        <Field label={labels.cityLabel}>
           <Input value={form.city} onChange={(e) => set("city", e.target.value)} />
         </Field>
       </div>
-      <Field label="О себе">
+      <Field label={labels.aboutLabel}>
         <textarea
           value={form.bio}
           onChange={(e) => set("bio", e.target.value)}
           rows={3}
           className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
-          placeholder="Коротко: кого готовите, какой подход, свой результат."
+          placeholder={labels.aboutPh}
         />
       </Field>
-      <Field label="Образование / методика">
+      <Field label={labels.eduLabel}>
         <Input value={form.methodology} onChange={(e) => set("methodology", e.target.value)} />
       </Field>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={form.trialFree} onChange={(e) => set("trialFree", e.target.checked)} />
-        Первый пробный урок бесплатно
+        {labels.freeTrialCheck}
       </label>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
       <Button type="submit" disabled={loading}>
-        {loading ? "Сохраняем…" : "Сохранить профиль"}
+        {loading ? labels.saving : labels.saveProfile}
       </Button>
     </form>
   );
