@@ -12,6 +12,7 @@ import {
   getPairUpcoming,
 } from "@/lib/pairs";
 import { computeStudentProgress } from "@/lib/metrics";
+import { getT } from "@/lib/locale";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,12 +29,6 @@ import { shortTzLabel, tzCity } from "@/lib/time";
 
 export const metadata = { title: "Кабинет пары — Agrigator" };
 
-const HW_BADGE: Record<string, { label: string; variant: "outline" | "secondary" | "success" }> = {
-  open: { label: "ждёт сдачи", variant: "outline" },
-  submitted: { label: "на проверке", variant: "secondary" },
-  done: { label: "проверено", variant: "success" },
-};
-
 export default async function RoomPage({ params }: { params: { pairId: string } }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -41,6 +36,7 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
   const view = await getPairForUser(params.pairId, user.id, user.role === "admin");
   if (!view) notFound();
 
+  const L = getT().room;
   const { pair, viewerRole } = view;
   const canTutor = viewerRole === "tutor" || user.role === "admin";
   const visavi = viewerRole === "tutor" ? view.student : view.tutor;
@@ -50,6 +46,12 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
     visavi.timezone && visavi.timezone !== user.timezone
       ? `${tzCity(visavi.timezone)} · ${shortTzLabel(visavi.timezone)}`
       : null;
+
+  const HW_BADGE: Record<string, { label: string; variant: "outline" | "secondary" | "success" }> = {
+    open: { label: L.hwOpen, variant: "outline" },
+    submitted: { label: L.hwSubmitted, variant: "secondary" },
+    done: { label: L.hwDone, variant: "success" },
+  };
 
   const [materials, homeworks, progress, messages, lessons, upcoming, studentProgress] = await Promise.all([
     getMaterials(pair.id),
@@ -70,12 +72,10 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
   const tabs: RoomTab[] = [
     {
       id: "schedule",
-      label: "Расписание",
+      label: L.tabSchedule,
       content: (
         <div className="space-y-3">
-          {upcoming.length === 0 && (
-            <p className="text-sm text-muted-foreground">Запланированных уроков нет.</p>
-          )}
+          {upcoming.length === 0 && <p className="text-sm text-muted-foreground">{L.noUpcoming}</p>}
           {upcoming.map((b) => (
             <Card key={b.id}>
               <CardContent className="flex items-center justify-between gap-3 py-3">
@@ -83,22 +83,22 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
                   <CalendarClock size={18} className="text-muted-foreground" />
                   <div>
                     <div className="font-medium">{formatDateTime(b.slotAt, tz)}</div>
-                    <div className="text-sm text-muted-foreground">{b.kind === "trial" ? "пробный" : "урок"}</div>
+                    <div className="text-sm text-muted-foreground">{b.kind === "trial" ? L.trial : L.lesson}</div>
                   </div>
                 </div>
                 {b.acceptedAt ? (
                   <a href={b.meetLink} target="_blank" rel="noopener noreferrer">
-                    <Button size="sm"><Video size={15} /> Войти</Button>
+                    <Button size="sm"><Video size={15} /> {L.enter}</Button>
                   </a>
                 ) : (
-                  <Badge variant="outline">ждёт подтверждения</Badge>
+                  <Badge variant="outline">{L.awaitingConfirm}</Badge>
                 )}
               </CardContent>
             </Card>
           ))}
           {viewerRole === "student" && (
             <Link href={`/book/${pair.tutorId}`}>
-              <Button variant="outline" size="sm"><CalendarClock size={15} /> Забронировать ещё</Button>
+              <Button variant="outline" size="sm"><CalendarClock size={15} /> {L.bookMore}</Button>
             </Link>
           )}
         </div>
@@ -106,11 +106,11 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
     },
     {
       id: "lessons",
-      label: "Уроки",
+      label: L.tabLessons,
       badge: lessons.length || undefined,
       content: (
         <div className="space-y-2">
-          {lessons.length === 0 && <p className="text-sm text-muted-foreground">Проведённых уроков пока нет.</p>}
+          {lessons.length === 0 && <p className="text-sm text-muted-foreground">{L.noLessons}</p>}
           {lessons.map((l) => (
             <Card key={l.id}>
               <CardContent className="flex items-center justify-between gap-3 py-3">
@@ -120,7 +120,7 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
                   </span>
                   <div>
                     <div className="text-sm text-muted-foreground">{formatDateTime(l.happenedAt, tz)}</div>
-                    <LessonNoteForm lessonId={l.id} topic={l.topic} canEdit={canTutor} />
+                    <LessonNoteForm lessonId={l.id} topic={l.topic} canEdit={canTutor} labels={L} />
                   </div>
                 </div>
               </CardContent>
@@ -131,23 +131,23 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
     },
     {
       id: "materials",
-      label: "Материалы",
+      label: L.tabMaterials,
       badge: materials.length || undefined,
       content: (
         <div className="space-y-3">
-          <AddItemForm pairId={pair.id} type="material" />
-          {materials.length === 0 && <p className="text-sm text-muted-foreground">Материалов пока нет.</p>}
+          <AddItemForm pairId={pair.id} type="material" labels={L} />
+          {materials.length === 0 && <p className="text-sm text-muted-foreground">{L.noMaterials}</p>}
           {materials.map((m) => (
             <Card key={m.id}>
               <CardContent className="py-3">
                 <div className="flex items-start gap-3">
                   <FileText size={18} className="mt-0.5 shrink-0 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
-                    <div className="font-medium">{m.title || "Без названия"}</div>
+                    <div className="font-medium">{m.title || L.untitled}</div>
                     {m.body && <p className="mt-0.5 whitespace-pre-wrap text-sm text-muted-foreground">{m.body}</p>}
                     {m.fileUrl && (
                       <a href={m.fileUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm text-primary hover:underline">
-                        <Paperclip size={13} /> файл
+                        <Paperclip size={13} /> {L.file}
                       </a>
                     )}
                   </div>
@@ -161,12 +161,12 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
     },
     {
       id: "homework",
-      label: "Домашка",
+      label: L.tabHomework,
       badge: hwBadge || undefined,
       content: (
         <div className="space-y-3">
-          {canTutor && <AddItemForm pairId={pair.id} type="homework" />}
-          {homeworks.length === 0 && <p className="text-sm text-muted-foreground">Домашних заданий пока нет.</p>}
+          {canTutor && <AddItemForm pairId={pair.id} type="homework" labels={L} />}
+          {homeworks.length === 0 && <p className="text-sm text-muted-foreground">{L.noHomework}</p>}
           {homeworks.map((h) => {
             const badge = HW_BADGE[h.status] ?? HW_BADGE.open;
             return (
@@ -174,16 +174,16 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
                 <CardContent className="space-y-2 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="font-medium">{h.title || "Домашнее задание"}</div>
+                      <div className="font-medium">{h.title || L.hwDefault}</div>
                       {h.body && <p className="mt-0.5 whitespace-pre-wrap text-sm text-muted-foreground">{h.body}</p>}
                       <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                         {h.fileUrl && (
                           <a href={h.fileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
-                            <Paperclip size={13} /> файл
+                            <Paperclip size={13} /> {L.file}
                           </a>
                         )}
                         {h.dueAt && (
-                          <span className="inline-flex items-center gap-1"><Clock size={12} /> до {formatDateTime(h.dueAt, tz)}</span>
+                          <span className="inline-flex items-center gap-1"><Clock size={12} /> {L.due} {formatDateTime(h.dueAt, tz)}</span>
                         )}
                       </div>
                     </div>
@@ -194,10 +194,10 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
                   {h.submission ? (
                     <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm">
                       <div className="mb-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                        <span>Сдано {formatDateTime(h.submission.submittedAt, tz)}</span>
+                        <span>{L.submittedAt} {formatDateTime(h.submission.submittedAt, tz)}</span>
                         {h.submission.fileUrl && (
                           <a href={h.submission.fileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
-                            <Paperclip size={13} /> работа
+                            <Paperclip size={13} /> {L.work}
                           </a>
                         )}
                       </div>
@@ -205,15 +205,15 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
                       {h.submission.reviewState === "reviewed" ? (
                         h.submission.reviewNote && (
                           <p className="mt-2 border-t border-border pt-2 text-muted-foreground">
-                            <span className="font-medium text-foreground">Комментарий: </span>{h.submission.reviewNote}
+                            <span className="font-medium text-foreground">{L.comment}: </span>{h.submission.reviewNote}
                           </p>
                         )
                       ) : (
-                        canTutor && <ReviewHomeworkForm homeworkId={h.id} />
+                        canTutor && <ReviewHomeworkForm homeworkId={h.id} labels={L} />
                       )}
                     </div>
                   ) : (
-                    viewerRole === "student" && h.status !== "done" && <SubmitHomeworkForm homeworkId={h.id} />
+                    viewerRole === "student" && h.status !== "done" && <SubmitHomeworkForm homeworkId={h.id} labels={L} />
                   )}
                 </CardContent>
               </Card>
@@ -224,27 +224,27 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
     },
     {
       id: "progress",
-      label: "Прогресс",
+      label: L.tabProgress,
       content: (
         <div className="space-y-4">
           {studentProgress.delta != null && studentProgress.latest != null && (
-            <Badge variant="success">официальная дельта {studentProgress.delta > 0 ? "+" : ""}{studentProgress.delta}</Badge>
+            <Badge variant="success">{L.officialDelta} {studentProgress.delta > 0 ? "+" : ""}{studentProgress.delta}</Badge>
           )}
           <ProgressChart points={progress} />
           <div className="border-t border-border pt-3">
-            <div className="mb-2 text-xs text-muted-foreground">Добавить балл</div>
-            <AddProgressForm pairId={pair.id} />
+            <div className="mb-2 text-xs text-muted-foreground">{L.addScore}</div>
+            <AddProgressForm pairId={pair.id} labels={L} />
           </div>
         </div>
       ),
     },
     {
       id: "chat",
-      label: "Чат",
+      label: L.tabChat,
       content: (
         <div className="space-y-3">
           <div className="max-h-[420px] space-y-2 overflow-y-auto">
-            {messages.length === 0 && <p className="text-sm text-muted-foreground">Сообщений пока нет. Напишите первое.</p>}
+            {messages.length === 0 && <p className="text-sm text-muted-foreground">{L.noMessages}</p>}
             {messages.map((m) => {
               const own = m.authorId === user.id;
               return (
@@ -260,7 +260,7 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
               );
             })}
           </div>
-          <MessageForm pairId={pair.id} />
+          <MessageForm pairId={pair.id} labels={L} />
         </div>
       ),
     },
@@ -272,7 +272,7 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
         href={viewerRole === "tutor" ? "/tutor" : "/dashboard"}
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft size={15} /> В кабинет
+        <ArrowLeft size={15} /> {L.back}
       </Link>
 
       {/* Шапка пары */}
@@ -283,7 +283,7 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
             <h1 className="text-xl font-bold">{visavi.name}</h1>
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               {pair.subject && <Badge variant="secondary">{pair.subject}</Badge>}
-              <span>{viewerRole === "tutor" ? "ваш ученик" : "ваш тьютор"}</span>
+              <span>{viewerRole === "tutor" ? L.yourStudent : L.yourTutor}</span>
               {otherTz && <span className="text-xs">· {otherTz}</span>}
             </div>
           </div>
@@ -292,7 +292,7 @@ export default async function RoomPage({ params }: { params: { pairId: string } 
           <Card className="sm:w-64">
             <CardContent className="flex items-center justify-between gap-2 py-3">
               <div>
-                <div className="text-xs text-muted-foreground">Следующий урок</div>
+                <div className="text-xs text-muted-foreground">{L.nextLesson}</div>
                 <div className="text-sm font-medium">{formatDateTime(nextLesson.slotAt, tz)}</div>
               </div>
               {nextLesson.acceptedAt && (

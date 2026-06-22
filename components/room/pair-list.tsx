@@ -5,9 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/ui/badge";
 import { formatDateTime } from "@/lib/utils";
+import { getT } from "@/lib/locale";
 
 // Карточки кабинетов пар для дашбордов (ведут в /room/[id]). tz — пояс зрителя.
 export function PairList({ pairs, tz }: { pairs: PairCard[]; tz?: string }) {
+  const t = getT();
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {pairs.map((p) => (
@@ -21,7 +23,7 @@ export function PairList({ pairs, tz }: { pairs: PairCard[]; tz?: string }) {
                   {p.subject && <Badge variant="secondary">{p.subject}</Badge>}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {p.nextSlotAt ? `следующий урок ${formatDateTime(p.nextSlotAt, tz)}` : "нет запланированных уроков"}
+                  {p.nextSlotAt ? `${t.room.nextSlot} ${formatDateTime(p.nextSlotAt, tz)}` : t.room.noSlots}
                 </div>
               </div>
               <ArrowRight size={16} className="shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
