@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import type { Dict } from "@/lib/i18n";
 
 interface Question {
   prompt: string;
@@ -16,7 +17,7 @@ interface Result {
   baseline: number;
 }
 
-export function DiagnosticWizard({ exam, questions }: { exam: string; questions: Question[] }) {
+export function DiagnosticWizard({ exam, questions, labels }: { exam: string; questions: Question[]; labels: Dict["diagnostic"] }) {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
@@ -53,19 +54,17 @@ export function DiagnosticWizard({ exam, questions }: { exam: string; questions:
       <Card>
         <CardContent className="text-center">
           <div className="text-5xl">🎯</div>
-          <h2 className="mt-3 text-xl font-bold">Готово!</h2>
+          <h2 className="mt-3 text-xl font-bold">{labels.done}</h2>
           <p className="mt-1 text-muted-foreground">
-            Верно {result.correct} из {result.total}.
+            {labels.correctPre} {result.correct} {labels.of} {result.total}.
           </p>
           <div className="mt-4 inline-block rounded-xl bg-accent px-6 py-4">
-            <div className="text-sm text-accent-foreground/80">Твой baseline по {exam}</div>
+            <div className="text-sm text-accent-foreground/80">{labels.yourBaselinePre}{exam}</div>
             <div className="text-3xl font-bold text-accent-foreground">{result.baseline}</div>
           </div>
-          <p className="mx-auto mt-4 max-w-sm text-sm text-muted-foreground">
-            Теперь, когда сдашь экзамен и загрузишь результат, система сама посчитает дельту.
-          </p>
+          <p className="mx-auto mt-4 max-w-sm text-sm text-muted-foreground">{labels.afterExamDelta}</p>
           <Link href="/dashboard" className="mt-5 inline-block">
-            <Button>В кабинет</Button>
+            <Button>{labels.toCabinet}</Button>
           </Link>
         </CardContent>
       </Card>
@@ -80,7 +79,7 @@ export function DiagnosticWizard({ exam, questions }: { exam: string; questions:
         <div className="h-full bg-primary transition-all" style={{ width: `${Math.max(progress, 6)}%` }} />
       </div>
       <div className="text-sm text-muted-foreground">
-        Вопрос {step + 1} из {questions.length} · {exam}
+        {labels.questionPre} {step + 1} {labels.of} {questions.length} · {exam}
       </div>
       <h1 className="mt-1 text-xl font-bold">{q.prompt}</h1>
 
@@ -102,7 +101,7 @@ export function DiagnosticWizard({ exam, questions }: { exam: string; questions:
 
       {step > 0 && (
         <Button variant="ghost" className="mt-4" onClick={() => setStep(step - 1)} disabled={loading}>
-          ← Назад
+          ← {labels.back}
         </Button>
       )}
     </div>

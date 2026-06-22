@@ -3,15 +3,18 @@ import { useState } from "react";
 import { Upload, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { Dict } from "@/lib/i18n";
 
 // Загрузка результата (UX §2.11). Студент грузит report — число не вводит.
 // Дельту посчитает верификация. reportUrl на проде = Supabase Storage.
 export function ResultUpload({
   tutors,
   defaultExam,
+  labels,
 }: {
   tutors: { id: string; name: string }[];
   defaultExam?: string | null;
+  labels: Dict["dash"];
 }) {
   const [tutorId, setTutorId] = useState(tutors[0]?.id ?? "");
   const [exam, setExam] = useState(defaultExam ?? "");
@@ -32,7 +35,7 @@ export function ResultUpload({
     const res = await fetch("/api/upload", { method: "POST", body: fd });
     const data = await res.json();
     setUploading(false);
-    if (!res.ok) return setError(data.error || "Не удалось загрузить файл");
+    if (!res.ok) return setError(data.error || labels.uploadFileError);
     setReportUrl(data.url);
     setFileName(file.name);
   }
@@ -48,20 +51,20 @@ export function ResultUpload({
     });
     const data = await res.json();
     setLoading(false);
-    if (!res.ok) return setError(data.error || "Не удалось отправить");
+    if (!res.ok) return setError(data.error || labels.sendError);
     setDone(true);
   }
 
   if (done) {
     return (
       <div className="flex items-center gap-2 rounded-lg bg-success/10 p-3 text-sm text-success">
-        <Check size={16} /> Отчёт отправлен на верификацию. Дельту посчитает система.
+        <Check size={16} /> {labels.reportSent}
       </div>
     );
   }
 
   if (tutors.length === 0) {
-    return <p className="text-sm text-muted-foreground">Появится после первого проведённого урока.</p>;
+    return <p className="text-sm text-muted-foreground">{labels.afterFirstLesson}</p>;
   }
 
   return (
@@ -76,23 +79,23 @@ export function ResultUpload({
             <option key={t.id} value={t.id}>{t.name}</option>
           ))}
         </select>
-        <Input placeholder="Экзамен (напр. IELTS)" value={exam} onChange={(e) => setExam(e.target.value)} required />
+        <Input placeholder={labels.examPh} value={exam} onChange={(e) => setExam(e.target.value)} required />
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <label className="cursor-pointer rounded-lg border border-input px-3 py-2 text-sm hover:bg-muted">
-          {uploading ? "Загружаем…" : "Прикрепить файл"}
+          {uploading ? labels.uploadingFile : labels.attachFile}
           <input type="file" accept="image/*,application/pdf" className="hidden" onChange={onFile} disabled={uploading} />
         </label>
         {fileName && <span className="text-xs text-success">✓ {fileName}</span>}
       </div>
       <Input
-        placeholder="…или ссылка на score report"
+        placeholder={labels.orReportLink}
         value={reportUrl}
         onChange={(e) => { setReportUrl(e.target.value); setFileName(""); }}
       />
       {error && <p className="text-sm text-destructive">{error}</p>}
       <Button type="submit" variant="outline" disabled={loading}>
-        <Upload size={15} /> {loading ? "Отправляем…" : "Загрузить результат"}
+        <Upload size={15} /> {loading ? labels.sending : labels.uploadResultBtn}
       </Button>
     </form>
   );

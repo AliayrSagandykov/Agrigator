@@ -2,9 +2,10 @@
 import { useState } from "react";
 import { Star, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { Dict } from "@/lib/i18n";
 
 // Оценка урока студентом (UX §2.9): одна шкала + опц. строка, скипабельно.
-export function LessonReview({ bookingId, tutorName }: { bookingId: string; tutorName: string }) {
+export function LessonReview({ bookingId, tutorName, labels }: { bookingId: string; tutorName: string; labels: Dict["dash"] }) {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [note, setNote] = useState("");
@@ -28,7 +29,7 @@ export function LessonReview({ bookingId, tutorName }: { bookingId: string; tuto
   if (done)
     return (
       <div className="rounded-lg bg-success/10 px-3 py-2 text-sm text-success">
-        Спасибо за оценку!
+        {labels.thanksRating}
       </div>
     );
 
@@ -37,11 +38,11 @@ export function LessonReview({ bookingId, tutorName }: { bookingId: string; tuto
       <button
         onClick={() => setHidden(true)}
         className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
-        aria-label="Пропустить"
+        aria-label={labels.skip}
       >
         <X size={15} />
       </button>
-      <div className="text-sm font-medium">Как прошёл урок с {tutorName}?</div>
+      <div className="text-sm font-medium">{labels.howWasLessonPre}{tutorName}?</div>
       <div className="mt-2 flex gap-1">
         {[1, 2, 3, 4, 5].map((n) => (
           <button
@@ -49,7 +50,7 @@ export function LessonReview({ bookingId, tutorName }: { bookingId: string; tuto
             onMouseEnter={() => setHover(n)}
             onMouseLeave={() => setHover(0)}
             onClick={() => setRating(n)}
-            aria-label={`${n} звёзд`}
+            aria-label={`${n} ${labels.stars}`}
           >
             <Star
               size={22}
@@ -67,7 +68,7 @@ export function LessonReview({ bookingId, tutorName }: { bookingId: string; tuto
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Пара слов (необязательно)"
+            placeholder={labels.fewWords}
             className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm"
           />
           <button
@@ -75,7 +76,7 @@ export function LessonReview({ bookingId, tutorName }: { bookingId: string; tuto
             disabled={loading}
             className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
           >
-            {loading ? "…" : "Отправить"}
+            {loading ? "…" : labels.send}
           </button>
         </div>
       )}

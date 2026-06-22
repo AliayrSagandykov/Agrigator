@@ -6,6 +6,7 @@ import { one } from "@/lib/db";
 import { parseJson } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { AvailabilityForm } from "@/components/availability-form";
+import { getT } from "@/lib/locale";
 
 export const metadata = { title: "Расписание — Agrigator" };
 
@@ -13,6 +14,8 @@ export default async function TutorSchedulePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (user.role !== "tutor") redirect("/dashboard");
+
+  const L = getT().tutorDash;
 
   const profile = await one<{ availabilityJson: string }>(
     `select "availabilityJson" from "TutorProfile" where "userId" = $1`,
@@ -25,16 +28,13 @@ export default async function TutorSchedulePage() {
   return (
     <div className="container max-w-2xl py-10">
       <Link href="/tutor" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft size={15} /> В кабинет
+        <ArrowLeft size={15} /> {L.toCabinet}
       </Link>
-      <h1 className="mt-4 text-2xl font-bold">Расписание</h1>
-      <p className="text-muted-foreground">
-        Отметь свободные часы — ученики увидят именно эти слоты при бронировании.
-        Пусто = показываем стандартные слоты.
-      </p>
+      <h1 className="mt-4 text-2xl font-bold">{L.schedule}</h1>
+      <p className="text-muted-foreground">{L.scheduleHint}</p>
       <Card className="mt-6">
         <CardContent>
-          <AvailabilityForm initial={initial} />
+          <AvailabilityForm initial={initial} labels={L} />
         </CardContent>
       </Card>
     </div>

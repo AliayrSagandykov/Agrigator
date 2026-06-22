@@ -3,15 +3,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import type { Dict } from "@/lib/i18n";
 
-// День недели = JS getDay(): 0=Вс..6=Сб.
-const DAYS = [
-  { d: 1, label: "Пн" }, { d: 2, label: "Вт" }, { d: 3, label: "Ср" },
-  { d: 4, label: "Чт" }, { d: 5, label: "Пт" }, { d: 6, label: "Сб" }, { d: 0, label: "Вс" },
-];
+// День недели = JS getDay(): 0=Вс..6=Сб. Порядок Пн→Вс = labels.days[i].
+const DAY_NUMS = [1, 2, 3, 4, 5, 6, 0];
 const TIMES = [10, 12, 14, 16, 18, 20];
 
-export function AvailabilityForm({ initial }: { initial: string[] }) {
+export function AvailabilityForm({ initial, labels }: { initial: string[]; labels: Dict["tutorDash"] }) {
   const router = useRouter();
   const [slots, setSlots] = useState<Set<string>>(new Set(initial));
   const [saved, setSaved] = useState(false);
@@ -51,9 +49,9 @@ export function AvailabilityForm({ initial }: { initial: string[] }) {
             </tr>
           </thead>
           <tbody>
-            {DAYS.map(({ d, label }) => (
+            {DAY_NUMS.map((d, i) => (
               <tr key={d}>
-                <td className="text-right text-muted-foreground">{label}</td>
+                <td className="text-right text-muted-foreground">{labels.days[i]}</td>
                 {TIMES.map((t) => {
                   const key = `${d}-${t}`;
                   const on = slots.has(key);
@@ -80,10 +78,10 @@ export function AvailabilityForm({ initial }: { initial: string[] }) {
 
       <div className="mt-4 flex items-center gap-3">
         <Button onClick={save} disabled={loading}>
-          {loading ? "Сохраняем…" : "Сохранить расписание"}
+          {loading ? labels.savingSchedule : labels.saveSchedule}
         </Button>
-        {saved && <span className="text-sm text-success">Сохранено ✓</span>}
-        <span className="text-sm text-muted-foreground">Выбрано слотов: {slots.size}</span>
+        {saved && <span className="text-sm text-success">{labels.saved}</span>}
+        <span className="text-sm text-muted-foreground">{labels.slotsSelected} {slots.size}</span>
       </div>
     </div>
   );
