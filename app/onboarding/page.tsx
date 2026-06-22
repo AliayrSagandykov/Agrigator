@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { IntakeWizard } from "@/components/intake-wizard";
+import { getT } from "@/lib/locale";
 
 export const metadata = { title: "Подбор тютора — Agrigator" };
 
@@ -11,7 +12,7 @@ export default async function OnboardingPage() {
 
   return (
     <div className="container py-12">
-      <IntakeWizard />
+      <IntakeWizard labels={getT().intake} />
     </div>
   );
 }

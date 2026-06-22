@@ -173,6 +173,43 @@ const ru = {
     title: "Избранное", sub: "Тюторы, которых ты сохранил.",
     empty: "Пока пусто. Жми ❤️ на карточках тюторов.", toTutors: "К тюторам",
   },
+  auth: {
+    loginTitle: "Вход", loginSub: "Рады видеть снова.", password: "Пароль",
+    signingIn: "Входим…", signIn: "Войти", noAccount: "Нет аккаунта?",
+    registerLink: "Зарегистрироваться", demoLogins: "Демо-входы:", loginError: "Не удалось войти",
+    registerTitle: "Регистрация", tutorFree: "Регистрация для тьюторов бесплатна навсегда.",
+    minFields: "Минимум полей — и сразу к подбору.", iSeekTutor: "Я ищу тютора", iAmTutor: "Я тютор",
+    name: "Имя", phone: "Телефон", phoneHint: "Для брони и напоминаний",
+    under18: "Мне меньше 18 лет", parentPhone: "Телефон родителя",
+    parentPhoneHint: "Нужен для оплаты и согласия (закон РК)",
+    creating: "Создаём…", createAccount: "Создать аккаунт", haveAccount: "Уже есть аккаунт?",
+    registerError: "Не удалось зарегистрироваться",
+  },
+  match: {
+    title: "Тюторы под твою цель", change: "изменить", diagTitle: "Хочешь точный график прогресса?",
+    diagBody: "Поставь baseline — короткой диагностикой или прошлым официальным баллом. Тогда дельта посчитается в цифрах.",
+    takeDiag: "Пройти диагностику", later: "Позже",
+    deadlineLabels: { "1-2m": "через 1–2 мес", "3-6m": "через 3–6 мес", flex: "без спешки" },
+    paceLabels: { slow: "основательный темп", fast: "интенсивный темп" },
+    styleLabels: { strict: "строгий стиль", soft: "мягкий стиль" },
+  },
+  diagnostic: {
+    soonPre: "Диагностика для ", soonSuf: " скоро",
+    manualHint: "Пока укажи стартовый балл вручную в кабинете — прогресс будет в цифрах.",
+    toCabinet: "В кабинет", done: "Готово!", correctPre: "Верно", of: "из",
+    yourBaselinePre: "Твой baseline по ",
+    afterExamDelta: "Теперь, когда сдашь экзамен и загрузишь результат, система сама посчитает дельту.",
+    questionPre: "Вопрос", back: "Назад",
+  },
+  intake: {
+    stepPre: "Шаг", of: "из", back: "Назад",
+    steps: {
+      exam: { title: "К какому экзамену готовимся?", hint: "Выбери цель — под неё подберём тютора с доказанным результатом." },
+      deadline: { title: "Когда экзамен?", hint: "Срок влияет на темп и интенсивность.", opts: { "1-2m": "Через 1–2 месяца", "3-6m": "Через 3–6 месяцев", flex: "Не спешу" } },
+      pace: { title: "Какой темп тебе ближе?", hint: "", opts: { slow: "Медленно и основательно", fast: "Быстро и интенсивно" } },
+      style: { title: "Какой стиль преподавания заходит?", hint: "", opts: { strict: "Строгий, держит в тонусе", soft: "Мягкий, как друг" } },
+    },
+  },
 };
 
 export type Dict = typeof ru;
@@ -330,6 +367,43 @@ const kk: Dict = {
     title: "Таңдаулылар", sub: "Сен сақтаған тьюторлар.",
     empty: "Әзірге бос. Тьютор карточкаларында ❤️ бас.", toTutors: "Тьюторларға",
   },
+  auth: {
+    loginTitle: "Кіру", loginSub: "Қайта көргенімізге қуаныштымыз.", password: "Құпиясөз",
+    signingIn: "Кіруде…", signIn: "Кіру", noAccount: "Аккаунт жоқ па?",
+    registerLink: "Тіркелу", demoLogins: "Демо-кірулер:", loginError: "Кіру мүмкін болмады",
+    registerTitle: "Тіркелу", tutorFree: "Тьюторларға тіркелу мәңгі тегін.",
+    minFields: "Минимум өріс — бірден таңдауға.", iSeekTutor: "Тьютор іздеймін", iAmTutor: "Мен тьютормын",
+    name: "Аты", phone: "Телефон", phoneHint: "Бронь мен еске салулар үшін",
+    under18: "Маған 18-ден кем", parentPhone: "Ата-ана телефоны",
+    parentPhoneHint: "Төлем мен келісім үшін қажет (ҚР заңы)",
+    creating: "Жасалуда…", createAccount: "Аккаунт жасау", haveAccount: "Аккаунт бар ма?",
+    registerError: "Тіркелу мүмкін болмады",
+  },
+  match: {
+    title: "Мақсатыңа сай тьюторлар", change: "өзгерту", diagTitle: "Нақты прогресс графигі керек пе?",
+    diagBody: "Baseline қой — қысқа диагностикамен немесе өткен ресми баллмен. Сонда өсім санмен есептеледі.",
+    takeDiag: "Диагностикадан өту", later: "Кейінірек",
+    deadlineLabels: { "1-2m": "1–2 айда", "3-6m": "3–6 айда", flex: "асықпай" },
+    paceLabels: { slow: "негізді қарқын", fast: "қарқынды" },
+    styleLabels: { strict: "қатаң стиль", soft: "жұмсақ стиль" },
+  },
+  diagnostic: {
+    soonPre: "", soonSuf: " үшін диагностика жақында",
+    manualHint: "Әзірге бастапқы баллды кабинетте қолмен көрсет — прогресс санмен болады.",
+    toCabinet: "Кабинетке", done: "Дайын!", correctPre: "Дұрыс", of: "/",
+    yourBaselinePre: "Сенің baseline-ың — ",
+    afterExamDelta: "Енді емтихан тапсырып, нәтиже жүктегенде, жүйе өсімді өзі есептейді.",
+    questionPre: "Сұрақ", back: "Артқа",
+  },
+  intake: {
+    stepPre: "Қадам", of: "/", back: "Артқа",
+    steps: {
+      exam: { title: "Қай емтиханға дайындаламыз?", hint: "Мақсатты таңда — соған дәлелденген нәтижелі тьютор табамыз." },
+      deadline: { title: "Емтихан қашан?", hint: "Мерзім қарқын мен қарқындылыққа әсер етеді.", opts: { "1-2m": "1–2 айдан кейін", "3-6m": "3–6 айдан кейін", flex: "Асықпаймын" } },
+      pace: { title: "Саған қай қарқын жақын?", hint: "", opts: { slow: "Баяу әрі негізді", fast: "Жылдам әрі қарқынды" } },
+      style: { title: "Қай оқыту стилі ұнайды?", hint: "", opts: { strict: "Қатаң, ширатады", soft: "Жұмсақ, дос сияқты" } },
+    },
+  },
 };
 
 const en: Dict = {
@@ -484,6 +558,43 @@ const en: Dict = {
   favorites: {
     title: "Favorites", sub: "Tutors you saved.",
     empty: "Empty so far. Tap ❤️ on tutor cards.", toTutors: "To tutors",
+  },
+  auth: {
+    loginTitle: "Log in", loginSub: "Good to see you again.", password: "Password",
+    signingIn: "Logging in…", signIn: "Log in", noAccount: "No account?",
+    registerLink: "Sign up", demoLogins: "Demo logins:", loginError: "Couldn't log in",
+    registerTitle: "Sign up", tutorFree: "Tutor registration is free forever.",
+    minFields: "Minimal fields — straight to matching.", iSeekTutor: "I'm looking for a tutor", iAmTutor: "I'm a tutor",
+    name: "Name", phone: "Phone", phoneHint: "For booking and reminders",
+    under18: "I'm under 18", parentPhone: "Parent's phone",
+    parentPhoneHint: "Required for payment and consent (KZ law)",
+    creating: "Creating…", createAccount: "Create account", haveAccount: "Already have an account?",
+    registerError: "Couldn't sign up",
+  },
+  match: {
+    title: "Tutors for your goal", change: "edit", diagTitle: "Want a precise progress chart?",
+    diagBody: "Set a baseline — via a quick diagnostic or a past official score. Then the delta is computed in numbers.",
+    takeDiag: "Take the diagnostic", later: "Later",
+    deadlineLabels: { "1-2m": "in 1–2 mo", "3-6m": "in 3–6 mo", flex: "no rush" },
+    paceLabels: { slow: "steady pace", fast: "intensive pace" },
+    styleLabels: { strict: "strict style", soft: "soft style" },
+  },
+  diagnostic: {
+    soonPre: "Diagnostic for ", soonSuf: " coming soon",
+    manualHint: "For now, set a starting score manually in your dashboard — progress will be in numbers.",
+    toCabinet: "To dashboard", done: "Done!", correctPre: "Correct", of: "of",
+    yourBaselinePre: "Your baseline in ",
+    afterExamDelta: "Now, once you take the exam and upload the result, the system computes the delta itself.",
+    questionPre: "Question", back: "Back",
+  },
+  intake: {
+    stepPre: "Step", of: "of", back: "Back",
+    steps: {
+      exam: { title: "Which exam are we prepping for?", hint: "Pick a goal — we'll match a tutor with proven results." },
+      deadline: { title: "When is the exam?", hint: "The deadline affects pace and intensity.", opts: { "1-2m": "In 1–2 months", "3-6m": "In 3–6 months", flex: "No rush" } },
+      pace: { title: "Which pace suits you?", hint: "", opts: { slow: "Slow and thorough", fast: "Fast and intensive" } },
+      style: { title: "Which teaching style works for you?", hint: "", opts: { strict: "Strict, keeps you sharp", soft: "Gentle, like a friend" } },
+    },
   },
 };
 
