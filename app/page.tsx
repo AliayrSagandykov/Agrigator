@@ -336,7 +336,7 @@ export default async function HomePage() {
               <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">{tr.home.ctaTitle}</h2>
               <p className="mx-auto mt-4 max-w-lg text-base text-white/85 md:text-lg">{tr.home.ctaSub}</p>
               <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <Link href="/onboarding" className="w-full sm:w-auto">
+                <Link href="/register?role=student" className="w-full sm:w-auto">
                   <Button
                     size="lg"
                     className="group w-full cursor-pointer bg-white text-primary hover:bg-white/90"
