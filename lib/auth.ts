@@ -1,8 +1,9 @@
 import "server-only";
 import crypto from "crypto";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { query, one } from "@/lib/db";
-import type { User, Session } from "@/lib/types";
+import type { User } from "@/lib/types";
 
 // ============================================================
 // Сессии: cookie-based, на node:crypto. Слой изолирован — позже
@@ -60,19 +61,24 @@ export async function destroySession(): Promise<void> {
   cookies().delete(SESSION_COOKIE);
 }
 
-/** Текущий пользователь по cookie (или null). Безопасно вызывать в Server Components. */
-export async function getCurrentUser(): Promise<User | null> {
+/**
+ * Текущий пользователь по cookie (или null). Безопасно вызывать в Server Components.
+ *
+ * Обёрнут в React cache(): layout и страница в одном запросе получают один и тот же
+ * результат без повторного похода в БД. Сессия и пользователь читаются одним JOIN —
+ * один round-trip вместо двух (важно для латентности пула Supabase).
+ */
+export const getCurrentUser = cache(async (): Promise<User | null> => {
   const token = cookies().get(SESSION_COOKIE)?.value;
   if (!token) return null;
 
-  const session = await one<Session>(`select * from "Session" where token = $1`, [token]);
-  if (!session) return null;
-  if (new Date(session.expiresAt) < new Date()) {
-    await query(`delete from "Session" where token = $1`, [token]);
-    return null;
-  }
-  return one<User>(`select * from "User" where id = $1`, [session.userId]);
-}
+  return one<User>(
+    `select u.* from "Session" s
+       join "User" u on u.id = s."userId"
+      where s.token = $1 and s."expiresAt" > now()`,
+    [token],
+  );
+});
 
 export async function requireUser(): Promise<User> {
   const user = await getCurrentUser();

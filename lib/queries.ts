@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { query, one } from "@/lib/db";
 import type { Review, Lead } from "@/lib/types";
 
@@ -178,11 +179,14 @@ export function getTutorsWithEscrow(): Promise<EscrowRow[]> {
   );
 }
 
-/** Ключи избранного пользователя ("tutor:<id>" | "course:<id>"). */
-export async function getFavoriteKeys(userId: string): Promise<Set<string>> {
+/**
+ * Ключи избранного пользователя ("tutor:<id>" | "course:<id>").
+ * cache() дедуплицирует вызов из layout (счётчик) и страницы (набор) в одном запросе.
+ */
+export const getFavoriteKeys = cache(async (userId: string): Promise<Set<string>> => {
   const rows = await query<{ key: string }>(`select key from "Favorite" where "userId" = $1`, [userId]);
   return new Set(rows.map((r) => r.key));
-}
+});
 
 /** bookingId, которые этот автор уже оценил (чтобы не просить повторно). */
 export async function getReviewedBookingIds(authorId: string): Promise<Set<string>> {

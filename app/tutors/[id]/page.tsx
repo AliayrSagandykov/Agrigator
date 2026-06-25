@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BadgeCheck, ShieldCheck, Lock, Star } from "lucide-react";
+import { BadgeCheck, ShieldCheck, Star } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getTutorByUserId } from "@/lib/tutors";
 import { computeTutorMetrics } from "@/lib/metrics";
@@ -26,7 +26,6 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
   ]);
 
   const L = getT().profile;
-  const canSeeContacts = user?.plan === "pro" || user?.role === "admin";
   const isFav = user ? (await getFavoriteKeys(user.id)).has(`tutor:${params.id}`) : false;
 
   return (
@@ -154,22 +153,6 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
                 <Row label={L.experience} value={`${tutor.experience} ${L.years}`} />
                 {tutor.languages.length > 0 && <Row label={L.languages} value={tutor.languages.join(", ")} />}
               </dl>
-
-              {/* Контакты — Pro-фича (слабый замок, главный путь — бронь) */}
-              <div className="rounded-lg border border-border p-3">
-                <div className="mb-1 flex items-center gap-1.5 text-sm font-medium">
-                  <Lock size={14} /> {L.directContacts}
-                </div>
-                {canSeeContacts ? (
-                  <div className="space-y-0.5 text-sm text-muted-foreground">
-                    {tutor.contacts.telegram && <div>Telegram: @{tutor.contacts.telegram}</div>}
-                    {tutor.contacts.whatsapp && <div>WhatsApp: {tutor.contacts.whatsapp}</div>}
-                    {tutor.contacts.phone && <div>{L.phoneShort} {tutor.contacts.phone}</div>}
-                  </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground">{L.proContacts}</p>
-                )}
-              </div>
             </CardContent>
           </Card>
         </aside>

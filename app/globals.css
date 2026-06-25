@@ -66,3 +66,98 @@ body {
   background-clip: text;
   color: transparent;
 }
+
+/* Тонкая сетка под героем — затухает к краям через mask. */
+.hero-grid {
+  background-image:
+    linear-gradient(to right, hsl(var(--border) / 0.7) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border) / 0.7) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 0%, #000 35%, transparent 75%);
+  mask-image: radial-gradient(ellipse 75% 65% at 50% 0%, #000 35%, transparent 75%);
+}
+
+/* Плавный «подъём» по карточкам каталога/категорий. */
+.lift {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.lift:hover {
+  transform: translateY(-6px);
+}
+
+/* Лёгкое всплытие секций при загрузке. */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise {
+  animation: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Анимированный градиентный текст с переливом. */
+.brand-grad-anim {
+  background-image: linear-gradient(110deg, hsl(256 72% 60%), hsl(199 89% 52%), hsl(286 80% 62%), hsl(256 72% 60%));
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 7s linear infinite;
+}
+@keyframes shimmer {
+  to { background-position: 220% center; }
+}
+
+/* Медленно плавающие пятна-ауроры под героем. */
+@keyframes float-slow {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(4%, -5%) scale(1.08); }
+  66% { transform: translate(-4%, 4%) scale(0.94); }
+}
+.animate-float-slow { animation: float-slow 18s ease-in-out infinite; }
+
+/* Бегущая строка экзаменов. */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 38s linear infinite; }
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+
+/* Появление поповера/дропдауна. */
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(-6px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-pop-in { animation: pop-in 0.16s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Появление при прокрутке (класс .in-view ставит компонент Reveal). */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.reveal.in-view {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .lift:hover {
+    transform: none;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
