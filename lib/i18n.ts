@@ -15,12 +15,12 @@ export function isLocale(v: string): v is Locale {
 
 const ru = {
   nav: {
-    tutors: "Тюторы", match: "Подбор", forTutors: "Тьюторам", login: "Войти",
+    home: "Главная", tutors: "Тюторы", match: "Подбор", forTutors: "Тьюторам", contacts: "Контакты", login: "Войти",
     register: "Регистрация", logout: "Выйти", favorites: "Избранное", dashboard: "Кабинет", menu: "Меню",
   },
   footer: {
-    tagline: "Агрегатор тюторов для подготовки к экзаменам. Выбор по верифицированным результатам. Данные демонстрационные.",
-    exams: "Экзамены", platform: "Платформа", account: "Аккаунт", aiMatch: "AI-подбор",
+    tagline: "Агрегатор тюторов для подготовки к экзаменам. Бесплатно для студентов — выбор по верифицированным результатам. Резидент Astana Hub.",
+    exams: "Популярные направления", platform: "Платформа", account: "Аккаунт", aiMatch: "AI-подбор", support: "Поддержать проект",
     rights: "© 2026 Agrigator · Демо-проект",
   },
   home: {
@@ -65,6 +65,27 @@ const ru = {
     b3Body: "Деньги держатся в эскроу до урока и падают тебе после. Никаких «забыл перевести».",
     b4Title: "Логистика — на платформе",
     b4Body: "Принятая бронь = слот в календаре и авто-ссылка на урок. Ты не тратишь время на переписку о времени.",
+  },
+  contacts: {
+    metaTitle: "Контакты — Agrigator",
+    badge: "Резидент Astana Hub",
+    heroTitle: "Свяжитесь с нами",
+    heroSub: "Мы — небольшая команда из Astana Hub. Делаем подбор тюторов честным, прозрачным и бесплатным.",
+    philosophyTitle: "Наша философия",
+    philosophyBody: "Agrigator базируется в Astana Hub — крупнейшем технологическом хабе Казахстана. Мы верим, что доступ к хорошему преподавателю не должен стоить денег на старте: для студентов платформа работает бесплатно. Мы не берём комиссию со студентов и не прячем тюторов за платной подпиской — выбор идёт по реальным, верифицированным результатам.",
+    founderTitle: "Основатель",
+    founderName: "Алияр Сагандыков",
+    founderRole: "CEO и основатель",
+    founderBody: "Если есть вопрос, идея или предложение о сотрудничестве — пишите мне напрямую в Telegram. Отвечаю лично.",
+    reachTitle: "Как связаться",
+    telegramLabel: "Telegram",
+    locationLabel: "Где мы",
+    locationValue: "Astana Hub, Астана, Казахстан",
+    donateTitle: "Поддержать проект",
+    donateBody: "Платформа бесплатна для всех. Если Agrigator оказался полезен и вы хотите помочь нам развиваться — вы можете поддержать нас переводом на Kaspi.",
+    donateReq: "За реквизитами Kaspi напишите в Telegram — пришлём номер для перевода.",
+    donateBtn: "Поддержать через Telegram",
+    writeBtn: "Написать в Telegram",
   },
   catalog: {
     title: "Тюторы",
@@ -263,12 +284,12 @@ export type Dict = typeof ru;
 
 const kk: Dict = {
   nav: {
-    tutors: "Тьюторлар", match: "Таңдау", forTutors: "Тьюторларға", login: "Кіру",
+    home: "Басты бет", tutors: "Тьюторлар", match: "Таңдау", forTutors: "Тьюторларға", contacts: "Байланыс", login: "Кіру",
     register: "Тіркелу", logout: "Шығу", favorites: "Таңдаулылар", dashboard: "Кабинет", menu: "Мәзір",
   },
   footer: {
-    tagline: "Емтиханға дайындық тьюторларының агрегаторы. Таңдау — верификацияланған нәтижелер бойынша. Деректер демонстрациялық.",
-    exams: "Емтихандар", platform: "Платформа", account: "Аккаунт", aiMatch: "AI-таңдау",
+    tagline: "Емтиханға дайындық тьюторларының агрегаторы. Студенттерге тегін — таңдау верификацияланған нәтижелер бойынша. Astana Hub резиденті.",
+    exams: "Танымал бағыттар", platform: "Платформа", account: "Аккаунт", aiMatch: "AI-таңдау", support: "Жобаны қолдау",
     rights: "© 2026 Agrigator · Демо-жоба",
   },
   home: {
@@ -313,6 +334,27 @@ const kk: Dict = {
     b3Body: "Ақша сабаққа дейін эскроуда тұрады, кейін саған түседі. «Аударуды ұмыттым» дегендей жоқ.",
     b4Title: "Логистика — платформада",
     b4Body: "Қабылданған бронь = күнтізбедегі слот және сабаққа авто-сілтеме. Уақыт туралы жазысуға уақыт жұмсамайсың.",
+  },
+  contacts: {
+    metaTitle: "Байланыс — Agrigator",
+    badge: "Astana Hub резиденті",
+    heroTitle: "Бізбен байланысыңыз",
+    heroSub: "Біз — Astana Hub-тағы шағын команда. Тьютор таңдауды әділ, ашық әрі тегін етеміз.",
+    philosophyTitle: "Біздің философия",
+    philosophyBody: "Agrigator Қазақстандағы ең ірі технологиялық хаб — Astana Hub-та орналасқан. Жақсы ұстазға қол жеткізу басында ақшаға тұрмауы керек деп санаймыз: студенттер үшін платформа тегін жұмыс істейді. Студенттерден комиссия алмаймыз, тьюторларды ақылы жазылым артына жасырмаймыз — таңдау нақты, верификацияланған нәтижелер бойынша жүреді.",
+    founderTitle: "Негізін қалаушы",
+    founderName: "Алияр Сағандықов",
+    founderRole: "CEO және негізін қалаушы",
+    founderBody: "Сұрақ, идея немесе ынтымақтастық туралы ұсыныс болса — маған Telegram арқылы тікелей жазыңыз. Жеке өзім жауап беремін.",
+    reachTitle: "Қалай байланысуға болады",
+    telegramLabel: "Telegram",
+    locationLabel: "Біз қайдамыз",
+    locationValue: "Astana Hub, Астана, Қазақстан",
+    donateTitle: "Жобаны қолдау",
+    donateBody: "Платформа бәріне тегін. Егер Agrigator пайдалы болса және дамуымызға көмектескіңіз келсе — бізді Kaspi-ге аударыммен қолдай аласыз.",
+    donateReq: "Kaspi реквизиттері үшін Telegram-ға жазыңыз — аударымға арналған нөмірді жібереміз.",
+    donateBtn: "Telegram арқылы қолдау",
+    writeBtn: "Telegram-ға жазу",
   },
   catalog: {
     title: "Тьюторлар",
@@ -502,12 +544,12 @@ const kk: Dict = {
 
 const en: Dict = {
   nav: {
-    tutors: "Tutors", match: "Match", forTutors: "For tutors", login: "Log in",
+    home: "Home", tutors: "Tutors", match: "Match", forTutors: "For tutors", contacts: "Contacts", login: "Log in",
     register: "Sign up", logout: "Log out", favorites: "Favorites", dashboard: "Dashboard", menu: "Menu",
   },
   footer: {
-    tagline: "A tutor marketplace for exam prep. Choose by verified results. Demo data.",
-    exams: "Exams", platform: "Platform", account: "Account", aiMatch: "AI match",
+    tagline: "A tutor marketplace for exam prep. Free for students — choose by verified results. Based at Astana Hub.",
+    exams: "Popular directions", platform: "Platform", account: "Account", aiMatch: "AI match", support: "Support the project",
     rights: "© 2026 Agrigator · Demo project",
   },
   home: {
@@ -552,6 +594,27 @@ const en: Dict = {
     b3Body: "Money is held in escrow until the lesson and lands with you after. No more 'forgot to transfer'.",
     b4Title: "Logistics on the platform",
     b4Body: "An accepted booking = a calendar slot and an auto lesson link. You don't waste time messaging about timing.",
+  },
+  contacts: {
+    metaTitle: "Contacts — Agrigator",
+    badge: "Astana Hub resident",
+    heroTitle: "Get in touch",
+    heroSub: "We're a small team based at Astana Hub. We make finding a tutor honest, transparent and free.",
+    philosophyTitle: "Our philosophy",
+    philosophyBody: "Agrigator is based at Astana Hub — Kazakhstan's largest technology hub. We believe access to a good teacher shouldn't cost money up front: the platform is free for students. We take no commission from students and hide no tutors behind a paywall — the choice is driven by real, verified results.",
+    founderTitle: "Founder",
+    founderName: "Aliyar Sagandykov",
+    founderRole: "CEO & founder",
+    founderBody: "Got a question, an idea, or a partnership proposal? Message me directly on Telegram. I reply personally.",
+    reachTitle: "How to reach us",
+    telegramLabel: "Telegram",
+    locationLabel: "Where we are",
+    locationValue: "Astana Hub, Astana, Kazakhstan",
+    donateTitle: "Support the project",
+    donateBody: "The platform is free for everyone. If Agrigator has been useful and you'd like to help us grow — you can support us with a Kaspi transfer.",
+    donateReq: "For Kaspi details, message us on Telegram — we'll send the number for the transfer.",
+    donateBtn: "Support via Telegram",
+    writeBtn: "Message on Telegram",
   },
   catalog: {
     title: "Tutors",

@@ -26,9 +26,10 @@ export function SiteHeader({ user, favCount = 0 }: { user: PublicUser | null; fa
         </Link>
 
         <nav className="hidden items-center gap-1 text-sm md:flex">
+          <NavLink href="/">{t.nav.home}</NavLink>
           <NavLink href="/catalog">{t.nav.tutors}</NavLink>
-          <NavLink href="/onboarding">{t.nav.match}</NavLink>
           <NavLink href="/for-tutors">{t.nav.forTutors}</NavLink>
+          <NavLink href="/contacts">{t.nav.contacts}</NavLink>
         </nav>
 
         <div className="flex items-center gap-1">

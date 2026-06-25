@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 interface NavLabels {
-  tutors: string; match: string; forTutors: string; login: string;
+  home: string; tutors: string; forTutors: string; contacts: string; login: string;
   register: string; logout: string; favorites: string; dashboard: string;
 }
 
@@ -48,9 +48,10 @@ export function MobileNav({
       {open && (
         <div className="absolute inset-x-0 top-16 z-50 border-b border-border bg-background p-3 shadow-md">
           <nav className="flex flex-col">
+            <MLink href="/" onClick={close}>{labels.home}</MLink>
             <MLink href="/catalog" onClick={close}>{labels.tutors}</MLink>
-            <MLink href="/onboarding" onClick={close}>{labels.match}</MLink>
             <MLink href="/for-tutors" onClick={close}>{labels.forTutors}</MLink>
+            <MLink href="/contacts" onClick={close}>{labels.contacts}</MLink>
             <div className="my-2 border-t border-border" />
             {user ? (
               <>
