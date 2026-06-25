@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { query, one } from "@/lib/db";
 import { parseJson } from "@/lib/utils";
 import type { TutorProfile } from "@/lib/types";
@@ -123,17 +124,18 @@ export function toTutorVM(p: ProfileRow): TutorVM {
   };
 }
 
-export async function getTutorCards(): Promise<TutorVM[]> {
+// cache(): дедупликация в пределах одного запроса (напр. каталог + сайдбары).
+export const getTutorCards = cache(async (): Promise<TutorVM[]> => {
   const rows = await query<ProfileRow>(
     `${SELECT_TUTOR} order by p.sponsored desc, p.rating desc`,
   );
   return rows.map(toTutorVM);
-}
+});
 
-export async function getTutorByUserId(userId: string): Promise<TutorVM | null> {
+export const getTutorByUserId = cache(async (userId: string): Promise<TutorVM | null> => {
   const row = await one<ProfileRow>(`${SELECT_TUTOR} where p."userId" = $1`, [userId]);
   return row ? toTutorVM(row) : null;
-}
+});
 
 /** Тюторы из избранного пользователя (ключ "tutor:<userId>"). */
 export async function getFavoriteTutors(userId: string): Promise<TutorVM[]> {

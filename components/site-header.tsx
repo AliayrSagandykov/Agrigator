@@ -57,7 +57,6 @@ export function SiteHeader({ user, favCount = 0 }: { user: PublicUser | null; fa
                 <Avatar name={user.name} color={user.avatarColor} size={32} />
                 <span className="hidden text-sm font-medium sm:inline">
                   {user.name.split(" ")[0]}
-                  {user.plan === "pro" && " ⭐"}
                 </span>
               </Link>
               <LogoutButton label={t.nav.logout} />

@@ -21,9 +21,11 @@ export function ThemeToggle() {
     <button
       onClick={toggle}
       aria-label="Сменить тему"
-      className="inline-flex h-9 w-9 items-center justify-center rounded-lg hover:bg-muted"
+      className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-muted active:scale-90"
     >
-      {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+      <span className="transition-transform duration-300 hover:rotate-12">
+        {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+      </span>
     </button>
   );
 }
