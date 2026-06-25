@@ -11,6 +11,7 @@ export interface User {
   plan: string; // 'free' | 'pro'
   planUntil: Date | null;
   avatarColor: string | null;
+  photo: string | null;
   timezone: string | null;
   languagesJson: string;
   verifiedScore: string | null;

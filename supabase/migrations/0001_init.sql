@@ -27,6 +27,7 @@ create table "User" (
   plan          text not null default 'free' check (plan in ('free','pro')),
   "planUntil"   timestamptz,
   "avatarColor" text,
+  photo         text,
   "createdAt"   timestamptz not null default now()
 );
 

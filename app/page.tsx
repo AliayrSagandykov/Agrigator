@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import {
   Search,
@@ -27,6 +28,7 @@ import { Avatar } from "@/components/avatar";
 import { Reveal } from "@/components/reveal";
 import { CountUp } from "@/components/count-up";
 import { getTutorCards } from "@/lib/tutors";
+import { getCurrentUser } from "@/lib/auth";
 import { getT } from "@/lib/locale";
 import { formatPrice } from "@/lib/utils";
 
@@ -47,6 +49,12 @@ const CATEGORY_META: { exam: string; Icon: LucideIcon; gradient: string; goal: s
 ];
 
 export default async function HomePage() {
+  // Залогиненный пользователь не видит лендинг — сразу в свой кабинет.
+  const user = await getCurrentUser();
+  if (user) {
+    redirect(user.role === "tutor" ? "/tutor" : user.role === "admin" ? "/admin" : "/dashboard");
+  }
+
   const tr = getT();
   const tutors = await getTutorCards();
 

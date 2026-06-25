@@ -56,16 +56,16 @@ export default async function StudentDashboard() {
     .find((t) => !answered.has(t.id) && !hasUpcoming.has(t.id));
 
   return (
-    <div className="container max-w-4xl py-10">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{L.hiPre}{user.name.split(" ")[0]}</h1>
-          {goal && <p className="text-muted-foreground">{L.goal} {goal.exam}</p>}
-        </div>
-        <Link href="/catalog">
-          <Button variant="outline"><Plus size={16} /> {L.findTutor}</Button>
-        </Link>
-      </div>
+    <div className="px-5 py-8 sm:px-8 lg:px-10">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">{L.hiPre}{user.name.split(" ")[0]}</h1>
+              {goal && <p className="text-muted-foreground">{L.goal} {goal.exam}</p>}
+            </div>
+            <Link href="/catalog">
+              <Button variant="outline"><Plus size={16} /> {L.findTutor}</Button>
+            </Link>
+          </div>
 
       {retentionTarget && (
         <div className="mt-6">
@@ -82,7 +82,7 @@ export default async function StudentDashboard() {
 
       <div className="mt-6 grid gap-6 md:grid-cols-2">
         {/* Прогресс */}
-        <Card>
+        <Card id="progress" className="scroll-mt-24">
           <CardContent>
             <h2 className="font-semibold">{L.progress}</h2>
             {progress.hasBaseline && progress.latest != null ? (

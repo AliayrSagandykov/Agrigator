@@ -17,6 +17,20 @@ const ru = {
   nav: {
     tutors: "Тюторы", match: "Подбор", forTutors: "Тьюторам", login: "Войти",
     register: "Регистрация", logout: "Выйти", favorites: "Избранное", dashboard: "Кабинет", menu: "Меню",
+    accountSettings: "Настройки аккаунта", theme: "Тема", light: "Светлая", dark: "Тёмная",
+    language: "Язык", searchPlaceholder: "Поиск тюторов…",
+  },
+  account: {
+    title: "Настройки аккаунта",
+    profile: "Профиль", name: "Имя", email: "Email", role: "Роль",
+    roleStudent: "Ученик", roleTutor: "Тьютор", roleAdmin: "Оператор",
+    appearance: "Оформление", language: "Язык", theme: "Тема",
+    avatar: "Аватар", avatarHint: "Загрузите фото или выберите цвет",
+    uploadPhoto: "Загрузить фото", removePhoto: "Удалить фото", errPhoto: "Не удалось загрузить изображение",
+    save: "Сохранить", saving: "Сохраняем…", saved: "Сохранено",
+    backToDashboard: "В кабинет",
+    errName: "Введите имя", errEmail: "Неверный email",
+    errEmailTaken: "Этот email уже занят", errGeneric: "Не удалось сохранить",
   },
   footer: {
     tagline: "Агрегатор тюторов для подготовки к экзаменам. Выбор по верифицированным результатам. Данные демонстрационные.",
@@ -135,6 +149,12 @@ const ru = {
     close: "Закрыть", thanksRetention: "Спасибо! Это помогает считать удержание честно.",
     stillStudyingPre: "Продолжаешь заниматься с ",
     rPause: "Да, просто пауза", rGoal: "Цель достигнута", rNotFit: "Не подошёл", rExpensive: "Дорого",
+    // dashboard-sidebar
+    sidebar: {
+      menu: "Меню", learning: "Обучение", overview: "Обзор",
+      findTutor: "Найти тютора", aiMatch: "AI-подбор", favorites: "Избранное",
+      diagnostic: "Диагностика", progress: "Прогресс", role: "Студент",
+    },
   },
   tutorDash: {
     tutorCabinet: "Кабинет тьютора", schedule: "Расписание", profile: "Профиль",
@@ -265,6 +285,20 @@ const kk: Dict = {
   nav: {
     tutors: "Тьюторлар", match: "Таңдау", forTutors: "Тьюторларға", login: "Кіру",
     register: "Тіркелу", logout: "Шығу", favorites: "Таңдаулылар", dashboard: "Кабинет", menu: "Мәзір",
+    accountSettings: "Аккаунт баптаулары", theme: "Тема", light: "Ашық", dark: "Қараңғы",
+    language: "Тіл", searchPlaceholder: "Тьютор іздеу…",
+  },
+  account: {
+    title: "Аккаунт баптаулары",
+    profile: "Профиль", name: "Аты", email: "Email", role: "Рөлі",
+    roleStudent: "Оқушы", roleTutor: "Тьютор", roleAdmin: "Оператор",
+    appearance: "Безендіру", language: "Тіл", theme: "Тема",
+    avatar: "Аватар", avatarHint: "Фото жүктеңіз немесе түс таңдаңыз",
+    uploadPhoto: "Фото жүктеу", removePhoto: "Фотоны жою", errPhoto: "Суретті жүктеу мүмкін болмады",
+    save: "Сақтау", saving: "Сақталуда…", saved: "Сақталды",
+    backToDashboard: "Кабинетке",
+    errName: "Атыңызды енгізіңіз", errEmail: "Қате email",
+    errEmailTaken: "Бұл email бос емес", errGeneric: "Сақтау мүмкін болмады",
   },
   footer: {
     tagline: "Емтиханға дайындық тьюторларының агрегаторы. Таңдау — верификацияланған нәтижелер бойынша. Деректер демонстрациялық.",
@@ -379,6 +413,12 @@ const kk: Dict = {
     close: "Жабу", thanksRetention: "Рахмет! Бұл қайта оралуды әділ есептеуге көмектеседі.",
     stillStudyingPre: "Жалғастырып жатырсың ба — ",
     rPause: "Иә, тек үзіліс", rGoal: "Мақсатқа жеттім", rNotFit: "Сәйкес келмеді", rExpensive: "Қымбат",
+    // dashboard-sidebar
+    sidebar: {
+      menu: "Мәзір", learning: "Оқу", overview: "Шолу",
+      findTutor: "Тьютор табу", aiMatch: "AI-таңдау", favorites: "Таңдаулылар",
+      diagnostic: "Диагностика", progress: "Прогресс", role: "Студент",
+    },
   },
   tutorDash: {
     tutorCabinet: "Тьютор кабинеті", schedule: "Кесте", profile: "Профиль",
@@ -504,6 +544,20 @@ const en: Dict = {
   nav: {
     tutors: "Tutors", match: "Match", forTutors: "For tutors", login: "Log in",
     register: "Sign up", logout: "Log out", favorites: "Favorites", dashboard: "Dashboard", menu: "Menu",
+    accountSettings: "Account settings", theme: "Theme", light: "Light", dark: "Dark",
+    language: "Language", searchPlaceholder: "Search tutors…",
+  },
+  account: {
+    title: "Account settings",
+    profile: "Profile", name: "Name", email: "Email", role: "Role",
+    roleStudent: "Student", roleTutor: "Tutor", roleAdmin: "Operator",
+    appearance: "Appearance", language: "Language", theme: "Theme",
+    avatar: "Avatar", avatarHint: "Upload a photo or pick a color",
+    uploadPhoto: "Upload photo", removePhoto: "Remove photo", errPhoto: "Couldn't load the image",
+    save: "Save", saving: "Saving…", saved: "Saved",
+    backToDashboard: "Back to dashboard",
+    errName: "Enter your name", errEmail: "Invalid email",
+    errEmailTaken: "This email is already taken", errGeneric: "Couldn't save",
   },
   footer: {
     tagline: "A tutor marketplace for exam prep. Choose by verified results. Demo data.",
@@ -618,6 +672,12 @@ const en: Dict = {
     close: "Close", thanksRetention: "Thanks! This keeps retention honest.",
     stillStudyingPre: "Still studying with ",
     rPause: "Yes, just a pause", rGoal: "Goal reached", rNotFit: "Not a fit", rExpensive: "Too pricey",
+    // dashboard-sidebar
+    sidebar: {
+      menu: "Menu", learning: "Learning", overview: "Overview",
+      findTutor: "Find a tutor", aiMatch: "AI match", favorites: "Favorites",
+      diagnostic: "Diagnostic", progress: "Progress", role: "Student",
+    },
   },
   tutorDash: {
     tutorCabinet: "Tutor dashboard", schedule: "Schedule", profile: "Profile",
