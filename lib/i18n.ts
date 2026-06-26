@@ -201,6 +201,19 @@ const ru = {
     // schedule + availability
     scheduleHint: "Отметь свободные часы — ученики увидят именно эти слоты при бронировании. Пусто = показываем стандартные слоты.",
     savingSchedule: "Сохраняем…", saveSchedule: "Сохранить расписание", saved: "Сохранено ✓", slotsSelected: "Выбрано слотов:",
+    // Оболочка кабинета: персонализация + стартовый чек-лист
+    hello: "Привет, ",
+    subLive: "Твой портфель результатов — в живых цифрах.",
+    subStarter: "Заполни профиль и проведи первые уроки — метрики начнут копиться.",
+    gettingStarted: "С чего начать", gsIntro: "Несколько шагов — и появятся первые ученики.",
+    gsProfileDone: "Профиль создан",
+    gsScheduleTodo: "Укажи свободные часы", gsScheduleDone: "Расписание указано",
+    gsBookingTodo: "Получи первую бронь", gsBookingDone: "Первые брони получены",
+    gsEditProfile: "Профиль", gsOpenSchedule: "Расписание", gsMyProfile: "Мой профиль",
+    sidebar: {
+      menu: "Меню", work: "Работа", overview: "Обзор", inbox: "Входящие", schedule: "Расписание",
+      students: "Ученики", portfolio: "Портфель", profile: "Профиль", role: "Тьютор",
+    },
     days: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
   },
   booking: {
@@ -483,6 +496,19 @@ const kk: Dict = {
     rated: "бағаланды ✓", onTime: "Уақытында", didHomework: "ҮЖ жасады", rate: "Бағалау",
     scheduleHint: "Бос сағаттарды белгіле — оқушылар брондағанда дәл осы слоттарды көреді. Бос = стандартты слоттар.",
     savingSchedule: "Сақталуда…", saveSchedule: "Кестені сақтау", saved: "Сақталды ✓", slotsSelected: "Таңдалған слот:",
+    // Кабинет қабығы: персонализация + бастапқы чек-лист
+    hello: "Сәлем, ",
+    subLive: "Нәтижелер портфолиоң — тірі сандармен.",
+    subStarter: "Профильді толтыр да алғашқы сабақтарды өткіз — метрикалар жинала бастайды.",
+    gettingStarted: "Неден бастау керек", gsIntro: "Бірнеше қадам — алғашқы оқушылар пайда болады.",
+    gsProfileDone: "Профиль жасалды",
+    gsScheduleTodo: "Бос сағаттарды көрсет", gsScheduleDone: "Кесте көрсетілді",
+    gsBookingTodo: "Алғашқы бронь ал", gsBookingDone: "Алғашқы брондар алынды",
+    gsEditProfile: "Профиль", gsOpenSchedule: "Кесте", gsMyProfile: "Менің профилім",
+    sidebar: {
+      menu: "Мәзір", work: "Жұмыс", overview: "Шолу", inbox: "Кіріс", schedule: "Кесте",
+      students: "Оқушылар", portfolio: "Портфолио", profile: "Профиль", role: "Тьютор",
+    },
     days: ["Дс", "Сс", "Ср", "Бс", "Жм", "Сб", "Жс"],
   },
   booking: {
@@ -763,6 +789,19 @@ const en: Dict = {
     rated: "rated ✓", onTime: "On time", didHomework: "Did homework", rate: "Rate",
     scheduleHint: "Mark your free hours — students will see exactly these slots when booking. Empty = we show standard slots.",
     savingSchedule: "Saving…", saveSchedule: "Save schedule", saved: "Saved ✓", slotsSelected: "Slots selected:",
+    // Dashboard shell: personalization + getting-started checklist
+    hello: "Hi, ",
+    subLive: "Your results portfolio, in live numbers.",
+    subStarter: "Fill in your profile and run your first lessons — metrics will start building.",
+    gettingStarted: "Getting started", gsIntro: "A few steps to your first students.",
+    gsProfileDone: "Profile created",
+    gsScheduleTodo: "Set your free hours", gsScheduleDone: "Schedule set",
+    gsBookingTodo: "Get your first booking", gsBookingDone: "First bookings received",
+    gsEditProfile: "Profile", gsOpenSchedule: "Schedule", gsMyProfile: "My profile",
+    sidebar: {
+      menu: "Menu", work: "Work", overview: "Overview", inbox: "Inbox", schedule: "Schedule",
+      students: "Students", portfolio: "Portfolio", profile: "Profile", role: "Tutor",
+    },
     days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
   },
   booking: {

@@ -3,11 +3,12 @@ import Link from "next/link";
 import "./globals.css";
 import { getCurrentUser } from "@/lib/auth";
 import { toPublicUser } from "@/lib/auth";
-import { getFavoriteKeys } from "@/lib/queries";
+import { getFavoriteKeys, hasTutorProfile } from "@/lib/queries";
 import { getLocale, getT } from "@/lib/locale";
 import type { Dict } from "@/lib/i18n";
 import { SiteHeader } from "@/components/site-header";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
+import { TutorSidebar } from "@/components/tutor-sidebar";
 import { Analytics } from "@/components/analytics";
 
 export const metadata: Metadata = {
@@ -25,12 +26,16 @@ const themeScript = `try{var t=localStorage.getItem('agr-theme');if(t==='dark'){
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
-  const favCount = user && user.role === "student" ? (await getFavoriteKeys(user.id)).size : 0;
+  const isStudent = !!user && user.role === "student";
+  const isTutor = !!user && user.role === "tutor";
+  const favCount = isStudent ? (await getFavoriteKeys(user!.id)).size : 0;
   const locale = getLocale();
   const t = getT();
 
-  // Сайдбар кабинета не исчезает на всех страницах залогиненного студента.
-  const showSidebar = !!user && user.role === "student";
+  // Оболочка кабинета (сайдбар) — у залогиненного студента всегда, у тьютора
+  // после создания профиля (до этого — фокусный онбординг без сайдбара).
+  const tutorReady = isTutor ? await hasTutorProfile(user!.id) : false;
+  const showSidebar = isStudent || tutorReady;
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -39,9 +44,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="min-h-screen flex flex-col">
         <SiteHeader user={user ? toPublicUser(user) : null} favCount={favCount} />
-        {showSidebar ? (
+        {showSidebar && user ? (
           <div className="flex flex-1 flex-col lg:flex-row">
-            <DashboardSidebar labels={t.dash.sidebar} studentName={user.name} />
+            {user.role === "tutor" ? (
+              <TutorSidebar labels={t.tutorDash.sidebar} tutorName={user.name} />
+            ) : (
+              <DashboardSidebar labels={t.dash.sidebar} studentName={user.name} />
+            )}
             <main className="min-w-0 flex-1">{children}</main>
           </div>
         ) : (

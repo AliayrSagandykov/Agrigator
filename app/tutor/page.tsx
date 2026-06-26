@@ -1,19 +1,21 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Pencil, TrendingUp, CalendarClock } from "lucide-react";
+import { Pencil, TrendingUp, CalendarClock, Check, ArrowRight } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { one } from "@/lib/db";
+import { parseJson, cn, formatDateTime, formatDelta, formatTenge } from "@/lib/utils";
 import { computeTutorMetrics } from "@/lib/metrics";
 import { getTutorBookings, getTutorPayments } from "@/lib/queries";
 import { getPairsForUser } from "@/lib/pairs";
 import { PairList } from "@/components/room/pair-list";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { MetricStat } from "@/components/metric-stat";
 import { Avatar } from "@/components/avatar";
 import { CompleteLessonButton } from "@/components/complete-lesson-button";
-import { formatDateTime, formatDelta, formatTenge } from "@/lib/utils";
 import { getT } from "@/lib/locale";
+import type { Dict } from "@/lib/i18n";
 
 export const metadata = { title: "Кабинет тьютора — Agrigator" };
 
@@ -23,8 +25,8 @@ export default async function TutorDashboard() {
   if (user.role === "admin") redirect("/admin");
   if (user.role !== "tutor") redirect("/dashboard");
 
-  const profile = await one<{ photo: string | null; price: number }>(
-    `select photo, price from "TutorProfile" where "userId" = $1`,
+  const profile = await one<{ photo: string | null; price: number; availabilityJson: string }>(
+    `select photo, price, "availabilityJson" from "TutorProfile" where "userId" = $1`,
     [user.id],
   );
   if (!profile) redirect("/tutor/onboarding");
@@ -39,21 +41,24 @@ export default async function TutorDashboard() {
     getPairsForUser(user.id),
   ]);
 
-  const requests = bookings.filter((b) => !b.hasLesson && b.slotAt >= now);
+  const requests = bookings.filter((b) => !b.hasLesson && b.slotAt >= now && b.status !== "cancelled");
   const escrow = payments.filter((p) => p.status === "confirmed").reduce((s, p) => s + p.amount, 0);
   const released = payments.filter((p) => p.status === "released").reduce((s, p) => s + p.amount, 0);
 
+  const hasSchedule = parseJson<string[]>(profile.availabilityJson, []).length > 0;
+  const hasBookings = bookings.length > 0;
+  // Холодный старт: нет ни уроков, ни броней — показываем стартовый чек-лист.
+  const isNew = metrics.lessons === 0 && !hasBookings;
+
   return (
-    <div className="container max-w-4xl py-10">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Avatar name={user.name} photo={profile.photo} color={user.avatarColor} size={48} />
-          <div>
-            <h1 className="text-2xl font-bold">{user.name}</h1>
-            <p className="text-muted-foreground">{L.tutorCabinet}</p>
-          </div>
+    <div className="px-5 py-8 sm:px-8 lg:px-10">
+      {/* Персонализированная шапка */}
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">{L.hello}{user.name.split(" ")[0]}</h1>
+          <p className="text-muted-foreground">{metrics.isLive ? L.subLive : L.subStarter}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex shrink-0 gap-2">
           <Link href="/tutor/schedule">
             <Button variant="outline"><CalendarClock size={15} /> {L.schedule}</Button>
           </Link>
@@ -63,8 +68,13 @@ export default async function TutorDashboard() {
         </div>
       </div>
 
-      {/* Репутационный актив: 3 метрики */}
-      <Card className="mt-6">
+      {/* Стартовый чек-лист — персонализация холодного старта */}
+      {isNew && (
+        <GettingStarted L={L} tutorId={user.id} hasSchedule={hasSchedule} hasBookings={hasBookings} />
+      )}
+
+      {/* Репутационный актив: портфель метрик */}
+      <Card id="portfolio" className="mt-6 scroll-mt-24">
         <CardContent>
           <div className="mb-3 flex items-center gap-2">
             <TrendingUp size={18} className="text-primary" />
@@ -87,7 +97,8 @@ export default async function TutorDashboard() {
         </CardContent>
       </Card>
 
-      <div className="mt-6 grid gap-6 md:grid-cols-3">
+      {/* Деньги */}
+      <div className="mt-6 grid gap-3 sm:grid-cols-3">
         <MetricStat value={formatTenge(escrow)} label={L.escrow} />
         <MetricStat value={formatTenge(released)} label={L.paidOut} />
         <MetricStat value={formatTenge(profile.price)} label={L.hourlyRate} />
@@ -95,7 +106,7 @@ export default async function TutorDashboard() {
 
       {/* Кабинеты учеников — центр удержания */}
       {pairs.length > 0 && (
-        <section className="mt-8">
+        <section id="rooms" className="mt-8 scroll-mt-24">
           <h2 className="mb-3 font-semibold">{L.studentRooms}</h2>
           <PairList pairs={pairs} tz={tz} />
         </section>
@@ -122,8 +133,14 @@ export default async function TutorDashboard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <a href={b.meetLink} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">{L.link}</a>
-                  <CompleteLessonButton bookingId={b.id} labels={L} />
+                  {b.acceptedAt ? (
+                    <>
+                      <a href={b.meetLink} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">{L.link}</a>
+                      <CompleteLessonButton bookingId={b.id} labels={L} />
+                    </>
+                  ) : (
+                    <Badge variant="outline">{L.awaitingResp}</Badge>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -131,5 +148,56 @@ export default async function TutorDashboard() {
         </div>
       </section>
     </div>
+  );
+}
+
+// Стартовый чек-лист тьютора: три шага до первых учеников. Состояние шагов —
+// из реальных данных (профиль создан · расписание указано · первая бронь).
+function GettingStarted({
+  L,
+  tutorId,
+  hasSchedule,
+  hasBookings,
+}: {
+  L: Dict["tutorDash"];
+  tutorId: string;
+  hasSchedule: boolean;
+  hasBookings: boolean;
+}) {
+  const steps = [
+    { done: true, todo: L.gsProfileDone, doneLabel: L.gsProfileDone, cta: L.gsEditProfile, href: "/tutor/onboarding" },
+    { done: hasSchedule, todo: L.gsScheduleTodo, doneLabel: L.gsScheduleDone, cta: L.gsOpenSchedule, href: "/tutor/schedule" },
+    { done: hasBookings, todo: L.gsBookingTodo, doneLabel: L.gsBookingDone, cta: L.gsMyProfile, href: `/tutors/${tutorId}` },
+  ];
+
+  return (
+    <Card className="mt-6 overflow-hidden border-primary/30">
+      <CardContent className="bg-gradient-to-br from-primary/5 via-violet-500/5 to-sky-500/5">
+        <h2 className="font-semibold">{L.gettingStarted}</h2>
+        <p className="mt-0.5 text-sm text-muted-foreground">{L.gsIntro}</p>
+        <ol className="mt-4 space-y-2">
+          {steps.map((s, i) => (
+            <li key={i} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
+              <span
+                className={cn(
+                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-semibold",
+                  s.done ? "bg-success text-success-foreground" : "border border-border bg-muted text-muted-foreground",
+                )}
+              >
+                {s.done ? <Check size={15} strokeWidth={3} /> : i + 1}
+              </span>
+              <span className={cn("flex-1 text-sm font-medium", s.done && "text-muted-foreground line-through")}>
+                {s.done ? s.doneLabel : s.todo}
+              </span>
+              {!s.done && (
+                <Link href={s.href} className="shrink-0">
+                  <Button size="sm" variant="outline">{s.cta} <ArrowRight size={14} /></Button>
+                </Link>
+              )}
+            </li>
+          ))}
+        </ol>
+      </CardContent>
+    </Card>
   );
 }

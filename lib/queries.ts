@@ -188,6 +188,19 @@ export const getFavoriteKeys = cache(async (userId: string): Promise<Set<string>
   return new Set(rows.map((r) => r.key));
 });
 
+/**
+ * Создал ли тьютор профиль (прошёл онбординг хотя бы раз).
+ * Гейтит оболочку кабинета: до профиля — фокусный онбординг, после — сайдбар.
+ * cache() дедуплицирует вызов из layout на одном рендере.
+ */
+export const hasTutorProfile = cache(async (userId: string): Promise<boolean> => {
+  const row = await one<{ exists: boolean }>(
+    `select exists(select 1 from "TutorProfile" where "userId" = $1) as exists`,
+    [userId],
+  );
+  return !!row?.exists;
+});
+
 /** bookingId, которые этот автор уже оценил (чтобы не просить повторно). */
 export async function getReviewedBookingIds(authorId: string): Promise<Set<string>> {
   const rows = await query<{ bookingId: string }>(

@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getTutorBookings, getReviewedBookingIds } from "@/lib/queries";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,11 +25,9 @@ export default async function TutorInbox() {
   ]);
 
   return (
-    <div className="container max-w-3xl py-10">
-      <Link href="/tutor" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft size={15} /> {L.toCabinet}
-      </Link>
-      <h1 className="mt-4 text-2xl font-bold">{L.incomingBookings}</h1>
+    <div className="px-5 py-8 sm:px-8 lg:px-10">
+      <div className="mx-auto max-w-3xl">
+      <h1 className="text-2xl font-bold">{L.incomingBookings}</h1>
       <p className="text-muted-foreground">{L.inboxHint}</p>
 
       <div className="mt-6 space-y-3">
@@ -76,6 +72,7 @@ export default async function TutorInbox() {
             </CardContent>
           </Card>
         ))}
+      </div>
       </div>
     </div>
   );
