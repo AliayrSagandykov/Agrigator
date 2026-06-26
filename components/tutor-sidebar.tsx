@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import { LayoutDashboard, Inbox, CalendarClock, Users, TrendingUp, UserCog } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CollapsibleSidebar, isFocusedRoute } from "@/components/sidebar-frame";
 import type { Dict } from "@/lib/i18n";
 
 // Боковая навигация кабинета тьютора. Тот же визуальный язык, что у студента
@@ -26,6 +27,9 @@ export function TutorSidebar({
   tutorName: string;
 }) {
   const pathname = usePathname();
+
+  // На онбординге/матч-тесте сайдбар скрыт — заполнение идёт фокусным экраном.
+  if (isFocusedRoute(pathname)) return null;
 
   const groups: { title: string; items: Item[] }[] = [
     {
@@ -72,9 +76,8 @@ export function TutorSidebar({
         })}
       </div>
 
-      {/* Десктоп: полноразмерная боковая панель у левого края экрана */}
-      <aside className="hidden border-r border-border bg-card/40 lg:sticky lg:top-16 lg:flex lg:h-[calc(100vh-4rem)] lg:w-64 lg:shrink-0 lg:flex-col lg:self-start lg:overflow-y-auto">
-        <div className="p-3">
+      {/* Десктоп: полноразмерная сворачиваемая боковая панель */}
+      <CollapsibleSidebar>
           <div className="flex items-center gap-3 rounded-xl bg-gradient-to-br from-primary/10 via-violet-500/10 to-sky-500/10 p-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-violet-600 text-sm font-bold text-white shadow-md">
               {tutorName.slice(0, 1).toUpperCase()}
@@ -120,8 +123,7 @@ export function TutorSidebar({
               </div>
             ))}
           </nav>
-        </div>
-      </aside>
+      </CollapsibleSidebar>
     </>
   );
 }
