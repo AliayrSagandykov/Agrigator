@@ -33,15 +33,18 @@ export function ChipSelect({
   onChange,
   max,
   size = "md",
+  single = false,
 }: {
   options: ChoiceOption[];
   selected: string[];
   onChange: (next: string[]) => void;
   max?: number;
   size?: "sm" | "md";
+  single?: boolean;
 }) {
-  const atMax = max != null && selected.length >= max;
+  const atMax = !single && max != null && selected.length >= max;
   const toggle = (v: string) => {
+    if (single) return onChange(selected.includes(v) ? [] : [v]);
     if (selected.includes(v)) onChange(selected.filter((x) => x !== v));
     else if (!atMax) onChange([...selected, v]);
   };
@@ -235,6 +238,35 @@ export function BandPicker({
         </div>
       </div>
     </div>
+  );
+}
+
+// ── Пикер одного уровня (текущий / целевой балл) ───────────
+export function LevelPicker({
+  exam,
+  value,
+  onChange,
+}: {
+  exam: string;
+  value: number | string;
+  onChange: (v: number | string) => void;
+}) {
+  const scale = EXAM_SCALES[exam];
+  if (!scale) return null;
+  if (scale.kind === "ordinal") {
+    return (
+      <Segmented
+        options={scale.grades.map((g) => ({ value: g, label: g }))}
+        value={String(value)}
+        onChange={(v) => onChange(v)}
+      />
+    );
+  }
+  return (
+    <Slider
+      min={scale.min} max={scale.max} step={scale.step}
+      value={Number(value)} onChange={(v) => onChange(v)}
+    />
   );
 }
 

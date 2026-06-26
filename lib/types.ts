@@ -104,6 +104,9 @@ export interface StudentGoal {
   style: string;
   baselineScore: string | null;
   baselineSource: string | null;
+  targetScore: string | null;
+  cadence: string | null;
+  approachJson: string;
   language: string;
   createdAt: Date;
   updatedAt: Date;

@@ -257,8 +257,8 @@ const ru = {
   match: {
     title: "Тюторы под твою цель", change: "изменить", diagTitle: "Хочешь точный график прогресса?",
     diagBody: "Поставь baseline — короткой диагностикой или прошлым официальным баллом. Тогда дельта посчитается в цифрах.",
-    takeDiag: "Пройти диагностику", later: "Позже",
-    deadlineLabels: { "1-2m": "через 1–2 мес", "3-6m": "через 3–6 мес", flex: "без спешки" },
+    takeDiag: "Пройти диагностику", later: "Позже", perWeek: "раз/нед",
+    deadlineLabels: { "1-2m": "через 1–2 мес", "3-6m": "через 3–6 мес", "6m+": "позже 6 мес", flex: "без спешки" },
     paceLabels: { slow: "основательный темп", fast: "интенсивный темп" },
     styleLabels: { strict: "строгий стиль", soft: "мягкий стиль" },
   },
@@ -272,6 +272,14 @@ const ru = {
   },
   intake: {
     stepPre: "Шаг", of: "из", back: "Назад",
+    next: "Далее", finish: "Показать тьюторов", saving: "Сохраняем…", saveError: "Не удалось сохранить",
+    startTitle: "На каком ты уровне сейчас?", startHint: "Примерный текущий балл — двигай ползунок.",
+    startSkip: "Пока не знаю",
+    targetTitle: "Какой балл — цель?", targetHint: "К чему идём. Это сравним с диапазоном тьютора.",
+    whenTitle: "Когда экзамен?", whenHint: "Срок влияет на темп и подбор.",
+    cadenceTitle: "Как часто хочешь заниматься?", cadenceHint: "Подберём тьютора под твой ритм.",
+    approachTitle: "Какой подход заходит?", approachHint: "Выбери до 2 — матчим по стилю.",
+    current: "сейчас", target: "цель",
     steps: {
       exam: { title: "К какому экзамену готовимся?", hint: "Выбери цель — под неё подберём тютора с доказанным результатом." },
       deadline: { title: "Когда экзамен?", hint: "Срок влияет на темп и интенсивность.", opts: { "1-2m": "Через 1–2 месяца", "3-6m": "Через 3–6 месяцев", flex: "Не спешу" } },
@@ -583,8 +591,8 @@ const kk: Dict = {
   match: {
     title: "Мақсатыңа сай тьюторлар", change: "өзгерту", diagTitle: "Нақты прогресс графигі керек пе?",
     diagBody: "Baseline қой — қысқа диагностикамен немесе өткен ресми баллмен. Сонда өсім санмен есептеледі.",
-    takeDiag: "Диагностикадан өту", later: "Кейінірек",
-    deadlineLabels: { "1-2m": "1–2 айда", "3-6m": "3–6 айда", flex: "асықпай" },
+    takeDiag: "Диагностикадан өту", later: "Кейінірек", perWeek: "рет/апта",
+    deadlineLabels: { "1-2m": "1–2 айда", "3-6m": "3–6 айда", "6m+": "6 айдан кейін", flex: "асықпай" },
     paceLabels: { slow: "негізді қарқын", fast: "қарқынды" },
     styleLabels: { strict: "қатаң стиль", soft: "жұмсақ стиль" },
   },
@@ -598,6 +606,14 @@ const kk: Dict = {
   },
   intake: {
     stepPre: "Қадам", of: "/", back: "Артқа",
+    next: "Әрі қарай", finish: "Тьюторларды көрсету", saving: "Сақталуда…", saveError: "Сақтау мүмкін болмады",
+    startTitle: "Қазір қай деңгейдесің?", startHint: "Шамамен қазіргі балл — жүгірткіні жылжыт.",
+    startSkip: "Әзірге білмеймін",
+    targetTitle: "Мақсат — қай балл?", targetHint: "Неге барамыз. Мұны тьютордың диапазонымен салыстырамыз.",
+    whenTitle: "Емтихан қашан?", whenHint: "Мерзім қарқын мен таңдауға әсер етеді.",
+    cadenceTitle: "Қаншалықты жиі айналысқың келеді?", cadenceHint: "Ырғағыңа қарай тьютор табамыз.",
+    approachTitle: "Қай тәсіл ұнайды?", approachHint: "2-ге дейін таңда — стиль бойынша матчтаймыз.",
+    current: "қазір", target: "мақсат",
     steps: {
       exam: { title: "Қай емтиханға дайындаламыз?", hint: "Мақсатты таңда — соған дәлелденген нәтижелі тьютор табамыз." },
       deadline: { title: "Емтихан қашан?", hint: "Мерзім қарқын мен қарқындылыққа әсер етеді.", opts: { "1-2m": "1–2 айдан кейін", "3-6m": "3–6 айдан кейін", flex: "Асықпаймын" } },
@@ -907,8 +923,8 @@ const en: Dict = {
   match: {
     title: "Tutors for your goal", change: "edit", diagTitle: "Want a precise progress chart?",
     diagBody: "Set a baseline — via a quick diagnostic or a past official score. Then the delta is computed in numbers.",
-    takeDiag: "Take the diagnostic", later: "Later",
-    deadlineLabels: { "1-2m": "in 1–2 mo", "3-6m": "in 3–6 mo", flex: "no rush" },
+    takeDiag: "Take the diagnostic", later: "Later", perWeek: "×/wk",
+    deadlineLabels: { "1-2m": "in 1–2 mo", "3-6m": "in 3–6 mo", "6m+": "6+ mo", flex: "no rush" },
     paceLabels: { slow: "steady pace", fast: "intensive pace" },
     styleLabels: { strict: "strict style", soft: "soft style" },
   },
@@ -922,6 +938,14 @@ const en: Dict = {
   },
   intake: {
     stepPre: "Step", of: "of", back: "Back",
+    next: "Next", finish: "Show tutors", saving: "Saving…", saveError: "Couldn't save",
+    startTitle: "What's your level now?", startHint: "Approximate current score — drag the slider.",
+    startSkip: "Not sure yet",
+    targetTitle: "What score is your goal?", targetHint: "Where we're heading. We compare it to the tutor's range.",
+    whenTitle: "When is the exam?", whenHint: "The deadline affects pace and matching.",
+    cadenceTitle: "How often do you want to study?", cadenceHint: "We'll match a tutor to your rhythm.",
+    approachTitle: "Which approach works for you?", approachHint: "Pick up to 2 — we match by style.",
+    current: "now", target: "goal",
     steps: {
       exam: { title: "Which exam are we prepping for?", hint: "Pick a goal — we'll match a tutor with proven results." },
       deadline: { title: "When is the exam?", hint: "The deadline affects pace and intensity.", opts: { "1-2m": "In 1–2 months", "3-6m": "In 3–6 months", flex: "No rush" } },

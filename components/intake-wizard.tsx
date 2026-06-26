@@ -1,83 +1,165 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { INTAKE_STEPS } from "@/lib/constants";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ChipSelect, LevelPicker, StepProgress } from "@/components/onboarding/inputs";
+import {
+  EXAM_OPTIONS, TIMELINE_OPTIONS, STUDENT_CADENCE_OPTIONS, STUDENT_APPROACH_OPTIONS,
+  MAX_STUDENT_APPROACH, studentDefaults, EXAM_SCALES, type ChoiceOption,
+} from "@/lib/onboarding-data";
+import { cn } from "@/lib/utils";
 import type { Dict } from "@/lib/i18n";
 
-// Интейк студента (UX §2.1): 4 вопроса, по одному на экран, крупные кнопки,
-// без полей ввода. Структура (ключи/значения) из constants, тексты — из словаря.
-export function IntakeWizard({ labels }: { labels: Dict["intake"] }) {
+// Интейк студента — симметрично матч-тесту тютора: цель, стартовый уровень,
+// сроки, частота, подход. Выбор вместо ввода; одиночные шаги авто-переходят.
+const STEPS = 6;
+
+export function IntakeWizard({ labels: L }: { labels: Dict["intake"] }) {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [exam, setExam] = useState("");
+  const [startLevel, setStartLevel] = useState<number | string>("");
+  const [startKnown, setStartKnown] = useState(true);
+  const [target, setTarget] = useState<number | string>("");
+  const [timeline, setTimeline] = useState("");
+  const [cadence, setCadence] = useState("");
+  const [approach, setApproach] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  const current = INTAKE_STEPS[step];
-  const stepText = labels.steps[current.key];
-  const progress = Math.round((step / INTAKE_STEPS.length) * 100);
+  const examOpts: ChoiceOption[] = EXAM_OPTIONS.map((e) => ({ value: e.value, label: e.value, emoji: e.emoji }));
+  const hasScale = !!EXAM_SCALES[exam];
 
-  // Подпись опции: экзамены не переводим (значение = подпись), остальное из словаря.
-  const optionLabel = (value: string): string => {
-    if (current.key === "exam") return value;
-    const opts = (stepText as { opts: Record<string, string> }).opts;
-    return opts[value] ?? value;
-  };
+  function pickExam(v: string) {
+    setExam(v);
+    const d = studentDefaults(v);
+    setStartLevel(d.start);
+    setTarget(d.target);
+    setStartKnown(true);
+    setStep(1);
+  }
 
-  async function choose(value: string) {
-    const next = { ...answers, [current.key]: value };
-    setAnswers(next);
+  const go = (d: number) => setStep((s) => Math.max(0, Math.min(STEPS - 1, s + d)));
+  const advance = () => step < STEPS - 1 && setStep(step + 1);
 
-    if (step < INTAKE_STEPS.length - 1) {
-      setStep(step + 1);
-      return;
-    }
-    // Последний шаг → сохраняем вектор (+ авто-определённый пояс) и ведём на матч.
+  async function save() {
     setSaving(true);
+    setError("");
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    await fetch("/api/onboarding", {
+    const res = await fetch("/api/onboarding", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...next, timezone }),
+      body: JSON.stringify({
+        exam,
+        deadline: timeline || "flex",
+        startScore: startKnown ? String(startLevel) : "",
+        targetScore: String(target),
+        cadence,
+        approach,
+        timezone,
+      }),
     });
+    setSaving(false);
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      return setError(d.error || L.saveError);
+    }
     router.push("/match");
     router.refresh();
   }
 
   return (
     <div className="mx-auto max-w-lg">
-      <div className="mb-6 h-2 w-full overflow-hidden rounded-full bg-muted">
-        <div className="h-full bg-primary transition-all" style={{ width: `${Math.max(progress, 6)}%` }} />
+      <StepProgress step={step} total={STEPS} />
+      <div className="mt-4 text-sm text-muted-foreground">{L.stepPre} {step + 1} {L.of} {STEPS}</div>
+
+      <div className="mt-1 min-h-[17rem]">
+        {step === 0 && (
+          <Section title={L.steps.exam.title} hint={L.steps.exam.hint}>
+            <ChipSelect single options={examOpts} selected={exam ? [exam] : []} onChange={(s) => pickExam(s[0] ?? "")} />
+          </Section>
+        )}
+
+        {step === 1 && (
+          <Section title={L.startTitle} hint={L.startHint}>
+            {hasScale && <LevelPicker exam={exam} value={startLevel} onChange={setStartLevel} />}
+          </Section>
+        )}
+
+        {step === 2 && (
+          <Section title={L.targetTitle} hint={L.targetHint}>
+            {hasScale && <LevelPicker exam={exam} value={target} onChange={setTarget} />}
+            <div className="mt-4 flex justify-center gap-4 text-sm">
+              <span className="text-muted-foreground">{L.current}: <b className="text-foreground">{startKnown ? startLevel : "—"}</b></span>
+              <span className="text-primary">→</span>
+              <span className="text-muted-foreground">{L.target}: <b className="text-foreground">{target}</b></span>
+            </div>
+          </Section>
+        )}
+
+        {step === 3 && (
+          <Section title={L.whenTitle} hint={L.whenHint}>
+            <ChipSelect single options={TIMELINE_OPTIONS} selected={timeline ? [timeline] : []}
+              onChange={(s) => { setTimeline(s[0] ?? ""); if (s[0]) advance(); }} />
+          </Section>
+        )}
+
+        {step === 4 && (
+          <Section title={L.cadenceTitle} hint={L.cadenceHint}>
+            <ChipSelect single options={STUDENT_CADENCE_OPTIONS} selected={cadence ? [cadence] : []}
+              onChange={(s) => { setCadence(s[0] ?? ""); if (s[0]) advance(); }} />
+          </Section>
+        )}
+
+        {step === 5 && (
+          <Section title={L.approachTitle} hint={L.approachHint}>
+            <ChipSelect options={STUDENT_APPROACH_OPTIONS} selected={approach} onChange={setApproach} max={MAX_STUDENT_APPROACH} />
+            <div className="mt-3 text-xs text-muted-foreground">{approach.length} / {MAX_STUDENT_APPROACH}</div>
+          </Section>
+        )}
       </div>
 
-      <div className="text-sm text-muted-foreground">
-        {labels.stepPre} {step + 1} {labels.of} {INTAKE_STEPS.length}
-      </div>
-      <h1 className="mt-1 text-2xl font-bold">{stepText.title}</h1>
-      {stepText.hint && <p className="mt-1 text-muted-foreground">{stepText.hint}</p>}
+      {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
 
-      <div className="mt-6 space-y-3">
-        {current.options.map((opt) => (
+      <div className="mt-6 flex items-center justify-between">
+        {step > 0 ? (
+          <Button variant="ghost" onClick={() => go(-1)} disabled={saving}><ArrowLeft size={16} /> {L.back}</Button>
+        ) : <span />}
+        <div className="flex gap-2">
+          {step === 1 && (
+            <Button variant="ghost" onClick={() => { setStartKnown(false); setStep(2); }} disabled={saving}>{L.startSkip}</Button>
+          )}
+          {(step === 1 || step === 2) && (
+            <Button onClick={advance}>{L.next} <ArrowRight size={16} /></Button>
+          )}
+          {step === 5 && (
+            <Button onClick={save} disabled={saving}>{saving ? L.saving : L.finish}</Button>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-5 flex justify-center gap-2">
+        {Array.from({ length: STEPS }).map((_, i) => (
           <button
-            key={opt.value}
-            disabled={saving}
-            onClick={() => choose(opt.value)}
-            className={cn(
-              "flex w-full items-center justify-between rounded-xl border border-border bg-card p-4 text-left text-lg font-medium transition-all hover:border-primary hover:bg-accent disabled:opacity-50",
-            )}
-          >
-            {optionLabel(opt.value)}
-            <span className="text-muted-foreground">→</span>
-          </button>
+            key={i}
+            onClick={() => setStep(i)}
+            disabled={saving || (i > 0 && !exam)}
+            aria-label={`${L.stepPre} ${i + 1}`}
+            className={cn("h-2 w-2 rounded-full transition-colors disabled:opacity-40", i === step ? "bg-primary" : "bg-muted hover:bg-primary/40")}
+          />
         ))}
       </div>
+    </div>
+  );
+}
 
-      {step > 0 && (
-        <Button variant="ghost" className="mt-4" onClick={() => setStep(step - 1)} disabled={saving}>
-          ← {labels.back}
-        </Button>
-      )}
+function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <div className="pt-4">
+      <h1 className="text-2xl font-bold">{title}</h1>
+      {hint && <p className="mt-1 text-muted-foreground">{hint}</p>}
+      <div className="mt-5">{children}</div>
     </div>
   );
 }
