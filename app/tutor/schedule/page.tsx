@@ -1,6 +1,4 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { one } from "@/lib/db";
 import { parseJson } from "@/lib/utils";
@@ -26,17 +24,16 @@ export default async function TutorSchedulePage() {
   const initial = parseJson<string[]>(profile.availabilityJson, []);
 
   return (
-    <div className="container max-w-2xl py-10">
-      <Link href="/tutor" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft size={15} /> {L.toCabinet}
-      </Link>
-      <h1 className="mt-4 text-2xl font-bold">{L.schedule}</h1>
-      <p className="text-muted-foreground">{L.scheduleHint}</p>
-      <Card className="mt-6">
-        <CardContent>
-          <AvailabilityForm initial={initial} labels={L} />
-        </CardContent>
-      </Card>
+    <div className="px-5 py-8 sm:px-8 lg:px-10">
+      <div className="mx-auto max-w-2xl">
+        <h1 className="text-2xl font-bold">{L.schedule}</h1>
+        <p className="text-muted-foreground">{L.scheduleHint}</p>
+        <Card className="mt-6">
+          <CardContent>
+            <AvailabilityForm initial={initial} labels={L} />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
