@@ -56,6 +56,8 @@ export interface TutorProfile {
   source: string;
   rating: number;
   availabilityJson: string;
+  teachBandsJson: string;
+  matchPrefsJson: string;
   createdAt: Date;
   updatedAt: Date;
 }

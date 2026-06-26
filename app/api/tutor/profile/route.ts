@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { isValidTimeZone } from "@/lib/time";
+import { MAX_EXAMS, SPECIALIZATIONS } from "@/lib/onboarding-data";
 
 const J = (v: unknown) => JSON.stringify(v);
 const toList = (v: unknown): string[] =>
@@ -20,8 +21,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Только для тьютора" }, { status: 403 });
 
   const body = await req.json().catch(() => ({}));
-  const subjects = toList(body.subjects);
-  const exams = toList(body.exams);
+  const exams = toList(body.exams).slice(0, MAX_EXAMS);
+  // Специализации держим только из таксономии выбранных экзаменов (защита от мусора).
+  const allowedSpecs = new Set(exams.flatMap((e) => SPECIALIZATIONS[e] ?? []));
+  const subjects = toList(body.subjects).filter((s) => allowedSpecs.size === 0 || allowedSpecs.has(s));
   const price = Math.max(0, parseInt(body.price, 10) || 0);
   const format = ["online", "offline", "hybrid"].includes(body.format) ? body.format : "online";
   const city = String(body.city ?? "Онлайн");

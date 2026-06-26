@@ -6,6 +6,7 @@
 // часовых поясов для онлайн-уроков. Без «стилей обучения» (v3).
 // ============================================================
 import { tzCompatibility, tzOffsetMinutes } from "@/lib/time";
+import { normalizeLevel, type Band } from "@/lib/onboarding-data";
 
 const SHRINK_K = 4; // псевдо-счёт усадки малой выборки
 
@@ -20,12 +21,29 @@ export interface TutorMatchInput {
   aiVerified: boolean;
   price: number;
   timezone?: string | null;
+  teachBands?: Record<string, Band>; // «кому помогаю» по экзаменам (матч-тест)
 }
 
 export interface StudentVector {
   exam: string;
   deadline: string; // "1-2m" | "3-6m" | "flex"
   timezone?: string | null;
+  level?: number | null; // нормализованный 0..1 текущий/целевой уровень по экзамену
+}
+
+/**
+ * Попадание уровня студента в бэнд тютора, 0..1. Внутри диапазона = 1,
+ * за его пределами — линейный спад на 25% шкалы. null уровень → нейтрально.
+ */
+function bandFit(band: Band | undefined, exam: string, level?: number | null): number | null {
+  if (!band || level == null) return null;
+  const a = normalizeLevel(exam, band.from);
+  const b = normalizeLevel(exam, band.to);
+  const lo = Math.min(a, b);
+  const hi = Math.max(a, b);
+  if (level >= lo && level <= hi) return 1;
+  const dist = level < lo ? lo - level : level - hi;
+  return Math.max(0, 1 - dist / 0.25);
 }
 
 export interface RankedTutor {
@@ -74,7 +92,17 @@ export function scoreTutor(t: TutorMatchInput, v: StudentVector): RankedTutor {
     0.08 * ratingScore;
 
   // Экзамен — жёсткий гейт: без совпадения резкий штраф (но не 0, на случай пустой выдачи).
-  const base = examMatch ? trust : trust * 0.15;
+  let base = examMatch ? trust : trust * 0.15;
+
+  // Бэнд матч-теста: если знаем уровень студента — нудж ±10% по попаданию в диапазон.
+  if (examMatch) {
+    const fit = bandFit(t.teachBands?.[v.exam], v.exam, v.level);
+    if (fit != null) {
+      base *= 0.9 + 0.2 * fit;
+      if (fit >= 0.99) reasons.splice(1, 0, "в твоём диапазоне баллов");
+    }
+  }
+
   const percent = Math.round(Math.min(0.99, base) * 100);
 
   return { id: t.id, percent, reasons: reasons.slice(0, 3) };

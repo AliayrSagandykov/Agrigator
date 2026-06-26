@@ -7,6 +7,7 @@ import { getTutorCards } from "@/lib/tutors";
 import { getFavoriteKeys } from "@/lib/queries";
 import type { StudentGoal } from "@/lib/types";
 import { rankTutors } from "@/lib/match";
+import { normalizeLevel } from "@/lib/onboarding-data";
 import { TutorCard } from "@/components/tutor-card";
 import { getT } from "@/lib/locale";
 
@@ -22,6 +23,11 @@ export default async function MatchPage() {
   const L = getT().match;
 
   const [tutors, favs] = await Promise.all([getTutorCards(), getFavoriteKeys(user.id)]);
+
+  // Уровень студента по экзамену (из baseline) — для матча по диапазону тютора.
+  const baseline = goal.baselineScore ? parseFloat(goal.baselineScore) : NaN;
+  const studentLevel = Number.isFinite(baseline) ? normalizeLevel(goal.exam, baseline) : null;
+
   const ranked = rankTutors(
     tutors.map((t) => ({
       id: t.id,
@@ -34,8 +40,9 @@ export default async function MatchPage() {
       aiVerified: t.aiVerified,
       price: t.price,
       timezone: t.timezone,
+      teachBands: t.teachBands,
     })),
-    { exam: goal.exam, deadline: goal.deadline, timezone: user.timezone },
+    { exam: goal.exam, deadline: goal.deadline, timezone: user.timezone, level: studentLevel },
   );
 
   const byId = new Map(tutors.map((t) => [t.id, t]));

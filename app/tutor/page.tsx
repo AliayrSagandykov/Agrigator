@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Pencil, TrendingUp, CalendarClock, Check, ArrowRight } from "lucide-react";
+import { Pencil, TrendingUp, CalendarClock, Check, ArrowRight, Target } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { one } from "@/lib/db";
 import { parseJson, cn, formatDateTime, formatDelta, formatTenge } from "@/lib/utils";
+import { EXAM_OPTIONS, formatBand, type Band } from "@/lib/onboarding-data";
 import { computeTutorMetrics } from "@/lib/metrics";
 import { getTutorBookings, getTutorPayments } from "@/lib/queries";
 import { getPairsForUser } from "@/lib/pairs";
@@ -25,13 +26,18 @@ export default async function TutorDashboard() {
   if (user.role === "admin") redirect("/admin");
   if (user.role !== "tutor") redirect("/dashboard");
 
-  const profile = await one<{ photo: string | null; price: number; availabilityJson: string }>(
-    `select photo, price, "availabilityJson" from "TutorProfile" where "userId" = $1`,
+  const profile = await one<{
+    photo: string | null; price: number; availabilityJson: string;
+    teachBandsJson: string; matchPrefsJson: string;
+  }>(
+    `select photo, price, "availabilityJson", "teachBandsJson", "matchPrefsJson"
+     from "TutorProfile" where "userId" = $1`,
     [user.id],
   );
   if (!profile) redirect("/tutor/onboarding");
 
   const L = getT().tutorDash;
+  const W = getT().tutorWizard;
   const tz = user.timezone ?? undefined;
   const now = new Date();
   const [metrics, bookings, payments, pairs] = await Promise.all([
@@ -50,6 +56,11 @@ export default async function TutorDashboard() {
   // Холодный старт: нет ни уроков, ни броней — показываем стартовый чек-лист.
   const isNew = metrics.lessons === 0 && !hasBookings;
 
+  // Матч-тест: бэнды «кому помогаю» + параметры. Пройден, если есть параметры.
+  const bands = parseJson<Record<string, Band>>(profile.teachBandsJson, {});
+  const prefs = parseJson<Record<string, string[]>>(profile.matchPrefsJson, {});
+  const matchDone = Object.values(prefs).some((a) => Array.isArray(a) && a.length > 0);
+
   return (
     <div className="px-5 py-8 sm:px-8 lg:px-10">
       {/* Персонализированная шапка */}
@@ -67,6 +78,9 @@ export default async function TutorDashboard() {
           </Link>
         </div>
       </div>
+
+      {/* Матч-тест: предложение пройти, пока не настроен матчмейкинг */}
+      {!matchDone && <MatchBanner W={W} />}
 
       {/* Стартовый чек-лист — персонализация холодного старта */}
       {isNew && (
@@ -103,6 +117,24 @@ export default async function TutorDashboard() {
         <MetricStat value={formatTenge(released)} label={L.paidOut} />
         <MetricStat value={formatTenge(profile.price)} label={L.hourlyRate} />
       </div>
+
+      {/* Мой диапазон (бэнды матч-теста) */}
+      {matchDone && Object.keys(bands).length > 0 && (
+        <div className="mt-6">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-semibold">{W.myRange}</h2>
+            <Link href="/tutor/match" className="text-sm text-primary hover:underline">{L.profile}</Link>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(bands).map(([e, b]) => (
+              <span key={e} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium">
+                <span>{EXAM_OPTIONS.find((x) => x.value === e)?.emoji}</span>
+                {e} <span className="text-muted-foreground">{formatBand(e, b)}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Кабинеты учеников — центр удержания */}
       {pairs.length > 0 && (
@@ -197,6 +229,26 @@ function GettingStarted({
             </li>
           ))}
         </ol>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Баннер-предложение пройти матч-тест (пока матчмейкинг не настроен).
+function MatchBanner({ W }: { W: Dict["tutorWizard"] }) {
+  return (
+    <Card className="mt-6 overflow-hidden border-primary/30">
+      <CardContent className="flex flex-col items-start gap-4 bg-gradient-to-br from-primary/10 via-violet-500/10 to-sky-500/10 sm:flex-row sm:items-center">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-violet-600 text-white shadow-md">
+          <Target size={20} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="font-semibold">{W.matchTitle}</div>
+          <p className="text-sm text-muted-foreground">{W.matchIntro}</p>
+        </div>
+        <Link href="/tutor/match" className="shrink-0">
+          <Button size="sm">{W.matchStart}</Button>
+        </Link>
       </CardContent>
     </Card>
   );

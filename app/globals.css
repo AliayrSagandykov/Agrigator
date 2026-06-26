@@ -145,6 +145,45 @@ body {
   transform: none;
 }
 
+/* Стилизованный range-слайдер онбординга: трек залит до бегунка (--pct). */
+.agr-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to right,
+    hsl(var(--primary)) 0%,
+    hsl(var(--primary)) var(--pct, 50%),
+    hsl(var(--muted)) var(--pct, 50%),
+    hsl(var(--muted)) 100%
+  );
+  outline: none;
+  cursor: pointer;
+}
+.agr-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: hsl(var(--background));
+  border: 3px solid hsl(var(--primary));
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.2);
+  cursor: grab;
+  transition: transform 0.12s ease;
+}
+.agr-range::-webkit-slider-thumb:active { transform: scale(1.15); cursor: grabbing; }
+.agr-range::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: hsl(var(--background));
+  border: 3px solid hsl(var(--primary));
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.2);
+  cursor: grab;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
