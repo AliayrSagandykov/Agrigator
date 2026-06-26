@@ -51,10 +51,13 @@ npm run dev           # http://localhost:3000
 
 ### 1. Supabase (база)
 1. Создай проект на [supabase.com](https://supabase.com) (фри-тариф).
-2. **SQL Editor** → выполни миграции из `supabase/migrations/` по порядку:
-   `0001_init.sql`, затем `0002_schedule.sql` (и любые новые). Миграции после 0001
-   аддитивны и идемпотентны — на боевой базе с данными прогоняй только новые файлы.
-   _Альтернатива (чистая база):_ локально `DATABASE_URL=<строка 5432> npm run db:migrate`.
+2. **Применить миграции.** Проще всего — локально с боевой строкой подключения:
+   `DATABASE_URL="<строка 5432>" npm run db:migrate`. Команда **безопасна для боевой
+   базы**: ничего не дропает, ведёт учёт применённого в таблице `_migration` и
+   докатывает только новые файлы (существующая схема «бейзлайнится»). Поэтому при
+   обновлении (новые колонки матча и т.п.) достаточно снова прогнать `db:migrate`.
+   _Альтернатива:_ вставить новые `supabase/migrations/*.sql` в **SQL Editor** Supabase —
+   они идемпотентны (`if not exists`).
 3. **Project Settings → Database → Connection string.** Понадобятся две строки:
    - **Transaction pooler** (порт `6543`) → это `DATABASE_URL` для Vercel (serverless).
    - **Session pooler / Direct** (порт `5432`) → для разовых `db:migrate`/`db:seed`
@@ -147,9 +150,9 @@ legacy/                  старая vanilla-JS реализация (для с
 ```bash
 npm run dev         # дев-сервер
 npm run build       # прод-сборка
-npm run db:migrate  # применить схему к DATABASE_URL
+npm run db:migrate  # докатить новые миграции (безопасно, без дропа; учёт в _migration)
 npm run db:seed     # засеять демо-данными
-npm run db:reset    # migrate + seed заново
+npm run db:reset    # ПЕРЕсоздать с нуля: дроп таблиц + миграции + сид (только локально!)
 ```
 
 Все данные на сайте — демонстрационные.
