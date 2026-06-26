@@ -8,6 +8,7 @@ import { getFavoriteKeys } from "@/lib/queries";
 import type { StudentGoal } from "@/lib/types";
 import { rankTutors } from "@/lib/match";
 import { normalizeLevel } from "@/lib/onboarding-data";
+import { parseJson } from "@/lib/utils";
 import { TutorCard } from "@/components/tutor-card";
 import { getT } from "@/lib/locale";
 
@@ -24,9 +25,14 @@ export default async function MatchPage() {
 
   const [tutors, favs] = await Promise.all([getTutorCards(), getFavoriteKeys(user.id)]);
 
-  // Уровень студента по экзамену (из baseline) — для матча по диапазону тютора.
+  // Старт/цель студента (нормализованы по шкале экзамена) — для матча по диапазону.
   const baseline = goal.baselineScore ? parseFloat(goal.baselineScore) : NaN;
+  const targetNum = goal.targetScore ? parseFloat(goal.targetScore) : NaN;
   const studentLevel = Number.isFinite(baseline) ? normalizeLevel(goal.exam, baseline) : null;
+  const studentTarget = goal.targetScore
+    ? normalizeLevel(goal.exam, Number.isFinite(targetNum) ? targetNum : goal.targetScore)
+    : null;
+  const studentApproach = parseJson<string[]>(goal.approachJson, []);
 
   const ranked = rankTutors(
     tutors.map((t) => ({
@@ -41,8 +47,13 @@ export default async function MatchPage() {
       price: t.price,
       timezone: t.timezone,
       teachBands: t.teachBands,
+      prefs: t.matchPrefs,
     })),
-    { exam: goal.exam, deadline: goal.deadline, timezone: user.timezone, level: studentLevel },
+    {
+      exam: goal.exam, deadline: goal.deadline, timezone: user.timezone,
+      level: studentLevel, target: studentTarget,
+      cadence: goal.cadence, approach: studentApproach,
+    },
   );
 
   const byId = new Map(tutors.map((t) => [t.id, t]));
@@ -52,7 +63,13 @@ export default async function MatchPage() {
     <div className="container py-10">
       <h1 className="text-3xl font-bold">{L.title}</h1>
       <p className="mt-1 text-muted-foreground">
-        {goal.exam} · {L.deadlineLabels[goal.deadline as keyof typeof L.deadlineLabels] ?? goal.deadline} · {L.paceLabels[goal.pace as keyof typeof L.paceLabels] ?? goal.pace} · {L.styleLabels[goal.style as keyof typeof L.styleLabels] ?? goal.style} ·{" "}
+        <span className="font-medium text-foreground">{goal.exam}</span>
+        {(goal.baselineScore || goal.targetScore) && (
+          <> · {goal.baselineScore ?? "?"} <span className="text-primary">→</span> <span className="font-medium text-foreground">{goal.targetScore ?? "?"}</span></>
+        )}
+        {" · "}{L.deadlineLabels[goal.deadline as keyof typeof L.deadlineLabels] ?? goal.deadline}
+        {goal.cadence && <> · {goal.cadence} {L.perWeek}</>}
+        {" · "}
         <Link href="/onboarding" className="text-primary hover:underline">{L.change}</Link>
       </p>
 

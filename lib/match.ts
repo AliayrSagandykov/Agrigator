@@ -6,7 +6,7 @@
 // часовых поясов для онлайн-уроков. Без «стилей обучения» (v3).
 // ============================================================
 import { tzCompatibility, tzOffsetMinutes } from "@/lib/time";
-import { normalizeLevel, type Band } from "@/lib/onboarding-data";
+import { normalizeLevel, levelBucket, deadlineToHorizon, type Band, type MatchPrefs } from "@/lib/onboarding-data";
 
 const SHRINK_K = 4; // псевдо-счёт усадки малой выборки
 
@@ -22,13 +22,17 @@ export interface TutorMatchInput {
   price: number;
   timezone?: string | null;
   teachBands?: Record<string, Band>; // «кому помогаю» по экзаменам (матч-тест)
+  prefs?: MatchPrefs;                // каденс / горизонт / уровни / подход
 }
 
 export interface StudentVector {
   exam: string;
-  deadline: string; // "1-2m" | "3-6m" | "flex"
+  deadline: string; // "1-2m" | "3-6m" | "6m+" | "flex"
   timezone?: string | null;
-  level?: number | null; // нормализованный 0..1 текущий/целевой уровень по экзамену
+  level?: number | null;  // нормализованный 0..1 стартовый уровень
+  target?: number | null; // нормализованный 0..1 целевой балл
+  cadence?: string | null;   // "1" | "2" | "3" | "4+"
+  approach?: string[];       // предпочитаемые подходы
 }
 
 /**
@@ -94,13 +98,42 @@ export function scoreTutor(t: TutorMatchInput, v: StudentVector): RankedTutor {
   // Экзамен — жёсткий гейт: без совпадения резкий штраф (но не 0, на случай пустой выдачи).
   let base = examMatch ? trust : trust * 0.15;
 
-  // Бэнд матч-теста: если знаем уровень студента — нудж ±10% по попаданию в диапазон.
+  // Совместимость матч-теста (бэнд · каденс · горизонт · уровень · подход):
+  // мягкий нудж ±12% поверх верифицированных метрик — персонализирует порядок,
+  // но не перебивает доказанный результат (честный матч).
   if (examMatch) {
-    const fit = bandFit(t.teachBands?.[v.exam], v.exam, v.level);
-    if (fit != null) {
-      base *= 0.9 + 0.2 * fit;
-      if (fit >= 0.99) reasons.splice(1, 0, "в твоём диапазоне баллов");
+    let sum = 0;
+    let n = 0;
+    const add = (fit: number | null) => { if (fit != null) { sum += fit; n++; } };
+
+    // Бэнд: целевой балл (или старт) попадает в диапазон тютора.
+    const lvlForBand = v.target ?? v.level;
+    const bf = bandFit(t.teachBands?.[v.exam], v.exam, lvlForBand);
+    add(bf);
+    if (bf != null && bf >= 0.99) reasons.splice(1, 0, "в твоём диапазоне баллов");
+
+    // Частота занятий.
+    if (t.prefs?.cadence?.length && v.cadence) {
+      const ok = t.prefs.cadence.includes(v.cadence);
+      add(ok ? 1 : 0);
+      if (ok) reasons.push("совпал график");
     }
+    // Горизонт подготовки (из срока экзамена).
+    if (t.prefs?.horizon?.length && v.deadline) {
+      add(t.prefs.horizon.includes(deadlineToHorizon(v.deadline)) ? 1 : 0);
+    }
+    // Уровень студента в фокусе тютора.
+    if (t.prefs?.levels?.length && v.level != null) {
+      add(t.prefs.levels.includes(levelBucket(v.level)) ? 1 : 0);
+    }
+    // Пересечение по подходу.
+    if (t.prefs?.approach?.length && v.approach?.length) {
+      const ok = v.approach.some((a) => t.prefs!.approach.includes(a));
+      add(ok ? 1 : 0);
+      if (ok) reasons.push("совпал подход");
+    }
+
+    if (n > 0) base *= 0.88 + 0.24 * (sum / n);
   }
 
   const percent = Math.round(Math.min(0.99, base) * 100);

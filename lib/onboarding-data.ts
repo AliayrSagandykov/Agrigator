@@ -104,6 +104,18 @@ function roundToStep(v: number, s: Extract<ExamScale, { kind: "numeric" }>): num
   return Math.round(v / s.step) * s.step;
 }
 
+/** Стартовые значения уровней для интейка студента (старт ниже, цель выше). */
+export function studentDefaults(exam: string): { start: number | string; target: number | string } {
+  const s = EXAM_SCALES[exam];
+  if (!s) return { start: 0, target: 0 };
+  if (s.kind === "numeric") {
+    const span = s.max - s.min;
+    return { start: roundToStep(s.min + span * 0.3, s), target: roundToStep(s.min + span * 0.75, s) };
+  }
+  const n = s.grades.length;
+  return { start: s.grades[Math.min(1, n - 1)], target: s.grades[n - 1] };
+}
+
 /** Позиция значения на шкале в 0..1 (для матча и сравнения бэндов). */
 export function normalizeLevel(exam: string, value: number | string): number {
   const s = EXAM_SCALES[exam];
@@ -187,6 +199,50 @@ export interface MatchPrefs {
 export const EMPTY_PREFS: MatchPrefs = { cadence: [], horizon: [], levels: [], approach: [] };
 
 // ── Примеры-плейсхолдеры для «о себе» и методики ────────────
+// ── Интейк студента (симметрично матч-тесту тютора) ────────
+export const MAX_STUDENT_APPROACH = 2;
+
+// Сроки до экзамена (→ горизонт тютора).
+export const TIMELINE_OPTIONS: ChoiceOption[] = [
+  { value: "1-2m", label: "Через 1–2 месяца", emoji: "⚡" },
+  { value: "3-6m", label: "Через 3–6 месяцев", emoji: "📅" },
+  { value: "6m+", label: "Позже 6 месяцев", emoji: "🌱" },
+  { value: "flex", label: "Не привязан к дате", emoji: "🧭" },
+];
+
+// Желаемая частота (→ каденс тютора). Значения совпадают с CADENCE_OPTIONS.
+export const STUDENT_CADENCE_OPTIONS: ChoiceOption[] = [
+  { value: "1", label: "1 раз/нед", emoji: "🟢" },
+  { value: "2", label: "2 раза/нед", emoji: "🔵" },
+  { value: "3", label: "3 раза/нед", emoji: "🟣" },
+  { value: "4+", label: "4+ раз/нед", emoji: "🔥" },
+];
+
+// Подход, который заходит студенту. Значения совпадают с APPROACH_OPTIONS
+// (для пересечения в матче), но формулировки — от лица ученика.
+export const STUDENT_APPROACH_OPTIONS: ChoiceOption[] = [
+  { value: "structured", label: "Чёткий план и дисциплина", emoji: "🧱" },
+  { value: "supportive", label: "Поддержка и мотивация", emoji: "🤝" },
+  { value: "exam_hacks", label: "Лайфхаки для экзамена", emoji: "🎯" },
+  { value: "fundamentals", label: "Глубокое понимание", emoji: "🏛️" },
+  { value: "practice", label: "Много практики", emoji: "✍️" },
+  { value: "personalized", label: "Упор на мои пробелы", emoji: "🧩" },
+];
+
+/** Корзина уровня по нормализованному 0..1 (для матча с tutor.levels). */
+export function levelBucket(norm: number): "beginner" | "intermediate" | "advanced" {
+  if (norm < 0.4) return "beginner";
+  if (norm < 0.75) return "intermediate";
+  return "advanced";
+}
+
+/** Срок экзамена → горизонт подготовки тютора. */
+export function deadlineToHorizon(deadline: string): string {
+  if (deadline === "1-2m") return "sprint";
+  if (deadline === "3-6m") return "standard";
+  return "long"; // 6m+ / flex
+}
+
 export const BIO_PLACEHOLDER =
   "Например: Готовлю к IELTS 5 лет, мой балл — 8.5. Специализируюсь на Writing и Speaking. " +
   "За курс поднимаю в среднем на 1.0–1.5 балла. Люблю разбирать реальные эссе студента построчно.";
