@@ -178,7 +178,7 @@ const ru = {
     },
   },
   tutorDash: {
-    tutorCabinet: "Кабинет тьютора", schedule: "Расписание", profile: "Профиль",
+    tutorCabinet: "Кабинет тьютора", schedule: "Расписание", profile: "Профиль", retake: "Перепройти",
     portfolio: "Твой портфель результатов", avgDelta: "средняя дельта", results: "рез.",
     adjusted: "с поправкой", droppedCounted: "учтены бросившие", continuation: "доходимость",
     lessons: "уроков", starter: "стартовая",
@@ -237,6 +237,8 @@ const ru = {
     format: "Формат", city: "Город", experience: "Опыт", years: "лет", languages: "Языки",
     directContacts: "Прямые контакты", phoneShort: "Тел:",
     proContacts: "Доступны в Pro. Рекомендуем бронь через платформу — так результат засчитается в метрики.",
+    previewBadge: "Так тебя видят ученики", editProfile: "Редактировать профиль",
+    retakeTest: "Перепройти матч-тест", ownerToDashboard: "В кабинет",
   },
   favorites: {
     title: "Избранное", sub: "Тюторы, которых ты сохранил.",
@@ -515,7 +517,7 @@ const kk: Dict = {
     },
   },
   tutorDash: {
-    tutorCabinet: "Тьютор кабинеті", schedule: "Кесте", profile: "Профиль",
+    tutorCabinet: "Тьютор кабинеті", schedule: "Кесте", profile: "Профиль", retake: "Қайта өту",
     portfolio: "Нәтижелер портфолиоң", avgDelta: "орташа өсім", results: "нәт.",
     adjusted: "түзетумен", droppedCounted: "тастағандар ескерілді", continuation: "жеткізу",
     lessons: "сабақ", starter: "бастапқы",
@@ -571,6 +573,8 @@ const kk: Dict = {
     format: "Формат", city: "Қала", experience: "Тәжірибе", years: "жыл", languages: "Тілдер",
     directContacts: "Тікелей байланыс", phoneShort: "Тел:",
     proContacts: "Pro-да қолжетімді. Платформа арқылы брондауды ұсынамыз — нәтиже метрикаға есептеледі.",
+    previewBadge: "Оқушылар сені осылай көреді", editProfile: "Профильді өзгерту",
+    retakeTest: "Матч-тестен қайта өту", ownerToDashboard: "Кабинетке",
   },
   favorites: {
     title: "Таңдаулылар", sub: "Сен сақтаған тьюторлар.",
@@ -847,7 +851,7 @@ const en: Dict = {
     },
   },
   tutorDash: {
-    tutorCabinet: "Tutor dashboard", schedule: "Schedule", profile: "Profile",
+    tutorCabinet: "Tutor dashboard", schedule: "Schedule", profile: "Profile", retake: "Retake",
     portfolio: "Your results portfolio", avgDelta: "avg. delta", results: "res.",
     adjusted: "adjusted", droppedCounted: "dropouts counted", continuation: "continuation",
     lessons: "lessons", starter: "starter",
@@ -903,6 +907,8 @@ const en: Dict = {
     format: "Format", city: "City", experience: "Experience", years: "yrs", languages: "Languages",
     directContacts: "Direct contacts", phoneShort: "Tel:",
     proContacts: "Available on Pro. We recommend booking through the platform — that way the result counts toward metrics.",
+    previewBadge: "This is how students see you", editProfile: "Edit profile",
+    retakeTest: "Retake match test", ownerToDashboard: "To dashboard",
   },
   favorites: {
     title: "Favorites", sub: "Tutors you saved.",

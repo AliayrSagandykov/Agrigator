@@ -40,9 +40,9 @@ export function CollapsibleSidebar({ children }: { children: React.ReactNode }) 
         onClick={toggle}
         aria-label="Показать панель"
         title="Показать панель"
-        className="fixed left-3 top-20 z-30 hidden h-9 w-9 items-center justify-center rounded-lg border border-border bg-card shadow-md transition-colors hover:bg-muted lg:flex"
+        className="fixed left-2 top-[4.5rem] z-30 hidden h-7 w-7 items-center justify-center rounded-md border border-border bg-card text-muted-foreground shadow-sm transition-colors hover:bg-muted hover:text-foreground lg:flex"
       >
-        <PanelLeft size={18} />
+        <PanelLeft size={15} />
       </button>
     );
   }
@@ -56,10 +56,10 @@ export function CollapsibleSidebar({ children }: { children: React.ReactNode }) 
           aria-label="Свернуть панель"
           title="Свернуть панель"
           className={cn(
-            "absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+            "absolute right-1.5 top-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground/70 transition-colors hover:bg-muted hover:text-foreground",
           )}
         >
-          <PanelLeftClose size={16} />
+          <PanelLeftClose size={14} />
         </button>
         {children}
       </div>

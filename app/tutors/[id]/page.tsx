@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BadgeCheck, ShieldCheck, Star } from "lucide-react";
+import { BadgeCheck, ShieldCheck, Star, Eye, Pencil } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getTutorByUserId } from "@/lib/tutors";
 import { computeTutorMetrics } from "@/lib/metrics";
@@ -27,9 +27,24 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
 
   const L = getT().profile;
   const isFav = user ? (await getFavoriteKeys(user.id)).has(`tutor:${params.id}`) : false;
+  const isOwner = !!user && user.id === params.id && user.role === "tutor";
 
   return (
     <div className="container py-10">
+      {/* Превью владельца: «так тебя видят ученики» + правка без повторного визарда */}
+      {isOwner && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-accent/40 p-3">
+          <div className="flex items-center gap-2 text-sm font-medium text-accent-foreground">
+            <Eye size={16} /> {L.previewBadge}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/tutor"><Button size="sm" variant="ghost">{L.ownerToDashboard}</Button></Link>
+            <Link href="/tutor/match"><Button size="sm" variant="outline">{L.retakeTest}</Button></Link>
+            <Link href="/tutor/onboarding"><Button size="sm"><Pencil size={14} /> {L.editProfile}</Button></Link>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
         {/* MAIN */}
         <div className="space-y-6">
