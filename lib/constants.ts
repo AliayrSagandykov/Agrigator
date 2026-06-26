@@ -87,6 +87,12 @@ export const RETENTION_REASON_LABEL: Record<string, string> = {
   expensive: "дорого",
 };
 
+// Палитра цветов аватара пользователя (выбор в настройках аккаунта).
+export const AVATAR_COLORS = [
+  "#7c3aed", "#0ea5e9", "#16a34a", "#f59e0b", "#ef4444",
+  "#ec4899", "#14b8a6", "#6366f1", "#f97316", "#8b5cf6",
+] as const;
+
 // Градиенты карточек (повторяют легаси-палитру).
 export const GRADIENTS: Record<string, string> = {
   g1: "from-indigo-500 to-violet-500",

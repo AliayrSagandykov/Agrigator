@@ -7,6 +7,7 @@ import { getFavoriteKeys } from "@/lib/queries";
 import { getLocale, getT } from "@/lib/locale";
 import type { Dict } from "@/lib/i18n";
 import { SiteHeader } from "@/components/site-header";
+import { DashboardSidebar } from "@/components/dashboard-sidebar";
 import { Analytics } from "@/components/analytics";
 
 export const metadata: Metadata = {
@@ -28,6 +29,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const locale = getLocale();
   const t = getT();
 
+  // Сайдбар кабинета не исчезает на всех страницах залогиненного студента.
+  const showSidebar = !!user && user.role === "student";
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
@@ -35,7 +39,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="min-h-screen flex flex-col">
         <SiteHeader user={user ? toPublicUser(user) : null} favCount={favCount} />
-        <main className="flex-1">{children}</main>
+        {showSidebar ? (
+          <div className="flex flex-1 flex-col lg:flex-row">
+            <DashboardSidebar labels={t.dash.sidebar} studentName={user.name} />
+            <main className="min-w-0 flex-1">{children}</main>
+          </div>
+        ) : (
+          <main className="flex-1">{children}</main>
+        )}
         <Footer t={t} />
         <Analytics />
       </body>
