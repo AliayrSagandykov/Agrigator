@@ -64,9 +64,9 @@ function Footer({ t }: { t: Dict }) {
           </div>
           <p className="mt-2 max-w-xs text-sm text-muted-foreground">{t.footer.tagline}</p>
         </div>
-        <FooterCol title={t.footer.exams} links={[["SAT", "/catalog?exam=SAT"], ["IELTS", "/catalog?exam=IELTS"], ["ЕНТ", "/catalog?exam=ЕНТ"], ["НМТ", "/catalog?exam=НМТ"]]} />
-        <FooterCol title={t.footer.platform} links={[[t.nav.tutors, "/catalog"], [t.footer.aiMatch, "/onboarding"], [t.nav.forTutors, "/for-tutors"]]} />
-        <FooterCol title={t.footer.account} links={[[t.nav.login, "/login"], [t.nav.register, "/register"], [t.nav.dashboard, "/dashboard"]]} />
+        <FooterCol title={t.footer.exams} links={[["IELTS", "/catalog?exam=IELTS"], ["SAT", "/catalog?exam=SAT"], ["ЕНТ", "/catalog?exam=ЕНТ"], ["TOEFL", "/catalog?exam=TOEFL"]]} />
+        <FooterCol title={t.footer.platform} links={[[t.nav.tutors, "/catalog"], [t.nav.forTutors, "/for-tutors"], [t.nav.contacts, "/contacts"], [t.footer.support, "/contacts#donate"]]} />
+        <FooterCol title={t.footer.account} links={[[t.nav.login, "/login"], [t.nav.register, "/register"]]} />
       </div>
       <div className="border-t border-border py-4 text-center text-xs text-muted-foreground">
         {t.footer.rights}
