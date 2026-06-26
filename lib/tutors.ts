@@ -3,6 +3,7 @@ import { cache } from "react";
 import { query, one } from "@/lib/db";
 import { parseJson } from "@/lib/utils";
 import type { TutorProfile } from "@/lib/types";
+import { EMPTY_PREFS, type Band, type MatchPrefs } from "@/lib/onboarding-data";
 
 // ============================================================
 // View-model тютора для витрины (каталог/матч/профиль).
@@ -65,6 +66,8 @@ export interface TutorVM {
   rating: number;
   metrics: TutorMetrics;
   contacts: Contacts;
+  teachBands: Record<string, Band>;
+  matchPrefs: MatchPrefs;
 }
 
 // Строка JOIN-а профиля с именем/цветом/поясом пользователя.
@@ -121,6 +124,8 @@ export function toTutorVM(p: ProfileRow): TutorVM {
       retention: p.statRetention,
     },
     contacts: parseJson<Contacts>(p.contactsJson, {}),
+    teachBands: parseJson<Record<string, Band>>(p.teachBandsJson, {}),
+    matchPrefs: parseJson<MatchPrefs>(p.matchPrefsJson, EMPTY_PREFS),
   };
 }
 
