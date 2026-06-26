@@ -22,9 +22,11 @@ type Item = {
 export function TutorSidebar({
   labels,
   tutorName,
+  tutorId,
 }: {
   labels: Dict["tutorDash"]["sidebar"];
   tutorName: string;
+  tutorId: string;
 }) {
   const pathname = usePathname();
 
@@ -45,7 +47,7 @@ export function TutorSidebar({
       items: [
         { key: "students", label: labels.students, href: "/tutor#rooms", Icon: Users, gradient: "from-rose-500 to-pink-500", active: () => false },
         { key: "portfolio", label: labels.portfolio, href: "/tutor#portfolio", Icon: TrendingUp, gradient: "from-emerald-500 to-teal-500", active: () => false },
-        { key: "profile", label: labels.profile, href: "/tutor/onboarding", Icon: UserCog, gradient: "from-amber-500 to-orange-500", active: (p) => p.startsWith("/tutor/onboarding") },
+        { key: "profile", label: labels.profile, href: `/tutors/${tutorId}`, Icon: UserCog, gradient: "from-amber-500 to-orange-500", active: (p) => p.startsWith("/tutors/") },
       ],
     },
   ];

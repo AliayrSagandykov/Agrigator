@@ -47,7 +47,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {showSidebar && user ? (
           <div className="flex flex-1 flex-col lg:flex-row">
             {user.role === "tutor" ? (
-              <TutorSidebar labels={t.tutorDash.sidebar} tutorName={user.name} />
+              <TutorSidebar labels={t.tutorDash.sidebar} tutorName={user.name} tutorId={user.id} />
             ) : (
               <DashboardSidebar labels={t.dash.sidebar} studentName={user.name} />
             )}

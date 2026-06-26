@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Pencil, TrendingUp, CalendarClock, Check, ArrowRight, Target } from "lucide-react";
+import { Eye, TrendingUp, CalendarClock, Check, ArrowRight, Target } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { one } from "@/lib/db";
 import { parseJson, cn, formatDateTime, formatDelta, formatTenge } from "@/lib/utils";
@@ -73,8 +73,8 @@ export default async function TutorDashboard() {
           <Link href="/tutor/schedule">
             <Button variant="outline"><CalendarClock size={15} /> {L.schedule}</Button>
           </Link>
-          <Link href="/tutor/onboarding">
-            <Button variant="outline"><Pencil size={15} /> {L.profile}</Button>
+          <Link href={`/tutors/${user.id}`}>
+            <Button variant="outline"><Eye size={15} /> {L.profile}</Button>
           </Link>
         </div>
       </div>
@@ -123,7 +123,7 @@ export default async function TutorDashboard() {
         <div className="mt-6">
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-sm font-semibold">{W.myRange}</h2>
-            <Link href="/tutor/match" className="text-sm text-primary hover:underline">{L.profile}</Link>
+            <Link href="/tutor/match" className="text-sm text-primary hover:underline">{L.retake}</Link>
           </div>
           <div className="flex flex-wrap gap-2">
             {Object.entries(bands).map(([e, b]) => (

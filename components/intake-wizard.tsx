@@ -15,16 +15,27 @@ import type { Dict } from "@/lib/i18n";
 // сроки, частота, подход. Выбор вместо ввода; одиночные шаги авто-переходят.
 const STEPS = 6;
 
-export function IntakeWizard({ labels: L }: { labels: Dict["intake"] }) {
+// Уже сохранённые ответы — чтобы интейк ПОМНИЛ выбор, а не начинался с нуля.
+export interface IntakeInitial {
+  exam: string;
+  startScore: string | null;
+  targetScore: string | null;
+  deadline: string;
+  cadence: string | null;
+  approach: string[];
+}
+
+export function IntakeWizard({ initial, labels: L }: { initial?: IntakeInitial; labels: Dict["intake"] }) {
   const router = useRouter();
+  const d = initial?.exam ? studentDefaults(initial.exam) : { start: "", target: "" };
   const [step, setStep] = useState(0);
-  const [exam, setExam] = useState("");
-  const [startLevel, setStartLevel] = useState<number | string>("");
-  const [startKnown, setStartKnown] = useState(true);
-  const [target, setTarget] = useState<number | string>("");
-  const [timeline, setTimeline] = useState("");
-  const [cadence, setCadence] = useState("");
-  const [approach, setApproach] = useState<string[]>([]);
+  const [exam, setExam] = useState(initial?.exam ?? "");
+  const [startLevel, setStartLevel] = useState<number | string>(initial?.startScore ?? d.start);
+  const [startKnown, setStartKnown] = useState(initial ? initial.startScore != null : true);
+  const [target, setTarget] = useState<number | string>(initial?.targetScore ?? d.target);
+  const [timeline, setTimeline] = useState(initial?.deadline ?? "");
+  const [cadence, setCadence] = useState(initial?.cadence ?? "");
+  const [approach, setApproach] = useState<string[]>(initial?.approach ?? []);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
