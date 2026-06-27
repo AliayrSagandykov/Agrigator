@@ -1,5 +1,5 @@
 import "server-only";
-import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { query, one } from "@/lib/db";
 import { parseJson } from "@/lib/utils";
 import type { TutorProfile } from "@/lib/types";
@@ -124,18 +124,28 @@ export function toTutorVM(p: ProfileRow): TutorVM {
   };
 }
 
-// cache(): дедупликация в пределах одного запроса (напр. каталог + сайдбары).
-export const getTutorCards = cache(async (): Promise<TutorVM[]> => {
-  const rows = await query<ProfileRow>(
-    `${SELECT_TUTOR} order by p.sponsored desc, p.rating desc`,
-  );
-  return rows.map(toTutorVM);
-});
+// Список тюторов одинаков для всех → кэшируем между запросами в Next Data Cache.
+// Большинство заходов на /catalog, / и / профиль обслуживаются из кэша (0 round-trip
+// до Токио вместо ~160 мс). Инвалидация — revalidateTag("tutors") при правках.
+export const getTutorCards = unstable_cache(
+  async (): Promise<TutorVM[]> => {
+    const rows = await query<ProfileRow>(
+      `${SELECT_TUTOR} order by p.sponsored desc, p.rating desc`,
+    );
+    return rows.map(toTutorVM);
+  },
+  ["tutor-cards"],
+  { revalidate: 120, tags: ["tutors"] },
+);
 
-export const getTutorByUserId = cache(async (userId: string): Promise<TutorVM | null> => {
-  const row = await one<ProfileRow>(`${SELECT_TUTOR} where p."userId" = $1`, [userId]);
-  return row ? toTutorVM(row) : null;
-});
+export const getTutorByUserId = unstable_cache(
+  async (userId: string): Promise<TutorVM | null> => {
+    const row = await one<ProfileRow>(`${SELECT_TUTOR} where p."userId" = $1`, [userId]);
+    return row ? toTutorVM(row) : null;
+  },
+  ["tutor-by-id"],
+  { revalidate: 120, tags: ["tutors"] },
+);
 
 /** Тюторы из избранного пользователя (ключ "tutor:<userId>"). */
 export async function getFavoriteTutors(userId: string): Promise<TutorVM[]> {

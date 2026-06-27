@@ -3,7 +3,6 @@ import Link from "next/link";
 import "./globals.css";
 import { getCurrentUser } from "@/lib/auth";
 import { toPublicUser } from "@/lib/auth";
-import { getFavoriteKeys } from "@/lib/queries";
 import { getLocale, getT } from "@/lib/locale";
 import type { Dict } from "@/lib/i18n";
 import { SiteHeader } from "@/components/site-header";
@@ -25,7 +24,6 @@ const themeScript = `try{var t=localStorage.getItem('agr-theme');if(t==='dark'){
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
-  const favCount = user && user.role === "student" ? (await getFavoriteKeys(user.id)).size : 0;
   const locale = getLocale();
   const t = getT();
 
@@ -38,7 +36,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-screen flex flex-col">
-        <SiteHeader user={user ? toPublicUser(user) : null} favCount={favCount} />
+        <SiteHeader user={user ? toPublicUser(user) : null} />
         {showSidebar ? (
           <div className="flex flex-1 flex-col lg:flex-row">
             <DashboardSidebar labels={t.dash.sidebar} studentName={user.name} />

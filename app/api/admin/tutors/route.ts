@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { query, one } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -25,5 +26,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Неизвестное действие" }, { status: 400 });
   }
 
+  revalidateTag("tutors"); // сбросить кэш витрины тюторов
   return NextResponse.json({ ok: true });
 }

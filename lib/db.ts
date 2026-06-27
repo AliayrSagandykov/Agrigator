@@ -21,12 +21,19 @@ const isLocal = /localhost|127\.0\.0\.1/.test(connectionString);
 
 const globalForPg = globalThis as unknown as { pgPool?: Pool };
 
+// На serverless (Vercel prod) держим коннектов мало — много инстансов делят
+// пул Supabase. Но один долгоживущий процесс (dev / next start) выигрывает от
+// большего пула: параллельные запросы страницы не встают в очередь по 160 мс.
+const isServerless = process.env.NODE_ENV === "production" && !isLocal;
+
 export const pool =
   globalForPg.pgPool ??
   new Pool({
     connectionString,
     ssl: isLocal ? false : { rejectUnauthorized: false },
-    max: isLocal ? 10 : 3, // на serverless держим коннектов мало — пул на стороне Supabase
+    max: isServerless ? 3 : 10,
+    keepAlive: true, // держим TCP-соединение тёплым — меньше дорогих реконнектов
+    idleTimeoutMillis: 30_000,
   });
 
 if (process.env.NODE_ENV !== "production") globalForPg.pgPool = pool;

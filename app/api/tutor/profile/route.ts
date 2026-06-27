@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { query } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { isValidTimeZone } from "@/lib/time";
@@ -56,5 +57,6 @@ export async function POST(req: Request) {
     await query(`update "User" set timezone = $1 where id = $2`, [tz, user.id]);
   }
 
+  revalidateTag("tutors"); // профиль изменился → сбросить кэш витрины
   return NextResponse.json({ ok: true });
 }
