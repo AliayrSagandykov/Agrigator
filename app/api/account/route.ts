@@ -34,7 +34,12 @@ export async function POST(req: Request) {
     const p = body.photo;
     if (p == null || p === "") {
       photo = null;
-    } else if (typeof p === "string" && /^(data:image\/|https?:\/\/)/.test(p) && p.length <= 700_000) {
+    } else if (
+      typeof p === "string" &&
+      // только растровые data-URL (без svg → защита от XSS через SVG) либо https-ссылка
+      /^(data:image\/(png|jpe?g|webp|gif|avif);base64,|https:\/\/)/.test(p) &&
+      p.length <= 700_000
+    ) {
       photo = p;
     } else {
       return NextResponse.json({ error: "photo" }, { status: 400 });

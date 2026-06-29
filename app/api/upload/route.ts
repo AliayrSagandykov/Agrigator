@@ -11,6 +11,11 @@ export async function POST(req: Request) {
   if (!(file instanceof File)) return NextResponse.json({ error: "Нет файла" }, { status: 400 });
   if (file.size > 8 * 1024 * 1024) return NextResponse.json({ error: "Файл больше 8 МБ" }, { status: 400 });
 
+  // Только score reports: изображения и PDF. Не пускаем html/svg/js в публичный бакет.
+  const ALLOWED = new Set(["image/png", "image/jpeg", "image/webp", "image/gif", "application/pdf"]);
+  if (!ALLOWED.has(file.type))
+    return NextResponse.json({ error: "Можно загрузить только изображение или PDF" }, { status: 400 });
+
   const bytes = await file.arrayBuffer();
   const url = await uploadReport(bytes, file.name, file.type);
 

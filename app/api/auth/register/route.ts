@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
 import { query, one } from "@/lib/db";
 import { hashPassword, createSession, toPublicUser } from "@/lib/auth";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 import type { User } from "@/lib/types";
 
 const AVATAR_COLORS = ["#7c3aed", "#0ea5e9", "#16a34a", "#f59e0b", "#ef4444", "#ec4899"];
 
 export async function POST(req: Request) {
+  // Анти-абуз: не больше 5 регистраций за 10 минут с одного IP.
+  const rl = rateLimit(`register:${clientIp(req)}`, 5, 10 * 60_000);
+  if (!rl.ok)
+    return NextResponse.json(
+      { error: "Слишком много попыток. Попробуйте позже." },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
+    );
+
   const body = await req.json().catch(() => ({}));
   const name = String(body.name ?? "").trim();
   const email = String(body.email ?? "").toLowerCase().trim();
