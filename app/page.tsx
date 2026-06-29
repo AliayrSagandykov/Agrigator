@@ -10,16 +10,16 @@ import {
   TrendingUp,
   Repeat,
   GraduationCap,
-  Globe,
+  Plane,
+  Compass,
   Languages,
-  Calculator,
-  PenTool,
   Landmark,
-  BookOpen,
-  FlaskConical,
-  Sigma,
+  Library,
+  Atom,
+  Award,
   Briefcase,
-  BrainCircuit,
+  Brain,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -35,17 +35,17 @@ import { formatPrice } from "@/lib/utils";
 // Метаданные экзаменов-категорий: иконка, дуотон-градиент и целевой ориентир.
 // Значения цели локале-нейтральны (числа/буквы), порядок — приоритет показа.
 const CATEGORY_META: { exam: string; Icon: LucideIcon; gradient: string; goal: string }[] = [
-  { exam: "IELTS", Icon: Globe, gradient: "from-violet-500 to-indigo-500", goal: "Band 7.5+" },
-  { exam: "SAT", Icon: Calculator, gradient: "from-sky-500 to-cyan-500", goal: "1500+" },
+  { exam: "IELTS", Icon: Plane, gradient: "from-violet-500 to-indigo-500", goal: "Band 7.5+" },
+  { exam: "SAT", Icon: Compass, gradient: "from-sky-500 to-cyan-500", goal: "1500+" },
   { exam: "TOEFL", Icon: Languages, gradient: "from-emerald-500 to-teal-500", goal: "100+ iBT" },
   { exam: "ЕНТ", Icon: GraduationCap, gradient: "from-amber-500 to-orange-500", goal: "120+" },
   { exam: "NUET", Icon: Landmark, gradient: "from-rose-500 to-pink-500", goal: "170+" },
-  { exam: "IB", Icon: BookOpen, gradient: "from-fuchsia-500 to-purple-500", goal: "40 / 45" },
-  { exam: "A-Level", Icon: FlaskConical, gradient: "from-blue-500 to-violet-500", goal: "A*/A" },
-  { exam: "AP", Icon: Sigma, gradient: "from-cyan-500 to-blue-500", goal: "5 / 5" },
+  { exam: "IB", Icon: Library, gradient: "from-fuchsia-500 to-purple-500", goal: "40 / 45" },
+  { exam: "A-Level", Icon: Atom, gradient: "from-blue-500 to-violet-500", goal: "A*/A" },
+  { exam: "AP", Icon: Award, gradient: "from-cyan-500 to-blue-500", goal: "5 / 5" },
   { exam: "GMAT", Icon: Briefcase, gradient: "from-indigo-500 to-blue-500", goal: "700+" },
-  { exam: "GRE", Icon: BrainCircuit, gradient: "from-teal-500 to-emerald-500", goal: "165+" },
-  { exam: "ACT", Icon: PenTool, gradient: "from-orange-500 to-rose-500", goal: "32+" },
+  { exam: "GRE", Icon: Brain, gradient: "from-teal-500 to-emerald-500", goal: "165+" },
+  { exam: "ACT", Icon: Target, gradient: "from-orange-500 to-rose-500", goal: "32+" },
 ];
 
 export default async function HomePage() {
@@ -163,21 +163,30 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ───────── БЕГУЩАЯ СТРОКА ЭКЗАМЕНОВ ───────── */}
+      {/* ───────── БЕГУЩАЯ СТРОКА ЭКЗАМЕНОВ (кликабельная) ───────── */}
       <section className="border-b border-border bg-muted/20 py-5">
         <div className="marquee-mask overflow-hidden">
-          <div className="flex w-max items-center gap-3 animate-marquee hover:[animation-play-state:paused]">
-            {[...CATEGORY_META, ...CATEGORY_META].map((c, i) => (
-              <div
-                key={i}
-                className="flex shrink-0 items-center gap-2 rounded-full border border-border bg-card px-4 py-2 shadow-sm"
-              >
-                <span
-                  className={`flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br ${c.gradient} text-white`}
-                >
-                  <c.Icon size={13} strokeWidth={2.4} />
-                </span>
-                <span className="text-sm font-semibold">{c.exam}</span>
+          {/* Две идентичные копии: трек = 2 набора, сдвиг −50% = ровно один набор → бесшовно.
+              Отступ задаём через mr на каждой плитке (не flex gap), иначе −50% не совпадает. */}
+          <div className="flex w-max items-center animate-marquee hover:[animation-play-state:paused]">
+            {[0, 1].map((copy) => (
+              <div key={copy} className="flex shrink-0 items-center" aria-hidden={copy === 1}>
+                {CATEGORY_META.map((c) => (
+                  <Link
+                    key={c.exam}
+                    href={`/catalog?exam=${encodeURIComponent(c.exam)}`}
+                    aria-label={c.exam}
+                    tabIndex={copy === 1 ? -1 : undefined}
+                    className="group mr-3 flex shrink-0 cursor-pointer items-center gap-2 rounded-full border border-border bg-card px-4 py-2 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"
+                  >
+                    <span
+                      className={`flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br ${c.gradient} text-white shadow-sm transition-transform duration-300 group-hover:scale-110`}
+                    >
+                      <c.Icon size={15} strokeWidth={2.3} />
+                    </span>
+                    <span className="text-sm font-semibold">{c.exam}</span>
+                  </Link>
+                ))}
               </div>
             ))}
           </div>
