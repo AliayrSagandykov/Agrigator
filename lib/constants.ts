@@ -6,8 +6,9 @@
 export const PRIMARY_EXAMS = ["SAT", "IELTS", "НМТ", "ЕНТ"] as const;
 
 // Полный список экзаменов агрегатора (каталог шире, чем интейк-фокус).
+// GMAT/GRE/ACT убраны — непопулярны на казахстанском рынке (фокус региона).
 export const ALL_EXAMS = [
-  "IELTS", "TOEFL", "SAT", "ACT", "IB", "A-Level", "AP", "GMAT", "GRE", "ЕНТ", "НМТ", "NUET",
+  "IELTS", "TOEFL", "SAT", "IB", "A-Level", "AP", "ЕНТ", "НМТ", "NUET",
 ] as const;
 
 export const CITIES = ["Онлайн", "Алматы", "Астана", "Шымкент"] as const;

@@ -17,9 +17,6 @@ import {
   Library,
   Atom,
   Award,
-  Briefcase,
-  Brain,
-  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -43,9 +40,6 @@ const CATEGORY_META: { exam: string; Icon: LucideIcon; gradient: string; goal: s
   { exam: "IB", Icon: Library, gradient: "from-fuchsia-500 to-purple-500", goal: "40 / 45" },
   { exam: "A-Level", Icon: Atom, gradient: "from-blue-500 to-violet-500", goal: "A*/A" },
   { exam: "AP", Icon: Award, gradient: "from-cyan-500 to-blue-500", goal: "5 / 5" },
-  { exam: "GMAT", Icon: Briefcase, gradient: "from-indigo-500 to-blue-500", goal: "700+" },
-  { exam: "GRE", Icon: Brain, gradient: "from-teal-500 to-emerald-500", goal: "165+" },
-  { exam: "ACT", Icon: Target, gradient: "from-orange-500 to-rose-500", goal: "32+" },
 ];
 
 export default async function HomePage() {
@@ -76,6 +70,12 @@ export default async function HomePage() {
     .filter((c) => c.count > 0)
     .sort((a, b) => b.count - a.count);
   const popular = categories.slice(0, 5).map((c) => c.exam);
+
+  // Лента: одна группа должна быть шире самого широкого вьюпорта, иначе на стыке
+  // появится «дыра». Повторяем набор так, чтобы в группе было ≥24 плиток
+  // (≈2600px) — устойчиво к любому числу экзаменов.
+  const repeat = Math.max(2, Math.ceil(24 / CATEGORY_META.length));
+  const marqueeSet = Array.from({ length: repeat }).flatMap(() => CATEGORY_META);
 
   return (
     <div>
@@ -163,21 +163,22 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ───────── БЕГУЩАЯ СТРОКА ЭКЗАМЕНОВ (кликабельная) ───────── */}
-      <section className="border-b border-border bg-muted/20 py-5">
-        <div className="marquee-mask overflow-hidden">
-          {/* Две идентичные копии: трек = 2 набора, сдвиг −50% = ровно один набор → бесшовно.
-              Отступ задаём через mr на каждой плитке (не flex gap), иначе −50% не совпадает. */}
+      {/* ───────── БЕГУЩАЯ СТРОКА ЭКЗАМЕНОВ (кликабельная, бесконечная) ───────── */}
+      <section className="border-b border-border bg-muted/20 py-2.5">
+        {/* py на маске — запас под hover-подъём/тень, иначе overflow-hidden срезает верх плитки.
+            Трек = 2 группы по 2 набора; одна группа всегда шире вьюпорта → на широких экранах
+            нет «дыры» на стыке. Сдвиг −50% = ровно одна группа → бесшовно. */}
+        <div className="marquee-mask overflow-hidden py-3">
           <div className="flex w-max items-center animate-marquee hover:[animation-play-state:paused]">
             {[0, 1].map((copy) => (
               <div key={copy} className="flex shrink-0 items-center" aria-hidden={copy === 1}>
-                {CATEGORY_META.map((c) => (
+                {marqueeSet.map((c, i) => (
                   <Link
-                    key={c.exam}
+                    key={`${copy}-${i}`}
                     href={`/catalog?exam=${encodeURIComponent(c.exam)}`}
                     aria-label={c.exam}
                     tabIndex={copy === 1 ? -1 : undefined}
-                    className="group mr-3 flex shrink-0 cursor-pointer items-center gap-2 rounded-full border border-border bg-card px-4 py-2 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"
+                    className="group mr-3 flex shrink-0 cursor-pointer items-center gap-2 rounded-full border border-border bg-card px-4 py-2 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md"
                   >
                     <span
                       className={`flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br ${c.gradient} text-white shadow-sm transition-transform duration-300 group-hover:scale-110`}
