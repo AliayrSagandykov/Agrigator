@@ -37,6 +37,7 @@ export default async function TutorOnboardingPage() {
                     bio: profile.bio,
                     methodology: profile.methodology,
                     trialFree: profile.trialFree,
+                    calendly: profile.bookingUrl,
                   }
                 : undefined
             }

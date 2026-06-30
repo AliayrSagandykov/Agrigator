@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { MetricStat } from "@/components/metric-stat";
 import { Avatar } from "@/components/avatar";
 import { CompleteLessonButton } from "@/components/complete-lesson-button";
+import { CalendlyField } from "@/components/calendly-field";
 import { formatDateTime, formatDelta, formatTenge } from "@/lib/utils";
 import { getT } from "@/lib/locale";
 
@@ -23,8 +24,8 @@ export default async function TutorDashboard() {
   if (user.role === "admin") redirect("/admin");
   if (user.role !== "tutor") redirect("/dashboard");
 
-  const profile = await one<{ photo: string | null; price: number }>(
-    `select photo, price from "TutorProfile" where "userId" = $1`,
+  const profile = await one<{ photo: string | null; price: number; bookingUrl: string }>(
+    `select photo, price, "bookingUrl" from "TutorProfile" where "userId" = $1`,
     [user.id],
   );
   if (!profile) redirect("/tutor/onboarding");
@@ -92,6 +93,27 @@ export default async function TutorDashboard() {
         <MetricStat value={formatTenge(released)} label={L.paidOut} />
         <MetricStat value={formatTenge(profile.price)} label={L.hourlyRate} />
       </div>
+
+      {/* Calendly: студенты бронируют пробный урок только через эту ссылку */}
+      <Card className="mt-6">
+        <CardContent>
+          <div className="mb-1 flex items-center gap-2">
+            <CalendarClock size={18} className="text-primary" />
+            <h2 className="font-semibold">{L.calendlyTitle}</h2>
+          </div>
+          <p className="mb-3 text-sm text-muted-foreground">{L.calendlyHint}</p>
+          <CalendlyField
+            initial={profile.bookingUrl ?? ""}
+            labels={{
+              placeholder: L.calendlyPlaceholder,
+              save: L.calendlySave,
+              saving: L.calendlySaving,
+              saved: L.calendlySaved,
+              error: L.calendlyError,
+            }}
+          />
+        </CardContent>
+      </Card>
 
       {/* Кабинеты учеников — центр удержания */}
       {pairs.length > 0 && (

@@ -15,6 +15,7 @@ export interface TutorProfileInitial {
   bio?: string;
   methodology?: string;
   trialFree?: boolean;
+  calendly?: string;
 }
 
 export function TutorProfileForm({ initial, labels }: { initial?: TutorProfileInitial; labels: Dict["tutorOnb"] }) {
@@ -29,6 +30,7 @@ export function TutorProfileForm({ initial, labels }: { initial?: TutorProfileIn
     bio: initial?.bio ?? "",
     methodology: initial?.methodology ?? "",
     trialFree: initial?.trialFree ?? true,
+    calendly: initial?.calendly ?? "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -95,6 +97,15 @@ export function TutorProfileForm({ initial, labels }: { initial?: TutorProfileIn
       </Field>
       <Field label={labels.eduLabel}>
         <Input value={form.methodology} onChange={(e) => set("methodology", e.target.value)} />
+      </Field>
+      <Field label={labels.calendlyLabel} hint={labels.calendlyHint}>
+        <Input
+          type="url"
+          inputMode="url"
+          value={form.calendly}
+          onChange={(e) => set("calendly", e.target.value)}
+          placeholder="https://calendly.com/your-name/trial"
+        />
       </Field>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={form.trialFree} onChange={(e) => set("trialFree", e.target.checked)} />

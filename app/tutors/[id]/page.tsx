@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BadgeCheck, ShieldCheck, Star } from "lucide-react";
+import { BadgeCheck, ShieldCheck, Star, CalendarClock } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getTutorByUserId } from "@/lib/tutors";
 import { computeTutorMetrics } from "@/lib/metrics";
@@ -141,11 +140,18 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
                 <div className="text-sm text-muted-foreground">{L.responsePre}{tutor.responseTime}</div>
               </div>
 
-              <Link href={`/book/${tutor.id}`} className="block">
-                <Button className="w-full" size="lg">
-                  {tutor.trialFree ? L.bookFreeTrial : L.bookTrial}
-                </Button>
-              </Link>
+              {/* Бронь пробного — строго через Calendly тьютора */}
+              {tutor.bookingUrl ? (
+                <a href={tutor.bookingUrl} target="_blank" rel="noopener noreferrer" className="block">
+                  <Button className="w-full cursor-pointer" size="lg">
+                    <CalendarClock size={18} /> {L.bookTrial}
+                  </Button>
+                </a>
+              ) : (
+                <p className="rounded-lg border border-dashed border-border bg-muted/40 p-3 text-center text-sm text-muted-foreground">
+                  {L.bookingUnavailable}
+                </p>
+              )}
 
               <dl className="space-y-1.5 text-sm">
                 <Row label={L.format} value={formatLabel(tutor.format)} />

@@ -179,6 +179,8 @@ const ru = {
   },
   tutorDash: {
     tutorCabinet: "Кабинет тьютора", schedule: "Расписание", profile: "Профиль",
+    calendlyTitle: "Бронирование через Calendly", calendlyHint: "Вставь ссылку на свой Calendly — студенты будут бронировать пробный урок через неё.",
+    calendlyPlaceholder: "https://calendly.com/your-name/trial", calendlySave: "Сохранить", calendlySaving: "Сохраняем…", calendlySaved: "Сохранено", calendlyError: "Не удалось сохранить ссылку",
     portfolio: "Твой портфель результатов", avgDelta: "средняя дельта", results: "рез.",
     adjusted: "с поправкой", droppedCounted: "учтены бросившие", continuation: "доходимость",
     lessons: "уроков", starter: "стартовая",
@@ -221,6 +223,8 @@ const ru = {
     metricsBuilding: "Метрики ещё копятся.", aboutTutor: "О тюторе", eduMethod: "Образование/методика:",
     reviews: "Отзывы", noReviews: "Пока нет отзывов.", verifiedReview: "подтверждён", responsePre: "Ответ ",
     bookFreeTrial: "Забронировать бесплатный пробный", bookTrial: "Забронировать пробный урок",
+    bookCalendly: "Записаться через Calendly", calendlyNote: "Бронирование пробного урока через Calendly тьютора.",
+    bookingUnavailable: "Тьютор пока не открыл запись на пробный урок.",
     format: "Формат", city: "Город", experience: "Опыт", years: "лет", languages: "Языки",
     directContacts: "Прямые контакты", phoneShort: "Тел:",
     proContacts: "Доступны в Pro. Рекомендуем бронь через платформу — так результат засчитается в метрики.",
@@ -275,6 +279,7 @@ const ru = {
     online: "Онлайн", offline: "Оффлайн", hybrid: "Гибрид", cityLabel: "Город",
     aboutLabel: "О себе", aboutPh: "Коротко: кого готовите, какой подход, свой результат.",
     eduLabel: "Образование / методика", freeTrialCheck: "Первый пробный урок бесплатно",
+    calendlyLabel: "Ссылка на Calendly (необязательно)", calendlyHint: "Студенты будут бронировать пробный урок через неё. Напр. https://calendly.com/your-name/trial",
     saveError: "Не удалось сохранить", saving: "Сохраняем…", saveProfile: "Сохранить профиль",
   },
   admin: {
@@ -464,6 +469,8 @@ const kk: Dict = {
   },
   tutorDash: {
     tutorCabinet: "Тьютор кабинеті", schedule: "Кесте", profile: "Профиль",
+    calendlyTitle: "Calendly арқылы брондау", calendlyHint: "Өзіңнің Calendly сілтеңді қой — оқушылар сынақ сабақты сол арқылы брондайды.",
+    calendlyPlaceholder: "https://calendly.com/atyniz/trial", calendlySave: "Сақтау", calendlySaving: "Сақталуда…", calendlySaved: "Сақталды", calendlyError: "Сілтемені сақтау мүмкін болмады",
     portfolio: "Нәтижелер портфолиоң", avgDelta: "орташа өсім", results: "нәт.",
     adjusted: "түзетумен", droppedCounted: "тастағандар ескерілді", continuation: "жеткізу",
     lessons: "сабақ", starter: "бастапқы",
@@ -503,6 +510,8 @@ const kk: Dict = {
     metricsBuilding: "Метрикалар әлі жиналуда.", aboutTutor: "Тьютор туралы", eduMethod: "Білім/әдістеме:",
     reviews: "Пікірлер", noReviews: "Пікірлер әзірге жоқ.", verifiedReview: "расталған", responsePre: "Жауап ",
     bookFreeTrial: "Тегін сынақ брондау", bookTrial: "Сынақ сабақ брондау",
+    bookCalendly: "Calendly арқылы жазылу", calendlyNote: "Сынақ сабақты тьютордың Calendly-і арқылы брондау.",
+    bookingUnavailable: "Тьютор сынақ сабаққа жазылуды әзірге ашпаған.",
     format: "Формат", city: "Қала", experience: "Тәжірибе", years: "жыл", languages: "Тілдер",
     directContacts: "Тікелей байланыс", phoneShort: "Тел:",
     proContacts: "Pro-да қолжетімді. Платформа арқылы брондауды ұсынамыз — нәтиже метрикаға есептеледі.",
@@ -557,6 +566,7 @@ const kk: Dict = {
     online: "Онлайн", offline: "Оффлайн", hybrid: "Гибрид", cityLabel: "Қала",
     aboutLabel: "Өзің туралы", aboutPh: "Қысқаша: кімді дайындайсың, қандай тәсіл, өз нәтижең.",
     eduLabel: "Білім / әдістеме", freeTrialCheck: "Алғашқы сынақ сабақ тегін",
+    calendlyLabel: "Calendly сілтемесі (міндетті емес)", calendlyHint: "Оқушылар сынақ сабақты осы арқылы брондайды. Мыс. https://calendly.com/atyniz/trial",
     saveError: "Сақтау мүмкін болмады", saving: "Сақталуда…", saveProfile: "Профильді сақтау",
   },
   admin: {
@@ -744,6 +754,8 @@ const en: Dict = {
   },
   tutorDash: {
     tutorCabinet: "Tutor dashboard", schedule: "Schedule", profile: "Profile",
+    calendlyTitle: "Booking via Calendly", calendlyHint: "Paste your Calendly link — students will book a trial lesson through it.",
+    calendlyPlaceholder: "https://calendly.com/your-name/trial", calendlySave: "Save", calendlySaving: "Saving…", calendlySaved: "Saved", calendlyError: "Couldn't save the link",
     portfolio: "Your results portfolio", avgDelta: "avg. delta", results: "res.",
     adjusted: "adjusted", droppedCounted: "dropouts counted", continuation: "continuation",
     lessons: "lessons", starter: "starter",
@@ -783,6 +795,8 @@ const en: Dict = {
     metricsBuilding: "Metrics still building.", aboutTutor: "About the tutor", eduMethod: "Education/method:",
     reviews: "Reviews", noReviews: "No reviews yet.", verifiedReview: "verified", responsePre: "Replies ",
     bookFreeTrial: "Book a free trial", bookTrial: "Book a trial lesson",
+    bookCalendly: "Book via Calendly", calendlyNote: "Book a trial lesson through the tutor's Calendly.",
+    bookingUnavailable: "This tutor hasn't opened trial booking yet.",
     format: "Format", city: "City", experience: "Experience", years: "yrs", languages: "Languages",
     directContacts: "Direct contacts", phoneShort: "Tel:",
     proContacts: "Available on Pro. We recommend booking through the platform — that way the result counts toward metrics.",
@@ -837,6 +851,7 @@ const en: Dict = {
     online: "Online", offline: "Offline", hybrid: "Hybrid", cityLabel: "City",
     aboutLabel: "About you", aboutPh: "Briefly: who you prep, your approach, your own result.",
     eduLabel: "Education / method", freeTrialCheck: "First trial lesson free",
+    calendlyLabel: "Calendly link (optional)", calendlyHint: "Students will book a trial lesson through it. E.g. https://calendly.com/your-name/trial",
     saveError: "Couldn't save", saving: "Saving…", saveProfile: "Save profile",
   },
   admin: {

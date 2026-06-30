@@ -34,10 +34,27 @@ export async function POST(req: Request) {
   if (exams.length === 0) return NextResponse.json({ error: "Укажите хотя бы один экзамен" }, { status: 400 });
   if (price <= 0) return NextResponse.json({ error: "Укажите цену за час" }, { status: 400 });
 
+  // Ссылка на Calendly хранится в "bookingUrl". Пусто = очистить; иначе только
+  // валидный https-URL (защита от javascript:/прочих схем при клике студента).
+  let bookingUrl = "";
+  const calendlyRaw = String(body.calendly ?? "").trim();
+  if (calendlyRaw) {
+    try {
+      const u = new URL(calendlyRaw);
+      if (u.protocol !== "https:") throw new Error("scheme");
+      bookingUrl = u.toString();
+    } catch {
+      return NextResponse.json(
+        { error: "Ссылка Calendly должна быть валидным https-адресом" },
+        { status: 400 },
+      );
+    }
+  }
+
   await query(
     `insert into "TutorProfile"
-       ("userId","subjectsJson","examsJson",price,format,city,experience,bio,methodology,"trialFree",verified)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,true)
+       ("userId","subjectsJson","examsJson",price,format,city,experience,bio,methodology,"trialFree","bookingUrl",verified)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,true)
      on conflict ("userId") do update set
        "subjectsJson" = excluded."subjectsJson",
        "examsJson"    = excluded."examsJson",
@@ -47,8 +64,9 @@ export async function POST(req: Request) {
        experience     = excluded.experience,
        bio            = excluded.bio,
        methodology    = excluded.methodology,
-       "trialFree"    = excluded."trialFree"`,
-    [user.id, J(subjects), J(exams), price, format, city, experience, bio, methodology, trialFree],
+       "trialFree"    = excluded."trialFree",
+       "bookingUrl"   = excluded."bookingUrl"`,
+    [user.id, J(subjects), J(exams), price, format, city, experience, bio, methodology, trialFree, bookingUrl],
   );
 
   // Часовой пояс тютора — на User (нужен для матча и расписания).
