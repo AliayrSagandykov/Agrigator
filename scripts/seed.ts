@@ -86,7 +86,7 @@ async function main() {
 
   await client.query(
     `truncate "Consent","Message","ProgressPt","Submission","RoomItem","Pair",
-              "RetentionSignal","Review","Result","Lesson","Payment","Booking",
+              "TrialRequest","RetentionSignal","Review","Result","Lesson","Payment","Booking",
               "StudentGoal","Favorite","Session","TutorProfile","Course","Lead","User"
      restart identity cascade`,
   );

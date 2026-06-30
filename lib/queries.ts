@@ -87,6 +87,34 @@ export async function getTutorPayments(tutorId: string): Promise<{ status: strin
   );
 }
 
+export interface TrialRequestRow {
+  id: string;
+  status: string; // 'opened' | 'scheduled' | 'canceled'
+  openedAt: Date;
+  scheduledAt: Date | null;
+  student: { name: string; avatarColor: string | null };
+}
+
+/** Заявки на пробный через Calendly (scheduled = записался, opened = только заходил). */
+export async function getTrialRequestsForTutor(tutorId: string): Promise<TrialRequestRow[]> {
+  const rows = await query<{
+    id: string; status: string; openedAt: Date; scheduledAt: Date | null;
+    studentName: string; studentColor: string | null;
+  }>(
+    `select tr.id, tr.status, tr."openedAt", tr."scheduledAt",
+            u.name as "studentName", u."avatarColor" as "studentColor"
+     from "TrialRequest" tr
+     join "User" u on u.id = tr."studentId"
+     where tr."tutorId" = $1
+     order by (tr.status = 'scheduled') desc, coalesce(tr."scheduledAt", tr."openedAt") desc`,
+    [tutorId],
+  );
+  return rows.map((r) => ({
+    id: r.id, status: r.status, openedAt: r.openedAt, scheduledAt: r.scheduledAt,
+    student: { name: r.studentName, avatarColor: r.studentColor },
+  }));
+}
+
 export function getReviewsFor(targetType: string, targetId: string): Promise<Review[]> {
   return query<Review>(
     `select * from "Review" where "targetType" = $1 and "targetId" = $2 order by "createdAt" desc`,

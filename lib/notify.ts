@@ -10,7 +10,8 @@ type OperatorEvent =
   | { type: "payment_pending"; bookingId: string; amount: number }
   | { type: "result_submitted"; resultId: string; studentName: string }
   | { type: "lead_new"; source: string }
-  | { type: "retention_due"; count: number };
+  | { type: "retention_due"; count: number }
+  | { type: "trial_scheduled"; studentName: string; tutorName: string };
 
 export async function notifyOperator(event: OperatorEvent): Promise<void> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -45,5 +46,7 @@ function renderOperatorMessage(event: OperatorEvent): string {
       return `🔎 Новый лид из ${event.source}. Разбери в /admin.`;
     case "retention_due":
       return `🔁 ${event.count} ученик(ов) давно без переброни — отправь ретеншн-вопрос.`;
+    case "trial_scheduled":
+      return `📅 ${event.studentName} записался(ась) на пробный урок к ${event.tutorName} через Calendly.`;
   }
 }

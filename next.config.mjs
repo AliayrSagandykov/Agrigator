@@ -8,12 +8,12 @@ const isProd = process.env.NODE_ENV === "production";
 // векторы: framing, base-tag hijack, form-exfil, плагины, левые источники.
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://*.posthog.com",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://i.pravatar.cc https://images.unsplash.com https://*.supabase.co",
-  "font-src 'self' data:",
-  "connect-src 'self' https://*.posthog.com https://*.supabase.co",
-  "frame-src https://meet.jit.si",
+  "script-src 'self' 'unsafe-inline' https://*.posthog.com https://assets.calendly.com",
+  "style-src 'self' 'unsafe-inline' https://assets.calendly.com",
+  "img-src 'self' data: blob: https://i.pravatar.cc https://images.unsplash.com https://*.supabase.co https://*.calendly.com",
+  "font-src 'self' data: https://*.calendly.com",
+  "connect-src 'self' https://*.posthog.com https://*.supabase.co https://*.calendly.com",
+  "frame-src https://meet.jit.si https://calendly.com https://*.calendly.com",
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",

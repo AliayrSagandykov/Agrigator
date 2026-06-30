@@ -23,7 +23,7 @@ const isLocal = /localhost|127\.0\.0\.1/.test(url);
 
 const TABLES = [
   "Consent", "Message", "ProgressPt", "Submission", "RoomItem", "Pair",
-  "RetentionSignal", "Review", "Result", "Lesson", "Payment", "Booking",
+  "TrialRequest", "RetentionSignal", "Review", "Result", "Lesson", "Payment", "Booking",
   "StudentGoal", "Favorite", "Session", "TutorProfile", "Course", "Lead", "User",
 ];
 

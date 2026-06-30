@@ -246,6 +246,20 @@ create table "Lead" (
   "foundAt"   timestamptz not null default now()
 );
 
+-- ── TrialRequest: бронь пробного через Calendly (opened = только открыл,
+--    scheduled = реально записался; ловим событие виджета Calendly) ──
+create table "TrialRequest" (
+  id            text primary key default gen_random_uuid()::text,
+  "studentId"   text not null references "User"(id) on delete cascade,
+  "tutorId"     text not null references "User"(id) on delete cascade,
+  status        text not null default 'opened' check (status in ('opened','scheduled','canceled')),
+  "eventUri"    text not null default '',
+  "openedAt"    timestamptz not null default now(),
+  "scheduledAt" timestamptz,
+  unique ("studentId","tutorId")
+);
+create index on "TrialRequest" ("tutorId");
+
 -- ── RLS: deny-by-default (доступ только через service-role на сервере) ──
 alter table "User"            enable row level security;
 alter table "Session"         enable row level security;
@@ -260,3 +274,4 @@ alter table "Result"          enable row level security;
 alter table "Review"          enable row level security;
 alter table "RetentionSignal" enable row level security;
 alter table "Lead"            enable row level security;
+alter table "TrialRequest"    enable row level security;

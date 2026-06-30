@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation";
-import { BadgeCheck, ShieldCheck, Star, CalendarClock } from "lucide-react";
+import { BadgeCheck, ShieldCheck, Star } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getTutorByUserId } from "@/lib/tutors";
 import { computeTutorMetrics } from "@/lib/metrics";
 import { getReviewsFor, getFavoriteKeys } from "@/lib/queries";
 import { Avatar } from "@/components/avatar";
+import { CalendlyBooking } from "@/components/calendly-booking";
 import { FavoriteButton } from "@/components/favorite-button";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DeltaChart } from "@/components/delta-chart";
 import { MetricRow } from "@/components/metric-stat";
@@ -140,13 +140,14 @@ export default async function TutorProfilePage({ params }: { params: { id: strin
                 <div className="text-sm text-muted-foreground">{L.responsePre}{tutor.responseTime}</div>
               </div>
 
-              {/* Бронь пробного — строго через Calendly тьютора */}
+              {/* Бронь пробного — через встроенный Calendly; ловим реальную запись */}
               {tutor.bookingUrl ? (
-                <a href={tutor.bookingUrl} target="_blank" rel="noopener noreferrer" className="block">
-                  <Button className="w-full cursor-pointer" size="lg">
-                    <CalendarClock size={18} /> {L.bookTrial}
-                  </Button>
-                </a>
+                <CalendlyBooking
+                  url={tutor.bookingUrl}
+                  tutorId={tutor.id}
+                  student={user && user.role === "student" ? { name: user.name, email: user.email } : null}
+                  labels={{ book: L.bookTrial, booked: L.trialBooked, bookedNote: L.trialBookedNote }}
+                />
               ) : (
                 <p className="rounded-lg border border-dashed border-border bg-muted/40 p-3 text-center text-sm text-muted-foreground">
                   {L.bookingUnavailable}

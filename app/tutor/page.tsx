@@ -4,10 +4,11 @@ import { Pencil, TrendingUp, CalendarClock } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { one } from "@/lib/db";
 import { computeTutorMetrics } from "@/lib/metrics";
-import { getTutorBookings, getTutorPayments } from "@/lib/queries";
+import { getTutorBookings, getTutorPayments, getTrialRequestsForTutor } from "@/lib/queries";
 import { getPairsForUser } from "@/lib/pairs";
 import { PairList } from "@/components/room/pair-list";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MetricStat } from "@/components/metric-stat";
 import { Avatar } from "@/components/avatar";
@@ -33,11 +34,12 @@ export default async function TutorDashboard() {
   const L = getT().tutorDash;
   const tz = user.timezone ?? undefined;
   const now = new Date();
-  const [metrics, bookings, payments, pairs] = await Promise.all([
+  const [metrics, bookings, payments, pairs, trialRequests] = await Promise.all([
     computeTutorMetrics(user.id),
     getTutorBookings(user.id),
     getTutorPayments(user.id),
     getPairsForUser(user.id),
+    getTrialRequestsForTutor(user.id),
   ]);
 
   const requests = bookings.filter((b) => !b.hasLesson && b.slotAt >= now);
@@ -122,6 +124,34 @@ export default async function TutorDashboard() {
           <PairList pairs={pairs} tz={tz} />
         </section>
       )}
+
+      {/* Записи на пробный через Calendly — видно, кто реально записался, а кто только заходил */}
+      <section className="mt-8">
+        <h2 className="mb-3 font-semibold">{L.trialRequestsTitle}</h2>
+        <div className="space-y-3">
+          {trialRequests.length === 0 && (
+            <Card><CardContent className="py-6 text-center text-sm text-muted-foreground">{L.trialEmpty}</CardContent></Card>
+          )}
+          {trialRequests.map((r) => (
+            <Card key={r.id}>
+              <CardContent className="flex items-center justify-between gap-3 py-4">
+                <div className="flex items-center gap-3">
+                  <Avatar name={r.student.name} color={r.student.avatarColor} size={40} />
+                  <div>
+                    <div className="font-medium">{r.student.name}</div>
+                    <div className="text-sm text-muted-foreground">{formatDateTime(r.scheduledAt ?? r.openedAt, tz)}</div>
+                  </div>
+                </div>
+                {r.status === "scheduled" ? (
+                  <Badge variant="success">{L.trialBookedBadge}</Badge>
+                ) : (
+                  <Badge variant="secondary">{L.trialOpenedBadge}</Badge>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
 
       {/* Входящие брони */}
       <section className="mt-8">
