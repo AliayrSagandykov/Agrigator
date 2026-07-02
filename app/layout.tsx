@@ -1,6 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+// Шрифт как у Apple: на iPhone/Mac системный SF Pro (-apple-system),
+// на остальных платформах — Inter, ближайший свободный аналог SF.
+const inter = Inter({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-inter",
+  display: "swap",
+});
 import { getCurrentUser } from "@/lib/auth";
 import { toPublicUser } from "@/lib/auth";
 import { getLocale, getT } from "@/lib/locale";
@@ -31,7 +40,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const showSidebar = !!user && user.role === "student";
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning className={inter.variable}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>

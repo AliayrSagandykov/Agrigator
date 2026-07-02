@@ -3,7 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Apple-стек: SF Pro на iPhone/Mac, Inter (next/font) — везде ещё. */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    var(--font-inter, "Inter"), "Segoe UI", Roboto, sans-serif;
 
   --background: 0 0% 100%;
   --foreground: 224 24% 12%;

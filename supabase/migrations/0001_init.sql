@@ -135,6 +135,8 @@ create table "StudentGoal" (
   deadline        text not null default 'flex',
   pace            text not null default 'slow',
   style           text not null default 'soft',
+  "formatsJson"   text not null default '[]',
+  "languagesJson" text not null default '[]',
   "baselineScore" text,
   "baselineSource" text,
   "createdAt"     timestamptz not null default now(),

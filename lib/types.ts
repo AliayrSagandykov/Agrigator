@@ -100,6 +100,8 @@ export interface StudentGoal {
   deadline: string;
   pace: string;
   style: string;
+  formatsJson: string; // string[] предпочтений формата; [] = без разницы
+  languagesJson: string; // string[] кодов языков (kk/ru/en); [] = без разницы
   baselineScore: string | null;
   baselineSource: string | null;
   language: string;

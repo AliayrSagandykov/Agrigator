@@ -31,18 +31,33 @@ export function CountUp({
       return;
     }
 
+    const run = () => {
+      if (started.current) return;
+      started.current = true;
+      const start = performance.now();
+      const tick = (now: number) => {
+        const p = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        setVal(Math.round(to * eased));
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+      // Страховка: если rAF заторможен (фоновая вкладка) — доставим финал таймером.
+      setTimeout(() => setVal(to), duration + 400);
+    };
+
+    // Уже во вьюпорте при маунте (напр. герой вверху страницы) — стартуем сразу,
+    // не полагаясь на IntersectionObserver (он молчит в неотрисованных вкладках).
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      run();
+      return;
+    }
+
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !started.current) {
-          started.current = true;
-          const start = performance.now();
-          const tick = (now: number) => {
-            const p = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - p, 3);
-            setVal(Math.round(to * eased));
-            if (p < 1) requestAnimationFrame(tick);
-          };
-          requestAnimationFrame(tick);
+        if (entry.isIntersecting) {
+          run();
           io.disconnect();
         }
       },

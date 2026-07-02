@@ -19,43 +19,25 @@ export const FORMATS = [
   { value: "hybrid", label: "Гибрид" },
 ] as const;
 
-// ── Интейк студента: 4 вопроса, по одному на экран (UX §2.1) ──
-export const INTAKE_STEPS = [
-  {
-    key: "exam",
-    title: "К какому экзамену готовимся?",
-    hint: "Выбери цель — под неё подберём тютора с доказанным результатом.",
-    options: PRIMARY_EXAMS.map((e) => ({ value: e, label: e })),
-  },
-  {
-    key: "deadline",
-    title: "Когда экзамен?",
-    hint: "Срок влияет на темп и интенсивность.",
-    options: [
-      { value: "1-2m", label: "Через 1–2 месяца" },
-      { value: "3-6m", label: "Через 3–6 месяцев" },
-      { value: "flex", label: "Не спешу" },
-    ],
-  },
-  {
-    key: "pace",
-    title: "Какой темп тебе ближе?",
-    hint: "",
-    options: [
-      { value: "slow", label: "Медленно и основательно" },
-      { value: "fast", label: "Быстро и интенсивно" },
-    ],
-  },
-  {
-    key: "style",
-    title: "Какой стиль преподавания заходит?",
-    hint: "",
-    options: [
-      { value: "strict", label: "Строгий, держит в тонусе" },
-      { value: "soft", label: "Мягкий, как друг" },
-    ],
-  },
-] as const;
+// ── Интейк студента: по одному вопросу на экран (UX §2.1).
+// multi = checkbox-шаг (несколько ответов); "any" = «без разницы»
+// (выбор any сбрасывает остальные и наоборот). Тексты — в i18n intake.steps.
+export type IntakeStepKey = "exam" | "deadline" | "format" | "language" | "pace" | "style";
+
+export interface IntakeStep {
+  key: IntakeStepKey;
+  multi: boolean;
+  options: readonly string[];
+}
+
+export const INTAKE_STEPS: readonly IntakeStep[] = [
+  { key: "exam", multi: false, options: ALL_EXAMS },
+  { key: "deadline", multi: false, options: ["1-2m", "3-6m", "flex"] },
+  { key: "format", multi: true, options: ["online", "offline", "hybrid", "any"] },
+  { key: "language", multi: true, options: ["kk", "ru", "en", "any"] },
+  { key: "pace", multi: false, options: ["slow", "fast", "any"] },
+  { key: "style", multi: false, options: ["strict", "soft", "any"] },
+];
 
 export const DEADLINE_LABEL: Record<string, string> = {
   "1-2m": "через 1–2 мес",

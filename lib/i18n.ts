@@ -248,6 +248,9 @@ const ru = {
     registerError: "Не удалось зарегистрироваться",
   },
   match: {
+    reveal: "У вас мэтч!", revealSub: "Мы подобрали тьютора под твою цель",
+    topBadge: "Лучшее совпадение", matchWord: "мэтч", othersTitle: "Другие совпадения",
+    viewProfile: "Открыть профиль",
     title: "Тюторы под твою цель", change: "изменить", diagTitle: "Хочешь точный график прогресса?",
     diagBody: "Поставь baseline — короткой диагностикой или прошлым официальным баллом. Тогда дельта посчитается в цифрах.",
     takeDiag: "Пройти диагностику", later: "Позже",
@@ -264,12 +267,14 @@ const ru = {
     questionPre: "Вопрос", back: "Назад",
   },
   intake: {
-    stepPre: "Шаг", of: "из", back: "Назад",
+    stepPre: "Шаг", of: "из", back: "Назад", next: "Далее",
     steps: {
       exam: { title: "К какому экзамену готовимся?", hint: "Выбери цель — под неё подберём тютора с доказанным результатом." },
       deadline: { title: "Когда экзамен?", hint: "Срок влияет на темп и интенсивность.", opts: { "1-2m": "Через 1–2 месяца", "3-6m": "Через 3–6 месяцев", flex: "Не спешу" } },
-      pace: { title: "Какой темп тебе ближе?", hint: "", opts: { slow: "Медленно и основательно", fast: "Быстро и интенсивно" } },
-      style: { title: "Какой стиль преподавания заходит?", hint: "", opts: { strict: "Строгий, держит в тонусе", soft: "Мягкий, как друг" } },
+      format: { title: "Какой формат занятий удобен?", hint: "Можно выбрать несколько.", opts: { online: "Онлайн", offline: "Оффлайн", hybrid: "Гибрид", any: "Без разницы" } },
+      language: { title: "На каком языке заниматься?", hint: "Можно выбрать несколько.", opts: { kk: "Қазақша", ru: "Русский", en: "English", any: "Без разницы" } },
+      pace: { title: "Какой темп тебе ближе?", hint: "", opts: { slow: "Медленно и основательно", fast: "Быстро и интенсивно", any: "Без разницы" } },
+      style: { title: "Какой стиль преподавания заходит?", hint: "", opts: { strict: "Строгий, держит в тонусе", soft: "Мягкий, как друг", any: "Без разницы" } },
     },
   },
   tutorOnb: {
@@ -537,6 +542,9 @@ const kk: Dict = {
     registerError: "Тіркелу мүмкін болмады",
   },
   match: {
+    reveal: "Сізде мэтч бар!", revealSub: "Мақсатыңа сай тьютор таптық",
+    topBadge: "Ең үздік сәйкестік", matchWord: "мэтч", othersTitle: "Басқа сәйкестіктер",
+    viewProfile: "Профильді ашу",
     title: "Мақсатыңа сай тьюторлар", change: "өзгерту", diagTitle: "Нақты прогресс графигі керек пе?",
     diagBody: "Baseline қой — қысқа диагностикамен немесе өткен ресми баллмен. Сонда өсім санмен есептеледі.",
     takeDiag: "Диагностикадан өту", later: "Кейінірек",
@@ -553,12 +561,14 @@ const kk: Dict = {
     questionPre: "Сұрақ", back: "Артқа",
   },
   intake: {
-    stepPre: "Қадам", of: "/", back: "Артқа",
+    stepPre: "Қадам", of: "/", back: "Артқа", next: "Әрі қарай",
     steps: {
       exam: { title: "Қай емтиханға дайындаламыз?", hint: "Мақсатты таңда — соған дәлелденген нәтижелі тьютор табамыз." },
       deadline: { title: "Емтихан қашан?", hint: "Мерзім қарқын мен қарқындылыққа әсер етеді.", opts: { "1-2m": "1–2 айдан кейін", "3-6m": "3–6 айдан кейін", flex: "Асықпаймын" } },
-      pace: { title: "Саған қай қарқын жақын?", hint: "", opts: { slow: "Баяу әрі негізді", fast: "Жылдам әрі қарқынды" } },
-      style: { title: "Қай оқыту стилі ұнайды?", hint: "", opts: { strict: "Қатаң, ширатады", soft: "Жұмсақ, дос сияқты" } },
+      format: { title: "Сабақтың қай форматы ыңғайлы?", hint: "Бірнешеуін таңдауға болады.", opts: { online: "Онлайн", offline: "Оффлайн", hybrid: "Гибрид", any: "Бәрібір" } },
+      language: { title: "Қай тілде оқығың келеді?", hint: "Бірнешеуін таңдауға болады.", opts: { kk: "Қазақша", ru: "Русский", en: "English", any: "Бәрібір" } },
+      pace: { title: "Саған қай қарқын жақын?", hint: "", opts: { slow: "Баяу әрі негізді", fast: "Жылдам әрі қарқынды", any: "Бәрібір" } },
+      style: { title: "Қай оқыту стилі ұнайды?", hint: "", opts: { strict: "Қатаң, ширатады", soft: "Жұмсақ, дос сияқты", any: "Бәрібір" } },
     },
   },
   tutorOnb: {
@@ -824,6 +834,9 @@ const en: Dict = {
     registerError: "Couldn't sign up",
   },
   match: {
+    reveal: "It's a match!", revealSub: "We found the best tutor for your goal",
+    topBadge: "Top match", matchWord: "match", othersTitle: "More matches",
+    viewProfile: "View profile",
     title: "Tutors for your goal", change: "edit", diagTitle: "Want a precise progress chart?",
     diagBody: "Set a baseline — via a quick diagnostic or a past official score. Then the delta is computed in numbers.",
     takeDiag: "Take the diagnostic", later: "Later",
@@ -840,12 +853,14 @@ const en: Dict = {
     questionPre: "Question", back: "Back",
   },
   intake: {
-    stepPre: "Step", of: "of", back: "Back",
+    stepPre: "Step", of: "of", back: "Back", next: "Continue",
     steps: {
       exam: { title: "Which exam are we prepping for?", hint: "Pick a goal — we'll match a tutor with proven results." },
       deadline: { title: "When is the exam?", hint: "The deadline affects pace and intensity.", opts: { "1-2m": "In 1–2 months", "3-6m": "In 3–6 months", flex: "No rush" } },
-      pace: { title: "Which pace suits you?", hint: "", opts: { slow: "Slow and thorough", fast: "Fast and intensive" } },
-      style: { title: "Which teaching style works for you?", hint: "", opts: { strict: "Strict, keeps you sharp", soft: "Gentle, like a friend" } },
+      format: { title: "Which lesson format works for you?", hint: "You can pick several.", opts: { online: "Online", offline: "In person", hybrid: "Hybrid", any: "No preference" } },
+      language: { title: "Which language to study in?", hint: "You can pick several.", opts: { kk: "Қазақша", ru: "Русский", en: "English", any: "No preference" } },
+      pace: { title: "Which pace suits you?", hint: "", opts: { slow: "Slow and thorough", fast: "Fast and intensive", any: "No preference" } },
+      style: { title: "Which teaching style works for you?", hint: "", opts: { strict: "Strict, keeps you sharp", soft: "Gentle, like a friend", any: "No preference" } },
     },
   },
   tutorOnb: {
